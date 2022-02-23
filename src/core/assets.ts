@@ -158,62 +158,52 @@ export class AssetManager {
     }
 
 
+    private loadItems(jsonData : any,
+        cb : (name : string, url : string) => void, 
+        basePath : string, arrayName : string) {
+        
+        let path : string;
+
+        if (jsonData[basePath] != undefined &&
+            jsonData[arrayName] != undefined) {
+                    
+            path = jsonData[basePath];
+            for (let o of jsonData[arrayName]) {
+
+                cb(o["name"], path + o["path"]);
+            }
+        }
+    }
+
+
     public parseAssetIndexFile(url : string) {
 
         this.loadTextFile(url, "json", (s : string) => {
 
             let data = JSON.parse(s);
-            let path : string;
 
-            // TODO:
-            // Some generic method to achieve the same?
+            this.loadItems(data, 
+                (name, url) => this.loadBitmap(name, url), 
+                "bitmapPath", "bitmaps");
 
-            if (data["bitmapPath"] != undefined &&
-                data["bitmaps"] != undefined) {
-                        
-                path = data["bitmapPath"];
-                for (let o of data["bitmaps"]) {
+            this.loadItems(data, 
+                (name, url) => this.loadSample(name, url), 
+                "samplePath", "samples");
 
-                    this.loadBitmap(o["name"], path + o["path"]);
-                }
-            }
+            this.loadItems(data, 
+                (name, url) => this.loadTilemap(name, url), 
+                "tilemapPath", "tilemaps");
 
-            if (data["samplePath"] != undefined &&
-                data["samples"] != undefined) {
-                        
-                path = data["samplePath"];
-                for (let o of data["samples"]) {
-
-                    this.loadSample(o["name"], path + o["path"]);
-                }
-            }
-
-            if (data["tilemapPath"] != undefined &&
-                data["tilemaps"] != undefined) {
-
-                path = data["tilemapPath"];
-                for (let o of data["tilemaps"]) {
-
-                    this.loadTilemap(o["name"], path + o["path"]);
-                }
-            }
-
-            if (data["documentPath"] != undefined &&
-                data["documents"] != undefined) {
-
-                path = data["documentPath"];
-                for (let o of data["documents"]) {
-
-                    this.loadDocument(o["name"], path + o["path"]);
-                }
-            }
+            this.loadItems(data, 
+                (name, url) => this.loadDocument(name, url), 
+                "documentPath", "documents");
         });
     }
 
 
     public hasLoaded() : boolean {
 
-        return this.loaded >= this.total;
+        return this.total == 0 || this.loaded >= this.total;
     }
     
 

@@ -1,4 +1,4 @@
-import { Matrix3 } from "./matrix";
+import { Matrix3 } from "./matrix.js";
 
 
 

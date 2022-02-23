@@ -88,7 +88,7 @@ export class Canvas {
     }
 
 
-    constructor(assets : AssetManager, width : number, height : number) {
+    constructor(assets : AssetManager) {
 
         this.canvas = createCanvas(window.innerWidth, window.innerHeight,
             createCanvasDiv());

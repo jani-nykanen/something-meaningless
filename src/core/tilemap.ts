@@ -19,7 +19,7 @@ export class Tilemap {
         this.width = Number(root.getAttribute("width"));
         this.height = Number(root.getAttribute("height"));
 
-        let data = <HTMLCollectionOf<Element>>root.getElementsByTagName("layer");
+        let data = <any>root.getElementsByTagName("layer");
         this.layers = new Array<Array<number>>();
 
         // Find the minimal id
@@ -59,7 +59,7 @@ export class Tilemap {
 
         if (prop != undefined) {
 
-            for (let p of <HTMLCollectionOf<Element>>prop.getElementsByTagName("property")) {
+            for (let p of <any>prop.getElementsByTagName("property")) {
 
                 if ( p.getAttribute("name") != undefined) {
 
