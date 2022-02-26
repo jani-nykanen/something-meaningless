@@ -93,7 +93,12 @@ export class Mesh {
     public dispose(gl : WebGLRenderingContext) {
         
         gl.deleteBuffer(this.vertexBuffer);
-        gl.deleteBuffer(this.uvBuffer);
         gl.deleteBuffer(this.indexBuffer);
+
+        if (this.colorBuffer != null)
+            gl.deleteBuffer(this.colorBuffer);
+
+        if (this.uvBuffer != null)
+            gl.deleteBuffer(this.uvBuffer);
     }
 }

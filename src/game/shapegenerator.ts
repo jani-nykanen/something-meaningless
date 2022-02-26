@@ -1,9 +1,10 @@
-import { CoreEvent } from "../core/core";
-import { Mesh } from "../core/mesh";
-import { RGBA, Vector2 } from "../core/vector";
+import { CoreEvent } from "../core/core.js";
+import { clamp } from "../core/math.js";
+import { Mesh } from "../core/mesh.js";
+import { RGBA, Vector2 } from "../core/vector.js";
 
 
-export type Path2D = (t : Number) => Vector2;
+export type Path2D = (t : number) => Vector2;
 
 
 export class ShapeGenerator {
@@ -35,6 +36,8 @@ export class ShapeGenerator {
             this.colors.push(
                 color.r, color.g, color.b, color.a
             );
+
+            this.indices.push(this.indices.length-1);
         }
         return this;
     }
@@ -42,7 +45,7 @@ export class ShapeGenerator {
 
     public fillClosedPath(path : Path2D, steps : number, color = new RGBA()) : ShapeGenerator {
 
-        let step = 1.0 / steps;
+        let step = 1.0 / (steps-1);
         let t : number;
 
         for (let i = 0; i < steps; ++ i) {
@@ -53,6 +56,22 @@ export class ShapeGenerator {
         }
 
         return this;
+    }
+
+
+    public addRoundedRectangle(diameter : number, roundRadius : number, quality : number,
+        color = new RGBA(), tx = 0.0, ty = 0.0, scalex = 1.0, scaley = 1.0) : ShapeGenerator {
+
+        let path = (t : number) : Vector2 => {
+
+            let s = t * Math.PI * 2;
+
+            let x = clamp(Math.cos(s) * roundRadius, -diameter/2, diameter/2);
+            let y = clamp(Math.sin(s) * roundRadius, -diameter/2, diameter/2);
+
+            return new Vector2(x * scalex + tx, y * scaley + ty);
+        }
+        return this.fillClosedPath(path, quality, color);
     }
 
 

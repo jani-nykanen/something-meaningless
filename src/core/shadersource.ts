@@ -75,7 +75,7 @@ void main() {
     if(res.a <= 0.01) {
          discard;
     }
-    gl_FragColor = res;
+    gl_FragColor = vcolor * color;
 }`,
 
 
