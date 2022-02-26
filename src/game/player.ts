@@ -167,14 +167,17 @@ export class Player {
                 new Vector2(-0.15, 0.0),
                 new Vector2(0, 0.25),
                 new Vector2(0.15, 0), new RGBA(0))
+            .addSector(0, Math.PI, 16, new RGBA(0), 0, 0, 0.15, -0.15)
             .addTriangle(
                 new Vector2(-0.125, 0.0),
                 new Vector2(0, 0.20),
                 new Vector2(0.125, 0), new RGBA(0.40))
+            .addSector(0, Math.PI, 16, new RGBA(0.40), 0, 0, 0.125, -0.125)
             .addTriangle(
                 new Vector2(-0.11, 0.0),
                 new Vector2(-0.01, 0.15),
                 new Vector2(0.09, 0), new RGBA(0.65))
+            .addSector(0, Math.PI, 16, new RGBA(0.65), -0.01, 0, 0.10, -0.10)
             .constructMesh(event);
     }
 
@@ -187,38 +190,62 @@ export class Player {
     }
 
 
-    public update(stage : Stage, event : CoreEvent) {
+    private animate(event : CoreEvent) {
 
         const EYE_MOVE_SPEED = 0.10;
         const BODY_ANGLE_SPEED = 0.15;
-
-        this.eyeTarget = event.input.getStick();
-
-        this.eyePos.x = updateSpeedAxis(this.eyePos.x, this.eyeTarget.x, EYE_MOVE_SPEED*event.step);
-        this.eyePos.y = updateSpeedAxis(this.eyePos.y, this.eyeTarget.y, EYE_MOVE_SPEED*event.step);
+        const EPS = 0.01;
 
         this.bodyAngle = (this.bodyAngle += BODY_ANGLE_SPEED * event.step) % (Math.PI*2);
+
+        this.eyeTarget = event.input.getStick();
+        if (Vector2.distance(this.eyePos, this.eyeTarget) < EPS) {
+
+            this.eyePos = this.eyeTarget.clone();
+            return;
+        }
+
+        let dir = Vector2.direction(this.eyePos, this.eyeTarget);
+        this.eyePos.x += dir.x * EYE_MOVE_SPEED * event.step;
+        this.eyePos.y += dir.y * EYE_MOVE_SPEED * event.step;
+
+        this.eyePos = Vector2.cap(this.eyePos, 1.0, EPS); 
+    }
+
+
+    public update(stage : Stage, event : CoreEvent) {
+
+        this.animate(event);
     }
 
 
     public draw(canvas : Canvas) {
 
         const LEG_OFFSET_X = 0.25;
-        const LEG_OFFSET_Y = 0.325;
+        const LEG_OFFSET_Y = 0.35;
+        const LEG_MOVE_FACTOR = 0.1;
 
         const EYE_RADIUS_X = 0.075;
         const EYE_RADIUS_Y = 0.05;
 
-        const BODY_ROTATION_FACTOR = Math.PI/9;
+        const BODY_ROTATION_FACTOR = Math.PI/12;
 
         let rotation = Math.sin(this.bodyAngle) * BODY_ROTATION_FACTOR;
+        let legOff : number;
 
         // Legs
         for (let i = -1; i <= 1; i += 2) {
 
+            legOff = 0.0;
+            if (this.bodyAngle >= (i+1)/2.0 * Math.PI &&
+                this.bodyAngle < (i+3)/2.0 * Math.PI) {
+
+                legOff = -Math.abs(Math.sin(this.bodyAngle - (i+1)/2.0 * Math.PI )) * LEG_MOVE_FACTOR;
+            }
+
             canvas.transform
                 .push()
-                .translate(i * LEG_OFFSET_X, LEG_OFFSET_Y)
+                .translate(i * LEG_OFFSET_X, LEG_OFFSET_Y + legOff)
                 .use();
 
             canvas.drawMesh(this.meshLeg);

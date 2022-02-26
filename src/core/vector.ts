@@ -72,13 +72,16 @@ export class Vector2 {
 	static add = (a : Vector2, b : Vector2) : Vector2 => new Vector2(a.x + b.x, a.y + b.y);
 
 
-	static max (v : Vector2, r : number) : Vector2 {
+	static cap(v : Vector2, r : number, eps = 0.0001) : Vector2 {
 
 		let out = v.clone();
 
-		if (out.length() > r) {
+		if (out.length() >= r - eps) {
 
 			out.normalize();
+
+			out.x *= r;
+			out.y *= r;
 		}
 		return out;
 	}
@@ -96,6 +99,7 @@ export class Vector2 {
 
 
 	public equals = (v : Vector2, eps = 0.001) : boolean => (Math.abs(v.x - this.x) + Math.abs(v.y - this.y)) < eps*2;
+	
 }
 
 
