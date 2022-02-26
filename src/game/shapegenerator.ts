@@ -89,13 +89,13 @@ export class ShapeGenerator {
 
 
     public addSector(startAngle : number, endAngle : number, quality : number,
-            color = new RGBA(), tx = 0.0, ty = 0.0, scalex = 1.0, scaley = 1.0) : ShapeGenerator {
+            color = new RGBA(), tx = 0.0, ty = 0.0, scalex = 1.0, scaley = 1.0, rotation = 0.0) : ShapeGenerator {
 
         let path = (t : number) => {
 
             let angle = startAngle + t * (endAngle - startAngle);
-            let x = tx + Math.cos(angle) * scalex;
-            let y = ty + Math.sin(angle) * scaley;
+            let x = tx + Math.cos(angle + rotation) * scalex;
+            let y = ty + Math.sin(angle + rotation) * scaley;
 
             return new Vector2(x, y);
         }
