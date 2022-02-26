@@ -37,41 +37,79 @@ export class ShapeGenerator {
                 color.r, color.g, color.b, color.a
             );
 
-            this.indices.push(this.indices.length-1);
+            this.indices.push(this.indices.length);
         }
         return this;
     }
 
 
-    public fillClosedPath(path : Path2D, steps : number, color = new RGBA()) : ShapeGenerator {
+    public fillClosedPath(path : Path2D, steps : number, color = new RGBA(), cx = 0.0, cy = 0.0) : ShapeGenerator {
 
-        let step = 1.0 / (steps-1);
+        let step = 1.0 / steps;
         let t : number;
+
+        let center = new Vector2(cx, cy);
 
         for (let i = 0; i < steps; ++ i) {
 
             t = i * step;
 
-            this.addTriangle(path(t), path(t+step), new Vector2(), color);
+            this.addTriangle(path(t), path(t+step), center, color);
         }
 
         return this;
     }
 
 
-    public addRoundedRectangle(diameter : number, roundRadius : number, quality : number,
-        color = new RGBA(), tx = 0.0, ty = 0.0, scalex = 1.0, scaley = 1.0) : ShapeGenerator {
+    public addRectangle(x : number, y : number, w : number, h : number, color = new RGBA()) : ShapeGenerator {
 
-        let path = (t : number) : Vector2 => {
+        let A = new Vector2(x, y);
+        let B = new Vector2(x+w, y);
+        let C = new Vector2(x+w, y+h);
+        let D = new Vector2(x, y+h);
 
-            let s = t * Math.PI * 2;
+        return this
+            .addTriangle(A, B, C, color)
+            .addTriangle(C, D, A, color);
+    }
 
-            let x = clamp(Math.cos(s) * roundRadius, -diameter/2, diameter/2);
-            let y = clamp(Math.sin(s) * roundRadius, -diameter/2, diameter/2);
 
-            return new Vector2(x * scalex + tx, y * scaley + ty);
+    public addRoundedRectangle(x : number, y : number, 
+        w : number, h : number, corner : number, quality : number,
+        color = new RGBA()) : ShapeGenerator {
+
+        return this
+            .addRectangle(x, y + corner, w, h - corner*2, color)
+            .addRectangle(x + corner, y, w - corner*2, h, color)
+            .addSector(0, Math.PI/2, quality, color, x + w - corner, y + h - corner, corner, corner)
+            .addSector(Math.PI/2, Math.PI, quality, color, x + corner, y + h - corner, corner, corner)
+            .addSector(Math.PI, Math.PI * 3.0/2.0, quality, color, x + corner, y + corner, corner, corner)
+            .addSector(Math.PI * 3.0/2.0, Math.PI*2.0, quality, color, x + w - corner, y + corner, corner, corner);
+    }
+
+
+    public addSector(startAngle : number, endAngle : number, quality : number,
+            color = new RGBA(), tx = 0.0, ty = 0.0, scalex = 1.0, scaley = 1.0) : ShapeGenerator {
+
+        let path = (t : number) => {
+
+            let angle = startAngle + t * (endAngle - startAngle);
+            let x = tx + Math.cos(angle) * scalex;
+            let y = ty + Math.sin(angle) * scaley;
+
+            return new Vector2(x, y);
         }
-        return this.fillClosedPath(path, quality, color);
+
+        return this.fillClosedPath(path, quality, color, tx, ty);
+    }
+
+
+    public addEllipse(cx : number, cy : number, 
+        w : number, h : number, 
+        quality : number, color = new RGBA()) : ShapeGenerator {
+
+        return this.addSector(0, Math.PI*2, quality, color,
+            cx, cy, w/2, h/2);
     }
 
 
