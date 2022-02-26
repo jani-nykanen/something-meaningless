@@ -94,10 +94,16 @@ export class ShapeGenerator {
         let path = (t : number) => {
 
             let angle = startAngle + t * (endAngle - startAngle);
-            let x = tx + Math.cos(angle + rotation) * scalex;
-            let y = ty + Math.sin(angle + rotation) * scaley;
+            let x = Math.cos(angle) * scalex;
+            let y = Math.sin(angle) * scaley;
 
-            return new Vector2(x, y);
+            let c = Math.cos(rotation);
+            let s = Math.sin(rotation);
+
+            let rx = tx + x * c - y * s;
+            let ry = ty + x * s + y * c;
+
+            return new Vector2(rx, ry);
         }
 
         return this.fillClosedPath(path, quality, color, tx, ty);

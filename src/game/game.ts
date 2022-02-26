@@ -32,7 +32,7 @@ export class GameScene implements Scene {
             .loadIdentity()
             .use();
 
-        canvas.clear(0.67, 0.67, 0.67);
+        canvas.clear(0.33, 0.67, 1.0);
 
         this.stage.draw(canvas);
     }

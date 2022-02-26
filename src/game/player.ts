@@ -30,9 +30,13 @@ export class Player {
     private meshBody : Mesh;
     private meshFaceStatic : Mesh;
     private meshEye : Mesh;
+    private meshLeg : Mesh;
+    private meshArm : Mesh;
 
     private eyePos : Vector2;
     private eyeTarget : Vector2;
+
+    private bodyAngle : number;
 
 
     constructor(x : number, y : number, moveTime : number, event : CoreEvent) {
@@ -49,6 +53,8 @@ export class Player {
 
         this.eyePos = new Vector2();
         this.eyeTarget = new Vector2();
+
+        this.bodyAngle = 0.0;
     }
 
 
@@ -60,26 +66,33 @@ export class Player {
         const WIDTH = 1.0;
         const HEIGHT = 0.75;
         
-        this.meshBody = (new ShapeGenerator())  
+        this.meshBody = (new ShapeGenerator())      
+            // Hat, back
+            .addSector(Math.PI, Math.PI*2, 16, new RGBA(0), 0.35, -0.25, 0.33, -0.10, Math.PI/5)
+            // Box
             .addRoundedRectangle(
                 -WIDTH/2, -HEIGHT/2, 
                 WIDTH, HEIGHT, 
                 0.1, CORNER_QUALITY, 
-                new RGBA(0, 0, 0))
+                new RGBA(0))
             .addRoundedRectangle(
                 -WIDTH/2 + OUTLINE_WIDTH, 
                 -HEIGHT/2 + OUTLINE_WIDTH, 
                 WIDTH - OUTLINE_WIDTH*2, 
                 HEIGHT - OUTLINE_WIDTH*2, 
                 0.1, CORNER_QUALITY, 
-                new RGBA(0.90, 0.75, 0.40))
+                new RGBA(0.65))
             .addRoundedRectangle(
                 -WIDTH/2 + OUTLINE_WIDTH + 0.025, 
                 -HEIGHT/2 + OUTLINE_WIDTH + 0.025, 
                 WIDTH - OUTLINE_WIDTH*2 - 0.1, 
                 HEIGHT - OUTLINE_WIDTH*2 - 0.1, 
                 0.1, CORNER_QUALITY, 
-                new RGBA(1, 1, 0.67))
+                new RGBA(0.85))
+            // Hat, front
+            .addSector(0, Math.PI, 16, new RGBA(0), 0.35, -0.25, 0.33, -0.10, Math.PI/5)
+            .addSector(0, Math.PI, 16, new RGBA(0), 0.35, -0.25, 0.225, -0.30, Math.PI/5)
+            .addEllipse(0.375, -0.425, 0.15, 0.10, 16, new RGBA(1.0))
             .constructMesh(event);
     }
 
@@ -131,12 +144,12 @@ export class Player {
                 NOSE_WIDTH - NOSE_OUTLINE*2, 
                 NOSE_HEIGHT - NOSE_OUTLINE*2, 
                 NOSE_QUALITY, 
-                new RGBA(0.70, 0.25, 0))
+                new RGBA(0.45))
             .addEllipse(0 - 0.025, NOSE_Y - 0.025*ratio, 
                 NOSE_WIDTH - NOSE_OUTLINE*2 - 0.1, 
                 NOSE_HEIGHT - NOSE_OUTLINE*2 - 0.1*ratio, 
                 NOSE_QUALITY, 
-                new RGBA(1.0, 0.50, 0))
+                new RGBA(0.75))
             .constructMesh(event);
 
         // TODO: Get rid of most numeric constants?
@@ -147,32 +160,81 @@ export class Player {
     }
 
 
+    private generateLimbs(event : CoreEvent) {
+
+        this.meshLeg = (new ShapeGenerator())
+            .addTriangle(
+                new Vector2(-0.15, 0.0),
+                new Vector2(0, 0.25),
+                new Vector2(0.15, 0), new RGBA(0))
+            .addTriangle(
+                new Vector2(-0.125, 0.0),
+                new Vector2(0, 0.20),
+                new Vector2(0.125, 0), new RGBA(0.40))
+            .addTriangle(
+                new Vector2(-0.11, 0.0),
+                new Vector2(-0.01, 0.15),
+                new Vector2(0.09, 0), new RGBA(0.65))
+            .constructMesh(event);
+    }
+
+
     private generateMeshes(event : CoreEvent) {
 
         this.generateBody(event);
         this.generateFace(event);
+        this.generateLimbs(event);
     }
 
 
     public update(stage : Stage, event : CoreEvent) {
 
         const EYE_MOVE_SPEED = 0.10;
+        const BODY_ANGLE_SPEED = 0.15;
 
         this.eyeTarget = event.input.getStick();
 
         this.eyePos.x = updateSpeedAxis(this.eyePos.x, this.eyeTarget.x, EYE_MOVE_SPEED*event.step);
         this.eyePos.y = updateSpeedAxis(this.eyePos.y, this.eyeTarget.y, EYE_MOVE_SPEED*event.step);
+
+        this.bodyAngle = (this.bodyAngle += BODY_ANGLE_SPEED * event.step) % (Math.PI*2);
     }
 
 
     public draw(canvas : Canvas) {
 
+        const LEG_OFFSET_X = 0.25;
+        const LEG_OFFSET_Y = 0.325;
+
         const EYE_RADIUS_X = 0.075;
         const EYE_RADIUS_Y = 0.05;
+
+        const BODY_ROTATION_FACTOR = Math.PI/9;
+
+        let rotation = Math.sin(this.bodyAngle) * BODY_ROTATION_FACTOR;
+
+        // Legs
+        for (let i = -1; i <= 1; i += 2) {
+
+            canvas.transform
+                .push()
+                .translate(i * LEG_OFFSET_X, LEG_OFFSET_Y)
+                .use();
+
+            canvas.drawMesh(this.meshLeg);
+
+            canvas.transform.pop();
+        }
+
+        canvas.transform.push()
+            .translate(this.renderPos.x, this.renderPos.y)
+            .rotate(rotation)
+            .use();
 
         canvas.drawMesh(this.meshBody);
         canvas.drawMesh(this.meshFaceStatic);
 
+        // Eyes
         for (let i = -1; i <= 1; i += 2) {
 
             canvas.transform
@@ -185,8 +247,9 @@ export class Player {
             canvas.drawMesh(this.meshEye);
 
             canvas.transform.pop();
-
         }
+
+        canvas.transform.pop();
     }
 
 }

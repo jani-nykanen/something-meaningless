@@ -226,7 +226,7 @@ export class RGBA {
 	public a : number;
 
 
-	constructor(r = 1, g = 1, b = 1, a = 1) {
+	constructor(r = 1, g = r, b = g, a = 1) {
 
 		this.r = r;
 		this.g = g;
