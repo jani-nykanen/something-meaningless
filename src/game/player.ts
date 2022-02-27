@@ -232,20 +232,25 @@ export class Player {
 
         let rotation = Math.sin(this.bodyAngle) * BODY_ROTATION_FACTOR;
         let legOff : number;
+        let legAngle : number;
 
         // Legs
         for (let i = -1; i <= 1; i += 2) {
 
             legOff = 0.0;
+            legAngle = 0.0;
+
             if (this.bodyAngle >= (i+1)/2.0 * Math.PI &&
                 this.bodyAngle < (i+3)/2.0 * Math.PI) {
 
-                legOff = -Math.abs(Math.sin(this.bodyAngle - (i+1)/2.0 * Math.PI )) * LEG_MOVE_FACTOR;
+                legOff = -Math.abs(Math.sin(this.bodyAngle % Math.PI)) * LEG_MOVE_FACTOR;
+                legAngle = -i * Math.sin(this.bodyAngle % Math.PI) * BODY_ROTATION_FACTOR;
             }
 
             canvas.transform
                 .push()
                 .translate(i * LEG_OFFSET_X, LEG_OFFSET_Y + legOff)
+                .rotate(legAngle)
                 .use();
 
             canvas.drawMesh(this.meshLeg);
