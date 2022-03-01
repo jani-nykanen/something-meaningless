@@ -37,6 +37,7 @@ export class Player {
     private eyeTarget : Vector2;
 
     private bodyAngle : number;
+    private armAngle : number;
 
 
     constructor(x : number, y : number, moveTime : number, event : CoreEvent) {
@@ -55,6 +56,7 @@ export class Player {
         this.eyeTarget = new Vector2();
 
         this.bodyAngle = 0.0;
+        this.armAngle = 0.0;
     }
 
 
@@ -179,6 +181,27 @@ export class Player {
                 new Vector2(0.09, 0), new RGBA(0.65))
             .addSector(0, Math.PI, 16, new RGBA(0.65), -0.01, 0, 0.10, -0.10)
             .constructMesh(event);
+
+        this.meshArm =(new ShapeGenerator())
+            .addSector(-Math.PI/2, Math.PI/2, 16, new RGBA(0), 0, 0, 0.15, 0.15)
+            .addTriangle(
+                new Vector2(0, -0.15),
+                new Vector2(-0.25, 0.15),
+                new Vector2(0, 0.15),
+                new RGBA(0))
+            .addSector(-Math.PI/2, Math.PI/2, 16, new RGBA(0.40), 0, 0, 0.120, 0.120)
+            .addTriangle(
+                new Vector2(0, -0.120),
+                new Vector2(-0.19, 0.120),
+                new Vector2(0, 0.120),
+                new RGBA(0.40))
+            .addSector(-Math.PI/2, Math.PI/2, 16, new RGBA(0.65), 0, 0.0, 0.10, 0.090)
+            .addTriangle(
+                new Vector2(0, -0.090),
+                new Vector2(-0.14, 0.090),
+                new Vector2(0, 0.090),
+                new RGBA(0.65))
+            .constructMesh(event);
     }
 
 
@@ -193,10 +216,12 @@ export class Player {
     private animate(event : CoreEvent) {
 
         const EYE_MOVE_SPEED = 0.10;
-        const BODY_ANGLE_SPEED = 0.15;
+        const BODY_ROTATION_SPEED = 0.15;
+        const ARM_ROTATION_SPEED = 0.30;
         const EPS = 0.01;
 
-        this.bodyAngle = (this.bodyAngle += BODY_ANGLE_SPEED * event.step) % (Math.PI*2);
+        this.bodyAngle = (this.bodyAngle += BODY_ROTATION_SPEED * event.step) % (Math.PI*2);
+        this.armAngle = (this.armAngle += ARM_ROTATION_SPEED * event.step) % (Math.PI*2);
 
         this.eyeTarget = event.input.getStick();
         if (Vector2.distance(this.eyePos, this.eyeTarget) < EPS) {
@@ -229,6 +254,7 @@ export class Player {
         const EYE_RADIUS_Y = 0.05;
 
         const BODY_ROTATION_FACTOR = Math.PI/12;
+        const ARM_ROTATION_FACTOR = Math.PI/5;
 
         let rotation = Math.sin(this.bodyAngle) * BODY_ROTATION_FACTOR;
         let legOff : number;
@@ -263,9 +289,24 @@ export class Player {
             .rotate(rotation)
             .use();
 
+        // Arms
+        for (let i = -1; i <= 1; i += 2) {
+
+            canvas.transform.push()
+                .translate(0.45*i, 0.075)
+                .rotate(i * (-ARM_ROTATION_FACTOR/2 +  Math.sin(this.armAngle) * ARM_ROTATION_FACTOR))
+                .scale(-i, 1)
+                .use();
+
+            canvas.drawMesh(this.meshArm);
+
+            canvas.transform.pop();
+        }
+        canvas.transform.use();
+
         canvas.drawMesh(this.meshBody);
         canvas.drawMesh(this.meshFaceStatic);
-
+        
         // Eyes
         for (let i = -1; i <= 1; i += 2) {
 
