@@ -116,7 +116,7 @@ export class Core {
         let barWidth = BAR_HEIGHT * 8;
         let barHeight = BAR_HEIGHT;
 
-        canvas.clear(1.0, 1.0, 1.0);
+        canvas.clear(0.33, 0.67, 1.0);
     
         let t = this.assets.dataLoadedUnit();
         let x = viewport.x/2 - barWidth/2;
@@ -125,7 +125,7 @@ export class Core {
         canvas.setColor(0, 0, 0);
         canvas.fillRect(x-BAR_BORDER_WIDTH*2, y-BAR_BORDER_WIDTH*2, 
             barWidth+BAR_BORDER_WIDTH*4, barHeight+BAR_BORDER_WIDTH*4);
-        canvas.setColor();
+        canvas.setColor(0.33, 0.67, 1.0);
         canvas.fillRect(x-BAR_BORDER_WIDTH, y-BAR_BORDER_WIDTH, 
             barWidth+BAR_BORDER_WIDTH*2, barHeight+BAR_BORDER_WIDTH*2);
     

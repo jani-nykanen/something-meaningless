@@ -27,7 +27,7 @@ export class Stage {
     public draw(canvas : Canvas) {
 
         canvas.transform
-            .fitGivenDimension(4.0, canvas.width/canvas.height)
+            .fitGivenDimension(6.0, canvas.width/canvas.height)
             .use();
 
         let view = canvas.transform.getViewport();

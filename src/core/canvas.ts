@@ -280,7 +280,7 @@ export class Canvas {
     }
 
 
-    public setColor(r = 1, g = 1, b = 1, a = 1) {
+    public setColor(r = 1, g = r, b = g, a = 1) {
 
         this.activeShader.setColor(r, g, b, a);
 
