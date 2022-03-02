@@ -83,14 +83,14 @@ export class Player {
                 WIDTH - OUTLINE_WIDTH*2, 
                 HEIGHT - OUTLINE_WIDTH*2, 
                 0.1, CORNER_QUALITY, 
-                new RGBA(0.65))
+                new RGBA(0.80, 0.60, 0.1))
             .addRoundedRectangle(
                 -WIDTH/2 + OUTLINE_WIDTH + 0.025, 
                 -HEIGHT/2 + OUTLINE_WIDTH + 0.025, 
                 WIDTH - OUTLINE_WIDTH*2 - 0.1, 
                 HEIGHT - OUTLINE_WIDTH*2 - 0.1, 
                 0.1, CORNER_QUALITY, 
-                new RGBA(0.85))
+                new RGBA(1.0, 0.90, 0.50))
             // Hat, front
             .addSector(0, Math.PI, 16, new RGBA(0), 0.35, -0.25, 0.33, -0.10, Math.PI/5)
             .addSector(0, Math.PI, 16, new RGBA(0), 0.35, -0.25, 0.225, -0.30, Math.PI/5)
@@ -146,12 +146,12 @@ export class Player {
                 NOSE_WIDTH - NOSE_OUTLINE*2, 
                 NOSE_HEIGHT - NOSE_OUTLINE*2, 
                 NOSE_QUALITY, 
-                new RGBA(0.45))
+                new RGBA(0.75, 0.25, 0))
             .addEllipse(0 - 0.025, NOSE_Y - 0.025*ratio, 
                 NOSE_WIDTH - NOSE_OUTLINE*2 - 0.1, 
                 NOSE_HEIGHT - NOSE_OUTLINE*2 - 0.1*ratio, 
                 NOSE_QUALITY, 
-                new RGBA(0.75))
+                new RGBA(1.0, 0.50, 0.2))
             .constructMesh(event);
 
         // TODO: Get rid of most numeric constants?
@@ -173,13 +173,13 @@ export class Player {
             .addTriangle(
                 new Vector2(-0.125, 0.0),
                 new Vector2(0, 0.20),
-                new Vector2(0.125, 0), new RGBA(0.40))
-            .addSector(0, Math.PI, 16, new RGBA(0.40), 0, 0, 0.125, -0.125)
+                new Vector2(0.125, 0), new RGBA(0.67, 0.33, 0.0))
+            .addSector(0, Math.PI, 16, new RGBA(0.67, 0.33, 0.0), 0, 0, 0.125, -0.125)
             .addTriangle(
                 new Vector2(-0.11, 0.0),
                 new Vector2(-0.01, 0.15),
-                new Vector2(0.09, 0), new RGBA(0.65))
-            .addSector(0, Math.PI, 16, new RGBA(0.65), -0.01, 0, 0.10, -0.10)
+                new Vector2(0.09, 0), new RGBA(0.90, 0.55, 0))
+            .addSector(0, Math.PI, 16, new RGBA(0.90, 0.55, 0), -0.01, 0, 0.10, -0.10)
             .constructMesh(event);
 
         this.meshArm =(new ShapeGenerator())
@@ -189,18 +189,18 @@ export class Player {
                 new Vector2(-0.25, 0.15),
                 new Vector2(0, 0.15),
                 new RGBA(0))
-            .addSector(-Math.PI/2, Math.PI/2, 16, new RGBA(0.40), 0, 0, 0.120, 0.120)
+            .addSector(-Math.PI/2, Math.PI/2, 16, new RGBA(0.60, 0.40, 0.0), 0, 0, 0.120, 0.120)
             .addTriangle(
                 new Vector2(0, -0.120),
                 new Vector2(-0.19, 0.120),
                 new Vector2(0, 0.120),
-                new RGBA(0.40))
-            .addSector(-Math.PI/2, Math.PI/2, 16, new RGBA(0.65), 0, 0.0, 0.10, 0.090)
+                new RGBA(0.60, 0.40, 0.0))
+            .addSector(-Math.PI/2, Math.PI/2, 16, new RGBA(0.90, 0.70, 0.1), 0, 0.0, 0.10, 0.090)
             .addTriangle(
                 new Vector2(0, -0.090),
                 new Vector2(-0.14, 0.090),
                 new Vector2(0, 0.090),
-                new RGBA(0.65))
+                new RGBA(0.90, 0.70, 0.1))
             .constructMesh(event);
     }
 
