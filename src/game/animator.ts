@@ -242,6 +242,7 @@ export class PlayerAnimator {
 
         const BODY_ROTATION_FACTOR = Math.PI/12;
         const ARM_ROTATION_FACTOR = Math.PI/5;
+        const ARM_ROTATION_START = Math.PI/4;
 
         let rotation = Math.sin(this.bodyAngle) * BODY_ROTATION_FACTOR;
         let legOff : number;
@@ -280,7 +281,7 @@ export class PlayerAnimator {
 
             canvas.transform.push()
                 .translate(ARM_OFFSET_X*i, ARM_OFFSET_Y)
-                .rotate(i * Math.sin(this.bodyAngle*2) * ARM_ROTATION_FACTOR)
+                .rotate(i * Math.sin(ARM_ROTATION_START + this.bodyAngle*2) * ARM_ROTATION_FACTOR)
                 .scale(-i, 1)
                 .use();
 

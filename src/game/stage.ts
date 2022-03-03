@@ -3,7 +3,7 @@ import { CoreEvent } from "../core/core.js";
 import { Player } from "./player.js";
 
 
-const TURN_TIME = 20;
+const TURN_TIME = 15;
 
 
 export class Stage {
