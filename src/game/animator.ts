@@ -5,6 +5,8 @@ import { RGBA, Vector2 } from "../core/vector.js";
 import { ShapeGenerator } from "./shapegenerator.js";
 
 
+const BODY_ROTATION_FACTOR = Math.PI/12;
+
 
 export class PlayerAnimator {
 
@@ -228,27 +230,15 @@ export class PlayerAnimator {
     }
 
 
-    public draw(canvas : Canvas) {
+    private drawLegs(canvas : Canvas, rotation : number) {
 
         const LEG_OFFSET_X = 0.225;
         const LEG_OFFSET_Y = 0.35;
         const LEG_MOVE_FACTOR = 0.1;
 
-        const ARM_OFFSET_X = 0.425;
-        const ARM_OFFSET_Y = 0.075;
-
-        const EYE_RADIUS_X = 0.075;
-        const EYE_RADIUS_Y = 0.05;
-
-        const BODY_ROTATION_FACTOR = Math.PI/12;
-        const ARM_ROTATION_FACTOR = Math.PI/5;
-        const ARM_ROTATION_START = Math.PI/4;
-
-        let rotation = Math.sin(this.bodyAngle) * BODY_ROTATION_FACTOR;
         let legOff : number;
         let legAngle : number;
 
-        // Legs
         for (let i = -1; i <= 1; i += 2) {
 
             legOff = 0.0;
@@ -271,12 +261,17 @@ export class PlayerAnimator {
 
             canvas.transform.pop();
         }
+    }
 
-        canvas.transform.push()
-            .rotate(rotation)
-            .use();
 
-        // Arms
+    private drawArms(canvas : Canvas) {
+
+        const ARM_ROTATION_FACTOR = Math.PI/5;
+        const ARM_ROTATION_START = Math.PI/4;
+
+        const ARM_OFFSET_X = 0.425;
+        const ARM_OFFSET_Y = 0.075;
+
         for (let i = -1; i <= 1; i += 2) {
 
             canvas.transform.push()
@@ -290,10 +285,17 @@ export class PlayerAnimator {
             canvas.transform.pop();
         }
         canvas.transform.use();
+    }
+
+
+    private drawBody(canvas : Canvas) {
+
+        const EYE_RADIUS_X = 0.075;
+        const EYE_RADIUS_Y = 0.05;
 
         canvas.drawMesh(this.meshBody);
         canvas.drawMesh(this.meshFaceStatic);
-        
+
         // Eyes
         for (let i = -1; i <= 1; i += 2) {
 
@@ -308,6 +310,21 @@ export class PlayerAnimator {
 
             canvas.transform.pop();
         }
+    }
+
+
+    public draw(canvas : Canvas) {
+
+        let rotation = Math.sin(this.bodyAngle) * BODY_ROTATION_FACTOR;
+
+        this.drawLegs(canvas, rotation);
+
+        canvas.transform.push()
+            .rotate(rotation)
+            .use();
+
+        this.drawArms(canvas);
+        this.drawBody(canvas);
 
         canvas.transform.pop();
     }
