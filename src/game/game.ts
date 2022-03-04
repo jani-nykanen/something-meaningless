@@ -12,7 +12,7 @@ export class GameScene implements Scene {
 
     constructor(param : any, event : CoreEvent) {
 
-        this.stage = new Stage(event);
+        this.stage = new Stage(event, 1);
     }
 
 

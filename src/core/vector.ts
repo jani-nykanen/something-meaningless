@@ -239,5 +239,10 @@ export class RGBA {
 	}
 
 
+	// NOTE: Preserves alpha
+	static scalarMultiply = (color : RGBA, scalar : number) : RGBA => 
+		new RGBA(color.r * scalar, color.g * scalar, color.b * scalar, color.a);
+
+
 	public clone = () : RGBA => new RGBA(this.r, this.g, this.b, this.a);
 }

@@ -129,13 +129,18 @@ export class Player {
     }
 
 
-    public draw(canvas : Canvas) {
+    public draw(canvas : Canvas, tileWidth : number, tileHeight : number) {
 
-        const SCALE_Y = 0.75;
+        const FIGURE_SCALE_FACTOR = 0.80;
+        const OFFSET_Y = -0.33;
+
+        let scale = Math.max(tileWidth, tileHeight) * FIGURE_SCALE_FACTOR;
 
         canvas.transform
             .push()
-            .translate(this.renderPos.x, this.renderPos.y * SCALE_Y)
+            .translate(this.renderPos.x * tileWidth, 
+                this.renderPos.y * tileHeight + OFFSET_Y)
+            .scale(scale, scale)
             .use();
 
         this.animator.draw(canvas);

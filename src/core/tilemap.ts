@@ -72,11 +72,11 @@ export class Tilemap {
     }
 
 
-    public getTile(l : number, x : number, y : number) : number {
+    public getTile(l : number, x : number, y : number, def = -1) : number {
 
         if (l < 0 || l >= this.layers.length || x < 0 || y < 0 ||
             x >= this.width || y >= this.height)
-            return -1;
+            return def;
 
         return this.layers[l][y * this.width + x];
     }

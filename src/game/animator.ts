@@ -234,7 +234,7 @@ export class PlayerAnimator {
 
         const LEG_OFFSET_X = 0.225;
         const LEG_OFFSET_Y = 0.35;
-        const LEG_MOVE_FACTOR = 0.1;
+        const LEG_MOVE_FACTOR = 0.15;
 
         let legOff : number;
         let legAngle : number;
