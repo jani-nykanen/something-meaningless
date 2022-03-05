@@ -136,6 +136,9 @@ export class PlayerAnimator {
 
     private generateLimbs(event : CoreEvent) {
 
+        const LEG_COLOR_1 = new RGBA(0.80, 0.20, 0.0);
+        const LEG_COLOR_2 = new RGBA(1.0, 0.50, 0.10);
+
         const ARM_COLOR_1 = new RGBA(1.0, 0.90, 0.50);
         const ARM_COLOR_2 = new RGBA(0.80, 0.60, 0.10)
 
@@ -153,13 +156,13 @@ export class PlayerAnimator {
             .addTriangle(
                 new Vector2(-0.133, 0.0),
                 new Vector2(0, 0.20),
-                new Vector2(0.133, 0), new RGBA(0.67, 0.33, 0.0))
-            .addSector(0, Math.PI, 16, new RGBA(0.67, 0.33, 0.0), 0, 0, 0.125, -0.125)
+                new Vector2(0.133, 0), LEG_COLOR_1)
+            .addSector(0, Math.PI, 16, LEG_COLOR_1, 0, 0, 0.125, -0.125)
             .addTriangle(
                 new Vector2(-0.11, 0.0),
                 new Vector2(-0.01, 0.15),
-                new Vector2(0.09, 0), new RGBA(0.90, 0.55, 0))
-            .addSector(0, Math.PI, 16, new RGBA(0.90, 0.55, 0), -0.01, 0, 0.10, -0.10)
+                new Vector2(0.09, 0), LEG_COLOR_2)
+            .addSector(0, Math.PI, 16, LEG_COLOR_2, -0.01, 0, 0.10, -0.10)
             .constructMesh(event);
 
         this.meshArm =(new ShapeGenerator())
