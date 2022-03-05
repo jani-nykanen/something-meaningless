@@ -8,8 +8,8 @@ import { ShapeGenerator } from "./shapegenerator.js";
 
 
 const COLORS = [
-    new RGBA(0.95, 0.70, 0.40),
-    new RGBA(1.0, 0.90, 0.67)
+    new RGBA(0.95, 0.70, 0.33),
+    new RGBA(1.0, 0.925, 0.67)
 ];
 
 
@@ -164,8 +164,8 @@ const generateShadowMesh = (map : Tilemap,
     tileWidth : number, tileHeight : number, 
     event : CoreEvent) : Mesh => {
 
-    const SHADOW_OFFSET_X = 0.20;
-    const SHADOW_OFFSET_Y = 0.20;
+    const SHADOW_OFFSET_X = 0.15;
+    const SHADOW_OFFSET_Y = 0.15;
 
     let gen = new ShapeGenerator();
 
@@ -195,7 +195,7 @@ const generateShadowMesh = (map : Tilemap,
                 black);
 
             tx = dx + 1.0 + OUTLINE_WIDTH;
-            ty = dy + SHADOW_OFFSET_Y;
+            ty = dy + (1.0 - tileHeight);
             gen.addTriangle(
                 new Vector2(tx, ty),
                 new Vector2(tx, ty + SHADOW_OFFSET_Y),

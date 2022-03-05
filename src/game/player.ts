@@ -93,6 +93,10 @@ export class Player {
                 }
 
                 this.jumping = true;
+                if (this.rotationPhase == 0) {
+
+                    this.rotationPhase = 1;
+                }
             }
 
             this.target = Vector2.add(this.pos, new Vector2(dirx, diry));
