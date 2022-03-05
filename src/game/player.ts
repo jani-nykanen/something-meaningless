@@ -24,6 +24,8 @@ export class Player {
     private bodyAngle : number;
     private rotationPhase : 0 | 1;
 
+    private jumping : boolean;
+
 
     constructor(x : number, y : number, moveTime : number, event : CoreEvent) {
 
@@ -42,6 +44,8 @@ export class Player {
 
         this.bodyAngle = 0.0;
         this.rotationPhase = 0;
+    
+        this.jumping = false;
     }
 
 
@@ -72,10 +76,21 @@ export class Player {
 
         if (dirx != 0 || diry != 0) {
 
+            this.jumping = false;
+
             // Check if free
             if (stage.getTile(0, px + dirx, py + diry) != 1) {
 
-                return;
+                // Check if can jump
+                dirx *= 2;
+                diry *= 2;
+
+                if (stage.getTile(0, px + dirx, py + diry) != 1) {
+
+                    return;
+                }
+
+                this.jumping = true;
             }
 
             this.target = Vector2.add(this.pos, new Vector2(dirx, diry));
@@ -117,7 +132,7 @@ export class Player {
 
             this.animator.setEyeTarget(new Vector2());
             this.bodyAngle = 0;
-            this.animator.setBodyAngle(0);
+            this.animator.animateWalkingCycle(0);
 
             this.animator.update(event);
 
@@ -126,9 +141,15 @@ export class Player {
 
         let angleStart = this.rotationPhase * Math.PI;
 
-        this.bodyAngle = (this.bodyAngle += bodyRotationSpeed * event.step) % Math.PI;
+        if (this.jumping) {
 
-        this.animator.setBodyAngle(angleStart + this.bodyAngle);
+            this.animator.animateJumping(1.0 - this.moveTimer/this.moveTime);
+        }   
+        else {
+
+            this.bodyAngle = (this.bodyAngle += bodyRotationSpeed * event.step) % Math.PI;
+            this.animator.animateWalkingCycle(angleStart + this.bodyAngle);
+        }
         this.animator.setEyeTarget(Vector2.direction(this.pos, this.target));
         this.animator.update(event);
     }
@@ -176,6 +197,19 @@ export class Player {
     }
 
 
+    private computeJumpHeight() {
+
+        const HEIGHT = 0.40;
+
+        if (!this.jumping)
+            return 0.0;
+
+        let t = -0.5 + (1.0 - this.moveTimer / this.moveTime);
+
+        return -Math.cos(t * Math.PI) * HEIGHT;
+    }
+
+
     public draw(canvas : Canvas, tileWidth : number, tileHeight : number) {
 
         const OFFSET_Y = -0.50;
@@ -185,8 +219,9 @@ export class Player {
 
         canvas.transform
             .push()
-            .translate(this.renderPos.x * tileWidth, 
-                this.renderPos.y * tileHeight + OFFSET_Y)
+            .translate(
+                this.renderPos.x * tileWidth, 
+                this.renderPos.y * tileHeight + OFFSET_Y + this.computeJumpHeight())
             .scale(scale, scale)
             .use();
 

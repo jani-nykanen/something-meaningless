@@ -6,6 +6,7 @@ import { ShapeGenerator } from "./shapegenerator.js";
 
 
 const BODY_ROTATION_FACTOR = Math.PI/12;
+const ARM_ROTATION_START = Math.PI/4;
 
 
 export class PlayerAnimator {
@@ -19,7 +20,10 @@ export class PlayerAnimator {
 
     private eyePos : Vector2;
     private eyeTarget : Vector2;
+
     private bodyAngle : number;
+    private armAngle : number;
+    private legTimer : number;
 
 
     constructor(event : CoreEvent) {
@@ -28,7 +32,10 @@ export class PlayerAnimator {
 
         this.eyePos = new Vector2();
         this.eyeTarget = new Vector2();
+
         this.bodyAngle = 0.0;
+        this.armAngle = 0.0;
+        this.legTimer = 0.0;
     }
 
 
@@ -196,9 +203,22 @@ export class PlayerAnimator {
     }
 
 
-    public setBodyAngle(angle : number) {
+    public animateWalkingCycle(angle : number) {
         
         this.bodyAngle = angle;
+        this.armAngle = ARM_ROTATION_START + angle * 2;
+        this.legTimer = angle;
+    }
+
+
+    public animateJumping(t : number) {
+
+        const BODY_ROTATION = Math.PI*2;
+
+        this.bodyAngle = t * BODY_ROTATION;
+        this.armAngle = ARM_ROTATION_START + t * Math.PI;
+        this.legTimer = this.bodyAngle;
+
     }
 
 
@@ -233,7 +253,7 @@ export class PlayerAnimator {
     }
 
 
-    private drawLegs(canvas : Canvas, rotation : number) {
+    private drawLegs(canvas : Canvas) {
 
         const LEG_OFFSET_X = 0.225;
         const LEG_OFFSET_Y = 0.35;
@@ -247,11 +267,11 @@ export class PlayerAnimator {
             legOff = 0.0;
             legAngle = 0.0;
 
-            if (this.bodyAngle >= (i+1)/2.0 * Math.PI &&
-                this.bodyAngle < (i+3)/2.0 * Math.PI) {
+            if (this.legTimer >= (i+1)/2.0 * Math.PI &&
+                this.legTimer < (i+3)/2.0 * Math.PI) {
 
-                legOff = -Math.abs(Math.sin(this.bodyAngle % Math.PI)) * LEG_MOVE_FACTOR;
-                legAngle = -i * Math.sin(this.bodyAngle % Math.PI) * BODY_ROTATION_FACTOR;
+                legOff = -Math.abs(Math.sin(this.legTimer % Math.PI)) * LEG_MOVE_FACTOR;
+                legAngle = -i * Math.sin(this.legTimer % Math.PI) * BODY_ROTATION_FACTOR;
             }
 
             canvas.transform
@@ -270,8 +290,7 @@ export class PlayerAnimator {
     private drawArms(canvas : Canvas) {
 
         const ARM_ROTATION_FACTOR = Math.PI/5;
-        const ARM_ROTATION_START = Math.PI/4;
-
+        
         const ARM_OFFSET_X = 0.425;
         const ARM_OFFSET_Y = 0.075;
 
@@ -279,7 +298,7 @@ export class PlayerAnimator {
 
             canvas.transform.push()
                 .translate(ARM_OFFSET_X*i, ARM_OFFSET_Y)
-                .rotate(i * Math.sin(ARM_ROTATION_START + this.bodyAngle*2) * ARM_ROTATION_FACTOR)
+                .rotate(i * Math.sin(this.armAngle) * ARM_ROTATION_FACTOR)
                 .scale(-i, 1)
                 .use();
 
@@ -320,7 +339,7 @@ export class PlayerAnimator {
 
         let rotation = Math.sin(this.bodyAngle) * BODY_ROTATION_FACTOR;
 
-        this.drawLegs(canvas, rotation);
+        this.drawLegs(canvas);
 
         canvas.transform.push()
             .rotate(rotation)
