@@ -45,7 +45,7 @@ export class Player {
     }
 
 
-    private control(event : CoreEvent) {
+    private control(stage : Stage, event : CoreEvent) {
 
         const MOVE_EPS = 0.5;
 
@@ -54,6 +54,9 @@ export class Player {
         let stick = event.input.getStick();
         if (stick.length() < MOVE_EPS)
             return;
+
+        let px = this.pos.x | 0;
+        let py = this.pos.y | 0;
 
         let dirx = 0;
         let diry = 0;
@@ -68,6 +71,12 @@ export class Player {
         }
 
         if (dirx != 0 || diry != 0) {
+
+            // Check if free
+            if (stage.getTile(0, px + dirx, py + diry) != 1) {
+
+                return;
+            }
 
             this.target = Vector2.add(this.pos, new Vector2(dirx, diry));
 
@@ -127,7 +136,7 @@ export class Player {
 
     public update(stage : Stage, event : CoreEvent) {
 
-        this.control(event);
+        this.control(stage, event);
         this.move(event);
         this.animate(event);
     }
@@ -184,6 +193,20 @@ export class Player {
         this.animator.draw(canvas);
 
         canvas.transform.pop();
+    }
+
+
+    public setPosition(x : number, y : number, reset = true) {
+
+        this.pos = new Vector2(x, y);
+        this.target = this.pos.clone();
+        this.renderPos = this.pos.clone();
+    
+        this.moveTimer = 0.0;
+        this.moving = false;
+
+        this.bodyAngle = 0.0;
+        this.rotationPhase = 0;
     }
 
 }

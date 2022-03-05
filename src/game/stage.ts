@@ -1,5 +1,6 @@
 import { Canvas, StencilCondition } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
+import { Tilemap } from "../core/tilemap.js";
 import { Player } from "./player.js";
 import { Terrain } from "./terrain.js";
 
@@ -20,6 +21,8 @@ export class Stage {
     private width : number;
     private height : number;
 
+    private activeLayers : Array<Array<number>>;
+
 
     constructor(event : CoreEvent, index : number) {
 
@@ -30,7 +33,34 @@ export class Stage {
         this.width = map.width;
         this.height = map.height;
 
+        this.activeLayers = map.cloneLayers();
+
         this.terrain = new Terrain(map, TILE_WIDTH, TILE_HEIGHT, event);
+
+        this.parseObjects(map);
+    }
+
+
+    private parseObjects(map : Tilemap) {
+
+        for (let y = 0; y < map.height; ++ y) {
+
+            for (let x = 0; x < map.width; ++ x) {
+
+                // Top layer
+                switch (map.getTile(1, x, y)) {
+                    
+                case 3:
+                    
+                    this.player.setPosition(x, y);
+                    break;
+
+                default:
+                    break;
+                }
+
+            }
+        }
     }
 
 
@@ -38,7 +68,6 @@ export class Stage {
 
         this.player.update(this, event);
     }
-
 
 
     public draw(canvas : Canvas) {
@@ -78,5 +107,14 @@ export class Stage {
         this.player.draw(canvas, TILE_WIDTH, TILE_HEIGHT);
     
         canvas.transform.pop();
+    }
+
+
+    public getTile(layer : 0 | 1, x : number, y : number, def = 0) {
+
+        if (x < 0 || y < 0 || x >= this.width || y >= this.height)
+            return def;
+
+        return this.activeLayers[layer][y * this.width + x];
     }
 }
