@@ -70,9 +70,24 @@ export class Stage {
     }
 
 
+    private drawShadowLayer(canvas : Canvas) {
+
+        canvas.toggleStencilTest(true);
+        canvas.clearStencilBuffer();
+
+        canvas.setColor(0, 0, 0, 0.33);
+        canvas.setStencilCondition(StencilCondition.NotEqual);
+
+        this.terrain.drawShadows(canvas);
+        this.player.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT, 1.0 - TILE_HEIGHT);
+
+        canvas.toggleStencilTest(false);
+    }
+
+
     public draw(canvas : Canvas) {
 
-        let scaleFactor = (this.height + 2.0) * TILE_HEIGHT;
+        let scaleFactor = (this.height + 2.5) * TILE_HEIGHT;
 
         canvas.transform
             .fitGivenDimension(scaleFactor, canvas.width/canvas.height)
@@ -85,10 +100,10 @@ export class Stage {
             .translate(view.x/2, view.y/2)
             .translate(
                 -(this.width-1) * TILE_WIDTH/2, 
-                -(this.height-1) * TILE_HEIGHT/2)
+                -(this.height-1) * TILE_HEIGHT/2 + TILE_HEIGHT/4)
             .use();
 
-        this.player.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT, 1.0 - TILE_HEIGHT);
+        this.drawShadowLayer(canvas);
 
         this.terrain.drawBottom(canvas);
 
@@ -102,7 +117,6 @@ export class Stage {
         this.player.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
 
         canvas.toggleStencilTest(false);
-
 
         this.player.draw(canvas, TILE_WIDTH, TILE_HEIGHT);
     

@@ -2,7 +2,7 @@ import { Canvas } from "../core/canvas";
 import { CoreEvent } from "../core/core.js";
 import { Mesh } from "../core/mesh.js";
 import { Tilemap } from "../core/tilemap.js";
-import { RGBA } from "../core/vector.js";
+import { RGBA, Vector2 } from "../core/vector.js";
 import { ShapeGenerator } from "./shapegenerator.js";
 
 
@@ -160,11 +160,67 @@ const generateWallMesh = (map : Tilemap,
 
 
 
+const generateShadowMesh = (map : Tilemap, 
+    tileWidth : number, tileHeight : number, 
+    event : CoreEvent) : Mesh => {
+
+    const SHADOW_OFFSET_X = 0.20;
+    const SHADOW_OFFSET_Y = 0.20;
+
+    let gen = new ShapeGenerator();
+
+    let dx : number;
+    let dy : number;
+
+    let black = new RGBA(0);
+
+    let tx : number;
+    let ty : number;
+
+    for (let y = 0; y < map.height; ++ y) {
+
+        for (let x = 0; x < map.width; ++ x) {
+
+            if (map.getTile(0, x, y) != 1)
+                continue;
+
+            dx = x * tileWidth - tileWidth/2 - OUTLINE_WIDTH/2; 
+            dy = y * tileHeight - tileHeight/2 - OUTLINE_WIDTH/2;
+
+            ty = dy + 1.0 + OUTLINE_WIDTH;
+            gen.addTriangle(
+                new Vector2(dx, ty),
+                new Vector2(dx + SHADOW_OFFSET_X, ty),
+                new Vector2(dx + SHADOW_OFFSET_X, ty + SHADOW_OFFSET_Y),
+                black);
+
+            tx = dx + 1.0 + OUTLINE_WIDTH;
+            ty = dy + SHADOW_OFFSET_Y;
+            gen.addTriangle(
+                new Vector2(tx, ty),
+                new Vector2(tx, ty + SHADOW_OFFSET_Y),
+                new Vector2(tx + SHADOW_OFFSET_X, ty + SHADOW_OFFSET_Y),
+                black);
+
+            gen.addRectangle(
+                dx + SHADOW_OFFSET_X, 
+                dy + SHADOW_OFFSET_Y + (1.0 - tileHeight),
+                tileWidth + OUTLINE_WIDTH, 
+                tileHeight + OUTLINE_WIDTH,
+                black);
+        }
+    }
+
+    return gen.constructMesh(event);
+}
+
+
 export class Terrain {
 
 
     private meshFloor : Mesh;
     private meshWalls : Mesh;
+    private meshShadows : Mesh;
 
 
     constructor(map : Tilemap, 
@@ -173,6 +229,13 @@ export class Terrain {
 
         this.meshFloor = generateFloorMesh(map, tileWidth, tileHeight, event);
         this.meshWalls = generateWallMesh(map, tileWidth, tileHeight, event);
+        this.meshShadows = generateShadowMesh(map, tileWidth, tileHeight, event);
+    }
+
+
+    public drawShadows(canvas : Canvas) {
+
+        canvas.drawMesh(this.meshShadows);
     }
         
 

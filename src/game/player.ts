@@ -16,7 +16,8 @@ export class Player {
 
     private moving : boolean;
     private moveTimer : number;
-    private readonly moveTime : number;
+    private moveTime :number;
+    private readonly baseMoveTime : number;
 
     private animator : PlayerAnimator;
     private shadow : Mesh; 
@@ -34,7 +35,8 @@ export class Player {
         this.renderPos = this.pos.clone();
     
         this.moveTimer = 0.0;
-        this.moveTime = moveTime;
+        this.baseMoveTime = moveTime;
+        this.moveTime = this.baseMoveTime;
         this.moving = false;
 
         this.animator = new PlayerAnimator(event);
@@ -99,6 +101,10 @@ export class Player {
             this.target.y |= 0;
 
             this.moving = true;
+            this.moveTime = this.baseMoveTime;
+            if (this.jumping)
+                this.moveTime *= 2;
+
             this.moveTimer = this.moveTime;
         }
     }

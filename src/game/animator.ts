@@ -216,9 +216,8 @@ export class PlayerAnimator {
         const BODY_ROTATION = Math.PI*2;
 
         this.bodyAngle = t * BODY_ROTATION;
-        this.armAngle = ARM_ROTATION_START + t * Math.PI;
+        this.armAngle = ARM_ROTATION_START + t * Math.PI * 2;
         this.legTimer = this.bodyAngle;
-
     }
 
 
