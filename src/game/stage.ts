@@ -1,4 +1,4 @@
-import { Canvas } from "../core/canvas.js";
+import { Canvas, StencilCondition } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
 import { Player } from "./player.js";
 import { Terrain } from "./terrain.js";
@@ -40,6 +40,7 @@ export class Stage {
     }
 
 
+
     public draw(canvas : Canvas) {
 
         let scaleFactor = (this.height + 2.0) * TILE_HEIGHT;
@@ -53,11 +54,27 @@ export class Stage {
         canvas.transform
             .push()
             .translate(view.x/2, view.y/2)
-            .translate(-(this.width-1) * TILE_WIDTH/2, -(this.height-1) * TILE_HEIGHT/2)
+            .translate(
+                -(this.width-1) * TILE_WIDTH/2, 
+                -(this.height-1) * TILE_HEIGHT/2)
             .use();
 
+        this.player.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT, 1.0 - TILE_HEIGHT);
+
         this.terrain.drawBottom(canvas);
+
+        canvas.toggleStencilTest(true);
+        canvas.clearStencilBuffer();
+        canvas.setStencilCondition(StencilCondition.Always);
+
         this.terrain.drawTop(canvas);
+
+        canvas.setStencilCondition(StencilCondition.Equal);
+        this.player.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
+
+        canvas.toggleStencilTest(false);
+
+
         this.player.draw(canvas, TILE_WIDTH, TILE_HEIGHT);
     
         canvas.transform.pop();

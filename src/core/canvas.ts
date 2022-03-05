@@ -33,6 +33,15 @@ export const enum TextAlign {
 };
 
 
+export const enum StencilCondition {
+
+    Always = 0, 
+    NotEqual = 1,
+    Equal = 2,
+    GreaterOrEqual = 3,
+};
+
+
 const createCanvasDiv = () : HTMLDivElement => {
     
     let cdiv = document.createElement("div");
@@ -396,4 +405,36 @@ export class Canvas {
         mesh.dispose(this.glCtx);
     }
 
+
+    public clearStencilBuffer() {
+
+        let gl = this.glCtx;
+
+        gl.clear(gl.STENCIL_BUFFER_BIT);
+    }
+
+
+    public toggleStencilTest(state : boolean) {
+
+        let gl = this.glCtx;
+
+        if (state) {
+
+            gl.enable(gl.STENCIL_TEST);
+        }
+        else {
+
+            gl.disable(gl.STENCIL_TEST);
+        }
+    }
+
+
+    public setStencilCondition(cond : StencilCondition) {
+
+        let gl = this.glCtx;
+
+        const LOOKUP = [gl.ALWAYS, gl.NOTEQUAL, gl.EQUAL, gl.GEQUAL];
+
+        gl.stencilFunc(LOOKUP[cond], 1, 0xff);
+    }
 }

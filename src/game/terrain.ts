@@ -13,12 +13,16 @@ const COLORS = [
 ];
 
 
+const OUTLINE_WIDTH = 0.05;
+
+
 const generateFloorMesh = (map : Tilemap, 
     tileWidth : number, tileHeight : number, 
     event : CoreEvent) : Mesh => {
 
     let gen = new ShapeGenerator();
 
+    // Base tiles
     for (let y = 0; y < map.height; ++ y) {
 
         for (let x = 0; x < map.width; ++ x) {
@@ -30,6 +34,16 @@ const generateFloorMesh = (map : Tilemap,
                 y * tileHeight - tileHeight/2,
                 tileWidth, tileHeight,
                 COLORS[x % 2 == y % 2 ? 1 : 0]);
+        }
+    }
+
+    // Outlines
+    for (let y = 0; y < map.height; ++ y) {
+
+        for (let x = 0; x < map.width; ++ x) {
+
+
+
         }
     }
 
