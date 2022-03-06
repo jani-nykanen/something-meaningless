@@ -17,6 +17,14 @@ const TILE_HEIGHT = 0.75;
 const SHADOW_ALPHA = 0.33;
 
 
+export const enum TileType {
+
+    Invalid = -1,
+    Floor = 0,
+    Platform = 1
+};
+
+
 export class Stage {
 
 
@@ -56,38 +64,67 @@ export class Stage {
 
     private generateMeshes(event : CoreEvent) {
 
+        const PLATFORM_SCALE = 0.90;
+        const PLATFORM_QUALITY = 32;
         const PLATFORM_COLOR_1 = new RGBA(0.70, 0.33, 0);
         const PLATFORM_COLOR_2 = new RGBA(1.0, 0.67, 0.33);
+        
+        /*
+        const CROSS_WIDTH = 0.20;
+        const CROSS_HEIGHT = 0.80;
+        const CROSS_COLOR = new RGBA(0.33, 0, 0);
+        */
 
-        const MAGIC_OFFSET = 0.1; // What
+        const SHADOW_OFFSET_X = 0.15;
+        const SHADOW_OFFSET_Y = 0.15;
 
         const OUTLINE_WIDTH = 0.033;
 
+        // TODO: This should be constant, too
         let black = new RGBA(0);
 
+        let dw = PLATFORM_SCALE * TILE_WIDTH;
+        let dh = (1.0 - TILE_HEIGHT);
+        let dx = -dw/2;
+        let dy = -dh;
+        
+        let ow = OUTLINE_WIDTH * PLATFORM_SCALE;
+
         this.meshPlatformBottom = (new ShapeGenerator())
-            .addRectangle(-0.5, -0.5, 1.0, 0.5-MAGIC_OFFSET, black)
-            .addSector(0, Math.PI, 32, black, 0, -0.5,
-                0.5, -0.5)
-            .addSector(0, Math.PI, 32, black, 0, -MAGIC_OFFSET,
-                0.5, 0.5)
             .addRectangle(
-                -0.5 + OUTLINE_WIDTH, 
-                -0.5 + OUTLINE_WIDTH, 
-                1.0 - OUTLINE_WIDTH*2, 
-                0.5 - MAGIC_OFFSET, 
+                dx, dy, 
+                dw,  dh, black)
+            .addSector(0, Math.PI, PLATFORM_QUALITY, black,
+                0, 0, 
+                PLATFORM_SCALE * TILE_WIDTH / 2.0, 
+                PLATFORM_SCALE * TILE_HEIGHT / 2.0)
+            .addSector(0, Math.PI, PLATFORM_QUALITY, black,
+                0, dy, 
+                PLATFORM_SCALE * TILE_WIDTH / 2.0, 
+                -PLATFORM_SCALE * TILE_HEIGHT / 2.0)
+            .addRectangle(
+                dx + ow, dy + ow, 
+                dw - ow*2, dh, 
                 PLATFORM_COLOR_1)
-            .addSector(0, Math.PI, 32, PLATFORM_COLOR_1, 0, -MAGIC_OFFSET,
-                0.5 - OUTLINE_WIDTH, 
-                0.5 - OUTLINE_WIDTH)
+            .addSector(0, Math.PI, PLATFORM_QUALITY, PLATFORM_COLOR_1,
+                0, 0, 
+                PLATFORM_SCALE * TILE_WIDTH / 2.0 - ow, 
+                PLATFORM_SCALE * TILE_HEIGHT / 2.0 - ow)
             .constructMesh(event);
 
         this.meshPlatformTop = (new ShapeGenerator())
-            .addEllipse(0, -0.5, 
-                1.0 - OUTLINE_WIDTH*2, 
-                1.0 - OUTLINE_WIDTH*2, 32, PLATFORM_COLOR_2)
+            .addEllipse(0, dy, 
+                PLATFORM_SCALE * TILE_WIDTH - ow*2, 
+                PLATFORM_SCALE * TILE_HEIGHT - ow*2, 
+                PLATFORM_QUALITY, PLATFORM_COLOR_2)
             .constructMesh(event);
             
+        this.meshPlatformShadow = (new ShapeGenerator())
+            .addEllipse(SHADOW_OFFSET_X/2, SHADOW_OFFSET_Y, 
+                PLATFORM_SCALE * (TILE_HEIGHT + SHADOW_OFFSET_X*2) - ow*2, 
+                PLATFORM_SCALE * TILE_HEIGHT - ow*2, 
+                PLATFORM_QUALITY, black)
+            .constructMesh(event);
     }
 
 
@@ -106,7 +143,7 @@ export class Stage {
                         new ShrinkingPlatform(x, y,
                             this.meshPlatformBottom,
                             this.meshPlatformTop,
-                            null,
+                            this.meshPlatformShadow,
                             TURN_TIME));
                     break;
     
@@ -148,7 +185,14 @@ export class Stage {
         this.terrain.drawShadows(canvas);
         this.player.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT, 1.0 - TILE_HEIGHT);
 
+        canvas.setColor(0, 0, 0, SHADOW_ALPHA);
+        for (let o of this.platforms) {
+
+            o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
+        }
+
         canvas.toggleStencilTest(false);
+        canvas.setColor();
     }
 
 
@@ -225,5 +269,23 @@ export class Stage {
             return def;
 
         return this.activeLayers[layer][y * this.width + x];
+    }
+
+
+    public getBottomTileType(x : number, y : number) : TileType {
+
+        let tile = this.getTile(0, x, y, 0);
+
+        switch (tile) {
+
+        case 1:
+            return TileType.Floor;
+
+        case 2:
+            return TileType.Platform;
+
+        default:
+            return TileType.Invalid;
+        }
     }
 }

@@ -1,3 +1,4 @@
+import { Vector2 } from "./vector.js";
 
 
 export class Matrix3 {
@@ -90,6 +91,17 @@ export class Matrix3 {
                 out.m[i*3 + j] = A.m[j*3 + i];
             }
         }
+        return out;
+    }
+
+
+    static multiplyVector(A : Matrix3, v : Vector2) : Vector2 {
+
+        let out = new Vector2();
+
+        out.x = A.m[0] * v.x + A.m[1] * v.x + A.m[2];
+        out.y = A.m[3] * v.x + A.m[4] * v.x + A.m[5];
+    
         return out;
     }
 

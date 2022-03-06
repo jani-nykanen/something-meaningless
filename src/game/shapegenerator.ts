@@ -1,5 +1,6 @@
 import { CoreEvent } from "../core/core.js";
 import { clamp } from "../core/math.js";
+import { Matrix3 } from "../core/matrix.js";
 import { Mesh } from "../core/mesh.js";
 import { RGBA, Vector2 } from "../core/vector.js";
 
@@ -61,7 +62,9 @@ export class ShapeGenerator {
     }
 
 
-    public addRectangle(x : number, y : number, w : number, h : number, color = new RGBA()) : ShapeGenerator {
+    public addRectangle(x : number, y : number, 
+        w : number, h : number, 
+        color = new RGBA()) : ShapeGenerator {
 
         let A = new Vector2(x, y);
         let B = new Vector2(x+w, y);

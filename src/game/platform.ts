@@ -6,9 +6,6 @@ import { Player } from "./player.js";
 import { Stage } from "./stage.js";
 
 
-const BASE_SCALE = 0.90;
-
-
 export class ShrinkingPlatform extends GameObject {
 
 
@@ -49,10 +46,7 @@ export class ShrinkingPlatform extends GameObject {
             .push()
             .translate(
                 this.pos.x * tileWidth, 
-                (this.pos.y + 0.5) * tileHeight)
-            .scale(
-                BASE_SCALE * tileWidth, 
-                BASE_SCALE * tileHeight)
+                this.pos.y * tileHeight + (1.0 - tileHeight))
             .use();
     }
 

@@ -4,7 +4,7 @@ import { Mesh } from "../core/mesh.js";
 import { Vector2, RGBA } from "../core/vector.js";
 import { PlayerAnimator } from "./animator.js";
 import { ShapeGenerator } from "./shapegenerator.js";
-import { Stage } from "./stage.js";
+import { Stage, TileType } from "./stage.js";
 
 
 export class Player {
@@ -26,6 +26,7 @@ export class Player {
     private rotationPhase : 0 | 1;
 
     private jumping : boolean;
+    private jumpHeight : number;
 
 
     constructor(x : number, y : number, moveTime : number, event : CoreEvent) {
@@ -48,6 +49,7 @@ export class Player {
         this.rotationPhase = 0;
     
         this.jumping = false;
+        this.jumpHeight = 1.0;
     }
 
 
@@ -76,28 +78,38 @@ export class Player {
             diry = Math.sign(stick.y) | 0;
         }
 
+        let tileType : number;
+        let moveTimeFactor = 1;
         if (dirx != 0 || diry != 0) {
 
             this.jumping = false;
+            this.jumpHeight = 1.0;
 
             // Check if free
-            if (stage.getTile(0, px + dirx, py + diry) != 1) {
+            tileType = stage.getBottomTileType(px + dirx, py + diry);
+            if (tileType == TileType.Invalid) {
 
                 // Check if can jump
                 dirx *= 2;
                 diry *= 2;
 
-                if (stage.getTile(0, px + dirx, py + diry) != 1) {
+                if (stage.getBottomTileType(px + dirx, py + diry) == TileType.Invalid) {
 
                     return;
                 }
 
                 this.jumping = true;
+                this.jumpHeight = 2.0;
+                moveTimeFactor = 2;
+
                 if (this.rotationPhase == 0) {
 
                     this.rotationPhase = 1;
                 }
             }
+
+            this.jumping = this.jumping || tileType == TileType.Platform ||
+                stage.getBottomTileType(px, py) == TileType.Platform;
 
             this.target = Vector2.add(this.pos, new Vector2(dirx, diry));
 
@@ -105,9 +117,7 @@ export class Player {
             this.target.y |= 0;
 
             this.moving = true;
-            this.moveTime = this.baseMoveTime;
-            if (this.jumping)
-                this.moveTime *= 2;
+            this.moveTime = this.baseMoveTime * moveTimeFactor;
 
             this.moveTimer = this.moveTime;
         }
@@ -179,7 +189,7 @@ export class Player {
     }
 
 
-    public drawShadow(canvas : Canvas, tileWidth : number, tileHeight : number, offset = 0) {
+    public drawShadow(canvas : Canvas, tileWidth : number, tileHeight : number, offset = 0 ) {
 
         const SHADOW_SCALE_FACTOR = 0.80;
         const BASE_OFFSET_Y = 0.0;
@@ -207,14 +217,14 @@ export class Player {
 
     private computeJumpHeight() {
 
-        const HEIGHT = 0.40;
+        const BASE_HEIGHT = 0.20;
 
         if (!this.jumping)
             return 0.0;
 
         let t = -0.5 + (1.0 - this.moveTimer / this.moveTime);
 
-        return -Math.cos(t * Math.PI) * HEIGHT;
+        return -Math.cos(t * Math.PI) * BASE_HEIGHT * this.jumpHeight;
     }
 
 

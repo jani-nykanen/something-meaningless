@@ -3,7 +3,7 @@ import { CoreEvent } from "./core.js";
 import { RGBA } from "./vector.js";
 
 
-export enum TransitionEffectType {
+export const enum TransitionEffectType {
 
     None = 0,
     Fade = 1,

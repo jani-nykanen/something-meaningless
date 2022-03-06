@@ -1,6 +1,6 @@
 
 
-export enum FilterType {
+export const enum FilterType {
 
     Nearest = 0,
     Linear = 1
