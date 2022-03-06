@@ -183,7 +183,6 @@ export class Player {
 
         const SHADOW_SCALE_FACTOR = 0.80;
         const BASE_OFFSET_Y = 0.0;
-        const ALPHA = 0.33;
         const SCALE_Y_FACTOR = 0.50;
         
         let ratio = tileHeight / tileWidth;
@@ -197,7 +196,6 @@ export class Player {
             .scale(scale, scale * SCALE_Y_FACTOR * ratio)
             .use();
 
-        canvas.setColor(0, 0, 0, ALPHA);
         canvas.drawMesh(this.shadow);
         canvas.setColor();
 
