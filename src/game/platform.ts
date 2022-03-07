@@ -15,6 +15,7 @@ export class ShrinkingPlatform extends GameObject {
 
     private shrinking : boolean;
     private shrinkTimer : number;
+    private readyToShrink : boolean;
     private readonly shrinkTime : number;
 
 
@@ -30,23 +31,62 @@ export class ShrinkingPlatform extends GameObject {
     
         this.shrinking = false;
         this.shrinkTimer = 0.0;
+        this.readyToShrink = false;
         this.shrinkTime = shrinkTime;
     }
 
 
-    public update(player : Player, stage : Stage, event : CoreEvent) {
+    public update(stage : Stage, event : CoreEvent) {
 
         if (!this.exist) return;
+
+        if (this.shrinking) {
+
+            if ((this.shrinkTimer -= event.step) <= 0) {
+
+                this.exist = false;
+            }
+            return;
+        }
+
+        let px = this.pos.x | 0;
+        let py = this.pos.y | 0;
+
+        if (!this.readyToShrink) {
+
+            if (stage.getTile(1, px, py) == 3) {
+
+                this.readyToShrink = true;
+            }
+        }
+        else {
+
+            if (stage.getTile(1, px, py) != 3) {
+
+                this.shrinkTimer = this.shrinkTime;
+                this.shrinking = true;
+                this.readyToShrink = false;
+
+                stage.setTile(0, px, py, 0);
+            }
+        }
     }
 
 
     private applyBaseTransform(canvas : Canvas, tileWidth : number, tileHeight : number) {
+
+        let scale = 1.0;
+        if (this.shrinking) {
+
+            scale = this.shrinkTimer / this.shrinkTime;
+        }
 
         canvas.transform
             .push()
             .translate(
                 this.pos.x * tileWidth, 
                 this.pos.y * tileHeight + (1.0 - tileHeight))
+            .scale(scale, scale)
             .use();
     }
 

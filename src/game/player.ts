@@ -120,6 +120,10 @@ export class Player {
             this.moveTime = this.baseMoveTime * moveTimeFactor;
 
             this.moveTimer = this.moveTime;
+
+            stage.setTile(1, px, py, 0);
+            // TODO: Check if needs to update after movement animation stops?
+            stage.setTile(1, px + dirx, py + diry, 3);
         }
     }
 

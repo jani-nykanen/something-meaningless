@@ -170,6 +170,10 @@ export class Stage {
 
     public update(event : CoreEvent) {
 
+        for (let o of this.platforms) {
+
+            o.update(this, event);
+        }
         this.player.update(this, event);
     }
 
@@ -263,7 +267,7 @@ export class Stage {
     }
 
 
-    public getTile(layer : 0 | 1, x : number, y : number, def = 0) {
+    public getTile(layer : 0 | 1, x : number, y : number, def = 0) : number {
 
         if (x < 0 || y < 0 || x >= this.width || y >= this.height)
             return def;
@@ -287,5 +291,14 @@ export class Stage {
         default:
             return TileType.Invalid;
         }
+    }
+
+
+    public setTile(layer : 0 | 1, x : number, y : number, value : number) {
+
+        if (x < 0 || y < 0 || x >= this.width || y >= this.height)
+            return;
+
+        this.activeLayers[layer][y * this.width + x] = value;
     }
 }
