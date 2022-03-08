@@ -99,8 +99,8 @@ export class Matrix3 {
 
         let out = new Vector2();
 
-        out.x = A.m[0] * v.x + A.m[1] * v.x + A.m[2];
-        out.y = A.m[3] * v.x + A.m[4] * v.x + A.m[5];
+        out.x = A.m[0] * v.x + A.m[1] * v.y + A.m[2];
+        out.y = A.m[3] * v.x + A.m[4] * v.y + A.m[5];
     
         return out;
     }

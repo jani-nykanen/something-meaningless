@@ -1,8 +1,11 @@
 import { Canvas, StencilCondition } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
+import { negMod } from "../core/math.js";
+import { Matrix3 } from "../core/matrix.js";
 import { Mesh } from "../core/mesh.js";
 import { Tilemap } from "../core/tilemap.js";
-import { RGBA } from "../core/vector.js";
+import { RGBA, Vector2 } from "../core/vector.js";
+import { GameObject, nextObject } from "./gameobject.js";
 import { ShrinkingPlatform } from "./platform.js";
 import { Player } from "./player.js";
 import { ShapeGenerator } from "./shapegenerator.js";
@@ -15,6 +18,8 @@ const TILE_WIDTH = 1.0;
 const TILE_HEIGHT = 0.75;
 
 const SHADOW_ALPHA = 0.33;
+
+const STATE_BUFFER_SIZE = 32;
 
 
 export const enum TileType {
@@ -37,11 +42,16 @@ export class Stage {
     private height : number;
 
     private activeLayers : Array<Array<number>>;
+    private stateBuffer : Array<Array<Array<number>>>;
+    private stateBufferPointer : number;
+    private stateBufferLength : number;
 
     private meshPlatformShadow : Mesh;
     private meshPlatformBottom : Mesh;
     private meshPlatformTop : Mesh;
 
+    private readonly baseMap : Tilemap;
+    
 
     constructor(event : CoreEvent, index : number) {
 
@@ -49,6 +59,8 @@ export class Stage {
         this.platforms = new Array<ShrinkingPlatform> ();
 
         let map = event.assets.getTilemap(String(index));
+
+        this.baseMap = map;
 
         this.width = map.width;
         this.height = map.height;
@@ -59,10 +71,62 @@ export class Stage {
 
         this.generateMeshes(event);
         this.parseObjects(map);
+
+        this.stateBuffer = new Array<Array<Array<number>>> (STATE_BUFFER_SIZE);
+        for (let i = 0; i < this.stateBuffer.length; ++ i) {
+
+            this.stateBuffer[i] = new Array<Array<number>> (2);
+        }
+        this.stateBufferPointer = 0;
+        this.stateBufferLength = 0;
     }
 
 
-    private generateMeshes(event : CoreEvent) {
+    private addPlatformCross(gen : ShapeGenerator, baseScale : number, tx = 0.0, ty = 0.0) {
+
+        const COLOR = new RGBA(0.33, 0.0, 0.0);
+
+        const RADIUS = 0.35;
+        const WIDTH = 0.15;
+
+        let r = RADIUS * baseScale;
+        let w = WIDTH * baseScale;
+
+        let M = Matrix3.multiply(
+                Matrix3.multiply(
+                    Matrix3.translate(tx, ty),
+                    Matrix3.scale(TILE_WIDTH, TILE_HEIGHT)), 
+                Matrix3.rotate(Math.PI/4));
+
+        let A = new Vector2(-r, -w/2);
+        let B = new Vector2(r, -w/2);
+        let C = new Vector2(r, w/2);
+        let D = new Vector2(-r, w/2);
+
+        let tA = Matrix3.multiplyVector(M, A);
+        let tB = Matrix3.multiplyVector(M, B);
+        let tC = Matrix3.multiplyVector(M, C);
+        let tD = Matrix3.multiplyVector(M, D);
+
+        gen.addTriangle(tA, tB, tC, COLOR)
+           .addTriangle(tC, tD, tA, COLOR); 
+
+        A.swapComponents();
+        B.swapComponents();
+        C.swapComponents();
+        D.swapComponents();
+
+        tA = Matrix3.multiplyVector(M, A);
+        tB = Matrix3.multiplyVector(M, B);
+        tC = Matrix3.multiplyVector(M, C);
+        tD = Matrix3.multiplyVector(M, D);
+
+        gen.addTriangle(tA, tB, tC, COLOR)
+           .addTriangle(tC, tD, tA, COLOR); 
+    }
+
+
+    private generatePlatformMeshes(event : CoreEvent) {
 
         const PLATFORM_SCALE = 0.90;
         const PLATFORM_QUALITY = 32;
@@ -112,12 +176,13 @@ export class Stage {
                 PLATFORM_SCALE * TILE_HEIGHT / 2.0 - ow)
             .constructMesh(event);
 
-        this.meshPlatformTop = (new ShapeGenerator())
-            .addEllipse(0, dy, 
+        let gen = new ShapeGenerator();
+        gen.addEllipse(0, dy, 
                 PLATFORM_SCALE * TILE_WIDTH - ow*2, 
                 PLATFORM_SCALE * TILE_HEIGHT - ow*2, 
-                PLATFORM_QUALITY, PLATFORM_COLOR_2)
-            .constructMesh(event);
+                PLATFORM_QUALITY, PLATFORM_COLOR_2);
+        this.addPlatformCross(gen, PLATFORM_SCALE, 0, -0.25); // Why -0.25?
+        this.meshPlatformTop = gen.constructMesh(event);
             
         this.meshPlatformShadow = (new ShapeGenerator())
             .addEllipse(SHADOW_OFFSET_X/2, SHADOW_OFFSET_Y, 
@@ -125,6 +190,12 @@ export class Stage {
                 PLATFORM_SCALE * TILE_HEIGHT - ow*2, 
                 PLATFORM_QUALITY, black)
             .constructMesh(event);
+    }
+
+
+    private generateMeshes(event : CoreEvent) {
+
+        this.generatePlatformMeshes(event);
     }
 
 
@@ -166,6 +237,7 @@ export class Stage {
             }
         }
     }
+    
 
 
     public update(event : CoreEvent) {
@@ -300,5 +372,88 @@ export class Stage {
             return;
 
         this.activeLayers[layer][y * this.width + x] = value;
+    }
+
+
+    public storeState() {
+
+        for (let j = 0; j < 2; ++ j) {
+
+            this.stateBuffer[this.stateBufferPointer][j] = Array.from(this.activeLayers[j]);
+        }
+
+        this.stateBufferPointer = (this.stateBufferPointer + 1) % (this.stateBuffer.length);
+        this.stateBufferLength = Math.min(this.stateBuffer.length, this.stateBufferLength + 1);
+    }
+
+
+    private resetObjects() {
+
+        for (let o of this.platforms)
+            o.kill();
+
+
+        let o : GameObject;
+
+        for (let y = 0; y < this.height; ++ y) {
+
+            for (let x = 0; x < this.width; ++ x) {
+
+                // Bottom layer
+                switch (this.activeLayers[0][y * this.width + x]) {
+                    
+                case 2:
+    
+                    o = <GameObject> nextObject<ShrinkingPlatform> (this.platforms);
+                    // Should not happen
+                    if (o == null)
+                        break;
+
+                    (<ShrinkingPlatform> o).recreate(x, y);
+
+                    break;
+    
+                default:
+                    break;
+                }
+
+                // Top layer
+                switch (this.activeLayers[1][y * this.width + x]) {
+
+                case 3:
+                    
+                    this.player.recreate(x, y);
+                    break;
+
+                default:
+                    break;
+                }
+
+            }
+        }
+    }
+
+
+    public undo() {
+
+        if (this.stateBufferLength == 0) return;
+
+        -- this.stateBufferLength;
+        this.stateBufferPointer = negMod(this.stateBufferPointer - 1, this.stateBuffer.length);
+
+        for (let j = 0; j < 2; ++ j) {
+
+            this.activeLayers[j] = Array.from(this.stateBuffer[this.stateBufferPointer][j]);
+        }
+        this.resetObjects();
+    }
+
+
+    public reset() {
+
+        this.storeState();
+        this.activeLayers = this.baseMap.cloneLayers();
+
+        this.resetObjects();
     }
 }

@@ -18,4 +18,30 @@ export class GameObject {
 
     public doesExist = () : boolean => this.exist;
     public getPosition = () : Vector2 => this.pos.clone();
+
+
+    public kill() {
+
+        this.exist = false;
+    }
+
+
+    public recreate(x : number, y : number) {}
+}
+
+
+export function nextObject<T extends GameObject> (arr : Array<T>) {
+
+    let o : T;
+
+    o = null;
+    for (let a of arr) {
+
+        if (!a.doesExist()) {
+
+            o = a;
+            break;
+        }
+    }
+    return o;
 }

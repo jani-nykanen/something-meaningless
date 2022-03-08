@@ -36,6 +36,19 @@ export class ShrinkingPlatform extends GameObject {
     }
 
 
+    public recreate(x : number, y : number) {
+
+        this.pos.x = x;
+        this.pos.y = y;
+
+        this.shrinking = false;
+        this.shrinkTimer = 0.0;
+        this.readyToShrink = false;
+
+        this.exist = true;
+    }
+
+
     public update(stage : Stage, event : CoreEvent) {
 
         if (!this.exist) return;

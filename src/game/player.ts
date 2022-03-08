@@ -3,14 +3,14 @@ import { CoreEvent } from "../core/core.js";
 import { Mesh } from "../core/mesh.js";
 import { Vector2, RGBA } from "../core/vector.js";
 import { PlayerAnimator } from "./animator.js";
+import { GameObject } from "./gameobject.js";
 import { ShapeGenerator } from "./shapegenerator.js";
 import { Stage, TileType } from "./stage.js";
 
 
-export class Player {
+export class Player extends GameObject {
 
 
-    private pos : Vector2;
     private target : Vector2;
     private renderPos : Vector2;
 
@@ -31,7 +31,7 @@ export class Player {
 
     constructor(x : number, y : number, moveTime : number, event : CoreEvent) {
 
-        this.pos = new Vector2(x, y);
+        super(x, y, true);
         this.target = this.pos.clone();
         this.renderPos = this.pos.clone();
     
@@ -44,6 +44,24 @@ export class Player {
         this.shadow = (new ShapeGenerator())
             .addEllipse(0, 0, 1.0, 1.0, 32, new RGBA(0))
             .constructMesh(event);
+
+        this.bodyAngle = 0.0;
+        this.rotationPhase = 0;
+    
+        this.jumping = false;
+        this.jumpHeight = 1.0;
+    }
+
+    
+    public recreate(x: number, y: number) {
+        
+        this.pos = new Vector2(x, y);
+        this.target = this.pos.clone();
+        this.renderPos = this.pos.clone();
+    
+        this.moveTimer = 0.0;
+        this.moveTime = this.baseMoveTime;
+        this.moving = false;
 
         this.bodyAngle = 0.0;
         this.rotationPhase = 0;
@@ -120,6 +138,9 @@ export class Player {
             this.moveTime = this.baseMoveTime * moveTimeFactor;
 
             this.moveTimer = this.moveTime;
+
+            // Store state before updating tiles
+            stage.storeState();
 
             stage.setTile(1, px, py, 0);
             // TODO: Check if needs to update after movement animation stops?

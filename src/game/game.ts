@@ -1,5 +1,6 @@
 import { Canvas, ShaderType } from "../core/canvas.js";
 import { CoreEvent, Scene } from "../core/core.js";
+import { State } from "../core/types.js";
 import { Stage } from "./stage.js";
 
 
@@ -19,6 +20,16 @@ export class GameScene implements Scene {
     public update(event: CoreEvent) : void {
 
         this.stage.update(event);
+
+        if (event.input.getAction("undo") == State.Pressed) {
+
+            this.stage.undo();
+        }
+
+        if (event.input.getAction("restart") == State.Pressed) {
+
+            this.stage.reset();
+        }
     }
 
 

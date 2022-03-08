@@ -54,6 +54,14 @@ export class Vector2 {
 	}
 
 
+	public swapComponents() {
+
+		let p = this.x;
+		this.x = this.y;
+		this.y = p;
+	}
+
+
 	static dot = (u : Vector2, v : Vector2) : number => u.x*v.x + u.y*v.y;
 	
 
