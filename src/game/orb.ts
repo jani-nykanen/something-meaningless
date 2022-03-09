@@ -14,6 +14,9 @@ export class Orb extends GameObject {
     private readonly meshShadow : Mesh;
 
 
+    private wave : number;
+
+
     constructor(x : number, y : number,
         meshOrb : Mesh,
         meshShadow : Mesh) {
@@ -22,6 +25,8 @@ export class Orb extends GameObject {
 
         this.meshOrb = meshOrb;
         this.meshShadow = meshShadow;
+
+        this.wave = (x % 2 == y % 2) ? Math.PI : 0.0;
     }
 
 
@@ -30,11 +35,15 @@ export class Orb extends GameObject {
         this.pos.x = x;
         this.pos.y = y;
 
+        this.wave = (x % 2 == y % 2) ? Math.PI : 0.0;
+
         this.exist = true;
     }
 
 
     public update(player : Player, stage : Stage, event : CoreEvent) {
+
+        const WAVE_SPEED = 0.05;
 
         if (!this.exist) return;
 
@@ -46,25 +55,33 @@ export class Orb extends GameObject {
 
             this.exist = false;
         }
+
+        this.wave = (this.wave + WAVE_SPEED * event.step) % (Math.PI*2);
     }
 
 
-    private setTransform(canvas : Canvas, tileWidth: number, tileHeight: number, yoff = 0) {
+    private setTransform(canvas : Canvas, tileWidth: number, tileHeight: number, yoff = 0, scale = 1.0) {
 
         canvas.transform
             .push()
             .translate(
                 this.pos.x * tileWidth, 
                 this.pos.y * tileHeight + yoff)
+            .scale(scale, scale)
             .use();
     }
 
 
     public drawShadow(canvas: Canvas, tileWidth: number, tileHeight: number, offset = 0.0) {
         
+        const BASE_SCALE = 0.85;
+        const SCALE_AMPLITUDE = 0.05;
+
         if (!this.exist) return;
 
-        this.setTransform(canvas, tileWidth, tileHeight);
+        let scale = BASE_SCALE + Math.sin(this.wave) * SCALE_AMPLITUDE;
+
+        this.setTransform(canvas, tileWidth, tileHeight, 0.0, scale);
 
         canvas.drawMesh(this.meshShadow);
 
@@ -76,11 +93,14 @@ export class Orb extends GameObject {
 
     public draw(canvas: Canvas, tileWidth: number, tileHeight: number) {
         
-        const BASE_OFFSET = -0.45;
+        const BASE_OFFSET = -0.40;
+        const AMPLITUDE = 0.05;
 
         if (!this.exist) return;
 
-        this.setTransform(canvas, tileWidth, tileHeight, BASE_OFFSET);
+        let offset = BASE_OFFSET + Math.sin(this.wave) * AMPLITUDE;
+
+        this.setTransform(canvas, tileWidth, tileHeight, offset);
 
         canvas.drawMesh(this.meshOrb);
 

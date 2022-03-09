@@ -211,8 +211,8 @@ export class Stage {
         const OUTLINE_WIDTH = 0.033;
 
         const BLACK = new RGBA(0);
-        const ORB_COLOR_1 = new RGBA(0.20, 0.70, 0.25);
-        const ORB_COLOR_2 = new RGBA(0.40, 1.0, 0.60);
+        const ORB_COLOR_1 = new RGBA(0.25, 0.70, 0.20);
+        const ORB_COLOR_2 = new RGBA(0.50, 1.0, 0.40);
 
         let r = ORB_RADIUS - OUTLINE_WIDTH;
 
