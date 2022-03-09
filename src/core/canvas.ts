@@ -39,6 +39,9 @@ export const enum StencilCondition {
     NotEqual = 1,
     Equal = 2,
     GreaterOrEqual = 3,
+    LessOrEqual = 4,
+    Less = 5,
+    Greater = 6
 };
 
 
@@ -433,7 +436,7 @@ export class Canvas {
 
         let gl = this.glCtx;
 
-        const LOOKUP = [gl.ALWAYS, gl.NOTEQUAL, gl.EQUAL, gl.GEQUAL];
+        const LOOKUP = [gl.ALWAYS, gl.NOTEQUAL, gl.EQUAL, gl.GEQUAL, gl.LEQUAL, gl.LESS, gl.GREATER];
 
         gl.stencilFunc(LOOKUP[cond], 1, 0xff);
     }

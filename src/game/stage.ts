@@ -6,6 +6,8 @@ import { Mesh } from "../core/mesh.js";
 import { Tilemap } from "../core/tilemap.js";
 import { RGBA, Vector2 } from "../core/vector.js";
 import { GameObject, nextObject } from "./gameobject.js";
+import { ObjectBuffer } from "./objectbuffer.js";
+import { Orb } from "./orb.js";
 import { ShrinkingPlatform } from "./platform.js";
 import { Player } from "./player.js";
 import { ShapeGenerator } from "./shapegenerator.js";
@@ -35,6 +37,9 @@ export class Stage {
 
     private player : Player;
     private platforms : Array<ShrinkingPlatform>;
+    private orbs : Array<Orb>;
+
+    private objectBuffer : ObjectBuffer;
 
     private terrain : Terrain;
 
@@ -50,6 +55,9 @@ export class Stage {
     private meshPlatformBottom : Mesh;
     private meshPlatformTop : Mesh;
 
+    private meshOrb : Mesh;
+    private meshOrbShadow : Mesh;
+
     private readonly baseMap : Tilemap;
     
 
@@ -57,6 +65,9 @@ export class Stage {
 
         this.player = new Player(0, 0, TURN_TIME, event);
         this.platforms = new Array<ShrinkingPlatform> ();
+        this.orbs = new Array<Orb> ();
+
+        this.objectBuffer = new ObjectBuffer();
 
         let map = event.assets.getTilemap(String(index));
 
@@ -193,9 +204,34 @@ export class Stage {
     }
 
 
+    private generateOrbMeshes(event : CoreEvent) {
+
+        const ORB_RADIUS = 0.25;
+        const INNER_RADIUS = 0.15;
+        const OUTLINE_WIDTH = 0.033;
+
+        const BLACK = new RGBA(0);
+        const ORB_COLOR_1 = new RGBA(0.20, 0.70, 0.25);
+        const ORB_COLOR_2 = new RGBA(0.40, 1.0, 0.60);
+
+        let r = ORB_RADIUS - OUTLINE_WIDTH;
+
+        this.meshOrb = (new ShapeGenerator())
+            .addEllipse(0, 0, ORB_RADIUS*2, ORB_RADIUS*2, 32, BLACK)
+            .addEllipse(0, 0, r*2, r*2, 32, ORB_COLOR_1)
+            .addEllipse(-0.033, -0.033, INNER_RADIUS*2, INNER_RADIUS*2, 32, ORB_COLOR_2)
+            .constructMesh(event);
+
+        this.meshOrbShadow = (new ShapeGenerator())
+            .addEllipse(0, 0, ORB_RADIUS*2, ORB_RADIUS, 32, BLACK)
+            .constructMesh(event);
+    }
+
+
     private generateMeshes(event : CoreEvent) {
 
         this.generatePlatformMeshes(event);
+        this.generateOrbMeshes(event);
     }
 
 
@@ -230,6 +266,14 @@ export class Stage {
                     this.player.setPosition(x, y);
                     break;
 
+                case 4:
+                    
+                    this.orbs.push(
+                        new Orb(x, y,
+                            this.meshOrb, 
+                            this.meshOrbShadow));
+                    break;
+
                 default:
                     break;
                 }
@@ -246,6 +290,12 @@ export class Stage {
 
             o.update(this, event);
         }
+
+        for (let o of this.orbs) {
+
+            o.update(this.player, this, event);
+        }
+
         this.player.update(this, event);
     }
 
@@ -294,7 +344,19 @@ export class Stage {
     }
 
 
+    private drawObjectShadows(canvas : Canvas) {
+
+        canvas.setColor(0, 0, 0, SHADOW_ALPHA);
+        this.objectBuffer.drawShadows(canvas, TILE_WIDTH, TILE_HEIGHT);
+    }
+
+
     public draw(canvas : Canvas) {
+
+        this.objectBuffer.flush();
+        this.objectBuffer.addObject(this.player);
+        this.objectBuffer.addObjects(this.orbs);
+        this.objectBuffer.sort();
 
         let scaleFactor = (this.height + 2.5) * TILE_HEIGHT;
 
@@ -325,15 +387,12 @@ export class Stage {
         this.terrain.drawTop(canvas);
 
         canvas.setStencilCondition(StencilCondition.Equal);
-
-        // Player shadow
-        canvas.setColor(0, 0, 0, SHADOW_ALPHA);
-        this.player.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT, 0);
+        this.drawObjectShadows(canvas);
         canvas.setColor();
 
         canvas.toggleStencilTest(false);
 
-        this.player.draw(canvas, TILE_WIDTH, TILE_HEIGHT);
+        this.objectBuffer.draw(canvas, TILE_WIDTH, TILE_HEIGHT);
     
         canvas.transform.pop();
     }
@@ -392,6 +451,8 @@ export class Stage {
         for (let o of this.platforms)
             o.kill();
 
+        for (let o of this.orbs)
+            o.kill();
 
         let o : GameObject;
 
@@ -423,6 +484,16 @@ export class Stage {
                 case 3:
                     
                     this.player.recreate(x, y);
+                    break;
+
+                case 4:
+
+                    o = <GameObject> nextObject<Orb> (this.orbs);
+                    // Should not happen
+                    if (o == null)
+                        break;
+
+                    (<Orb> o).recreate(x, y);
                     break;
 
                 default:

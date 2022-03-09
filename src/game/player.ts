@@ -232,8 +232,6 @@ export class Player extends GameObject {
             .use();
 
         canvas.drawMesh(this.shadow);
-        canvas.setColor();
-
         canvas.transform
             .pop()
             .use();
@@ -286,5 +284,14 @@ export class Player extends GameObject {
         this.bodyAngle = 0.0;
         this.rotationPhase = 0;
     }
+
+
+    public depth() : number {
+        
+        return this.renderPos.y;
+    } 
+
+
+    public isMoving = () : boolean => this.moving;
 
 }

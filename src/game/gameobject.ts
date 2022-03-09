@@ -1,3 +1,4 @@
+import { Canvas } from "../core/canvas.js";
 import { Vector2 } from "../core/vector.js";
 
 
@@ -27,6 +28,17 @@ export class GameObject {
 
 
     public recreate(x : number, y : number) {}
+
+    
+    public depth() : number {
+
+        return this.pos.y;
+    }
+
+
+    public draw(canvas : Canvas, tileWidth : number, tileHeight : number) {}
+    public drawShadow(canvas : Canvas, tileWidth : number, tileHeight : number, offset = 0) {}
+
 }
 
 
