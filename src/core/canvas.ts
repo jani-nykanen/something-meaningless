@@ -45,6 +45,13 @@ export const enum StencilCondition {
 };
 
 
+export const enum StencilOperation {
+
+    Keep = 0,
+    Zero = 1, // hah
+};
+
+
 const createCanvasDiv = () : HTMLDivElement => {
     
     let cdiv = document.createElement("div");
@@ -439,5 +446,16 @@ export class Canvas {
         const LOOKUP = [gl.ALWAYS, gl.NOTEQUAL, gl.EQUAL, gl.GEQUAL, gl.LEQUAL, gl.LESS, gl.GREATER];
 
         gl.stencilFunc(LOOKUP[cond], 1, 0xff);
+    }
+
+
+    public setStencilOperation(op : StencilOperation) {
+
+        let gl = this.glCtx;
+
+        const LOOKUP = [gl.KEEP, gl.ZERO];
+        const TEST = [gl.REPLACE, gl.ZERO]
+
+        gl.stencilOp(LOOKUP[op], LOOKUP[op], TEST[op]);
     }
 }

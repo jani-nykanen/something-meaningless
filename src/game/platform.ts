@@ -28,7 +28,7 @@ export class ShrinkingPlatform extends GameObject {
         this.meshBottom = meshBottom;
         this.meshTop = meshTop;
         this.meshShadow = meshShadow;
-    
+
         this.shrinking = false;
         this.shrinkTimer = 0.0;
         this.readyToShrink = false;

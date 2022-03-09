@@ -1,16 +1,13 @@
-import { Canvas, StencilCondition } from "../core/canvas.js";
+import { Canvas, StencilCondition, StencilOperation } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
 import { negMod } from "../core/math.js";
-import { Matrix3 } from "../core/matrix.js";
-import { Mesh } from "../core/mesh.js";
 import { Tilemap } from "../core/tilemap.js";
-import { RGBA, Vector2 } from "../core/vector.js";
 import { GameObject, nextObject } from "./gameobject.js";
 import { ObjectBuffer } from "./objectbuffer.js";
 import { Orb } from "./orb.js";
 import { ShrinkingPlatform } from "./platform.js";
 import { Player } from "./player.js";
-import { ShapeGenerator } from "./shapegenerator.js";
+import { StageMesh, StageMeshBuilder } from "./stagemeshbuilder.js";
 import { Terrain } from "./terrain.js";
 
 
@@ -51,12 +48,7 @@ export class Stage {
     private stateBufferPointer : number;
     private stateBufferLength : number;
 
-    private meshPlatformShadow : Mesh;
-    private meshPlatformBottom : Mesh;
-    private meshPlatformTop : Mesh;
-
-    private meshOrb : Mesh;
-    private meshOrbShadow : Mesh;
+    private meshBuilder : StageMeshBuilder;
 
     private readonly baseMap : Tilemap;
     
@@ -78,11 +70,6 @@ export class Stage {
 
         this.activeLayers = map.cloneLayers();
 
-        this.terrain = new Terrain(map, TILE_WIDTH, TILE_HEIGHT, event);
-
-        this.generateMeshes(event);
-        this.parseObjects(map);
-
         this.stateBuffer = new Array<Array<Array<number>>> (STATE_BUFFER_SIZE);
         for (let i = 0; i < this.stateBuffer.length; ++ i) {
 
@@ -90,148 +77,11 @@ export class Stage {
         }
         this.stateBufferPointer = 0;
         this.stateBufferLength = 0;
-    }
 
+        this.terrain = new Terrain(map, TILE_WIDTH, TILE_HEIGHT, event);
+        this.meshBuilder = new StageMeshBuilder(TILE_WIDTH, TILE_HEIGHT, event);
 
-    private addPlatformCross(gen : ShapeGenerator, baseScale : number, tx = 0.0, ty = 0.0) {
-
-        const COLOR = new RGBA(0.33, 0.0, 0.0);
-
-        const RADIUS = 0.35;
-        const WIDTH = 0.15;
-
-        let r = RADIUS * baseScale;
-        let w = WIDTH * baseScale;
-
-        let M = Matrix3.multiply(
-                Matrix3.multiply(
-                    Matrix3.translate(tx, ty),
-                    Matrix3.scale(TILE_WIDTH, TILE_HEIGHT)), 
-                Matrix3.rotate(Math.PI/4));
-
-        let A = new Vector2(-r, -w/2);
-        let B = new Vector2(r, -w/2);
-        let C = new Vector2(r, w/2);
-        let D = new Vector2(-r, w/2);
-
-        let tA = Matrix3.multiplyVector(M, A);
-        let tB = Matrix3.multiplyVector(M, B);
-        let tC = Matrix3.multiplyVector(M, C);
-        let tD = Matrix3.multiplyVector(M, D);
-
-        gen.addTriangle(tA, tB, tC, COLOR)
-           .addTriangle(tC, tD, tA, COLOR); 
-
-        A.swapComponents();
-        B.swapComponents();
-        C.swapComponents();
-        D.swapComponents();
-
-        tA = Matrix3.multiplyVector(M, A);
-        tB = Matrix3.multiplyVector(M, B);
-        tC = Matrix3.multiplyVector(M, C);
-        tD = Matrix3.multiplyVector(M, D);
-
-        gen.addTriangle(tA, tB, tC, COLOR)
-           .addTriangle(tC, tD, tA, COLOR); 
-    }
-
-
-    private generatePlatformMeshes(event : CoreEvent) {
-
-        const PLATFORM_SCALE = 0.90;
-        const PLATFORM_QUALITY = 32;
-        const PLATFORM_COLOR_1 = new RGBA(0.70, 0.33, 0);
-        const PLATFORM_COLOR_2 = new RGBA(1.0, 0.67, 0.33);
-        
-        /*
-        const CROSS_WIDTH = 0.20;
-        const CROSS_HEIGHT = 0.80;
-        const CROSS_COLOR = new RGBA(0.33, 0, 0);
-        */
-
-        const SHADOW_OFFSET_X = 0.15;
-        const SHADOW_OFFSET_Y = 0.15;
-
-        const OUTLINE_WIDTH = 0.033;
-
-        // TODO: This should be constant, too
-        let black = new RGBA(0);
-
-        let dw = PLATFORM_SCALE * TILE_WIDTH;
-        let dh = (1.0 - TILE_HEIGHT);
-        let dx = -dw/2;
-        let dy = -dh;
-        
-        let ow = OUTLINE_WIDTH * PLATFORM_SCALE;
-
-        this.meshPlatformBottom = (new ShapeGenerator())
-            .addRectangle(
-                dx, dy, 
-                dw,  dh, black)
-            .addSector(0, Math.PI, PLATFORM_QUALITY, black,
-                0, 0, 
-                PLATFORM_SCALE * TILE_WIDTH / 2.0, 
-                PLATFORM_SCALE * TILE_HEIGHT / 2.0)
-            .addSector(0, Math.PI, PLATFORM_QUALITY, black,
-                0, dy, 
-                PLATFORM_SCALE * TILE_WIDTH / 2.0, 
-                -PLATFORM_SCALE * TILE_HEIGHT / 2.0)
-            .addRectangle(
-                dx + ow, dy + ow, 
-                dw - ow*2, dh, 
-                PLATFORM_COLOR_1)
-            .addSector(0, Math.PI, PLATFORM_QUALITY, PLATFORM_COLOR_1,
-                0, 0, 
-                PLATFORM_SCALE * TILE_WIDTH / 2.0 - ow, 
-                PLATFORM_SCALE * TILE_HEIGHT / 2.0 - ow)
-            .constructMesh(event);
-
-        let gen = new ShapeGenerator();
-        gen.addEllipse(0, dy, 
-                PLATFORM_SCALE * TILE_WIDTH - ow*2, 
-                PLATFORM_SCALE * TILE_HEIGHT - ow*2, 
-                PLATFORM_QUALITY, PLATFORM_COLOR_2);
-        this.addPlatformCross(gen, PLATFORM_SCALE, 0, -0.25); // Why -0.25?
-        this.meshPlatformTop = gen.constructMesh(event);
-            
-        this.meshPlatformShadow = (new ShapeGenerator())
-            .addEllipse(SHADOW_OFFSET_X/2, SHADOW_OFFSET_Y, 
-                PLATFORM_SCALE * (TILE_HEIGHT + SHADOW_OFFSET_X*2) - ow*2, 
-                PLATFORM_SCALE * TILE_HEIGHT - ow*2, 
-                PLATFORM_QUALITY, black)
-            .constructMesh(event);
-    }
-
-
-    private generateOrbMeshes(event : CoreEvent) {
-
-        const ORB_RADIUS = 0.25;
-        const INNER_RADIUS = 0.15;
-        const OUTLINE_WIDTH = 0.033;
-
-        const BLACK = new RGBA(0);
-        const ORB_COLOR_1 = new RGBA(0.25, 0.70, 0.20);
-        const ORB_COLOR_2 = new RGBA(0.50, 1.0, 0.40);
-
-        let r = ORB_RADIUS - OUTLINE_WIDTH;
-
-        this.meshOrb = (new ShapeGenerator())
-            .addEllipse(0, 0, ORB_RADIUS*2, ORB_RADIUS*2, 32, BLACK)
-            .addEllipse(0, 0, r*2, r*2, 32, ORB_COLOR_1)
-            .addEllipse(-0.033, -0.033, INNER_RADIUS*2, INNER_RADIUS*2, 32, ORB_COLOR_2)
-            .constructMesh(event);
-
-        this.meshOrbShadow = (new ShapeGenerator())
-            .addEllipse(0, 0, ORB_RADIUS*2, ORB_RADIUS, 32, BLACK)
-            .constructMesh(event);
-    }
-
-
-    private generateMeshes(event : CoreEvent) {
-
-        this.generatePlatformMeshes(event);
-        this.generateOrbMeshes(event);
+        this.parseObjects(map);
     }
 
 
@@ -248,9 +98,9 @@ export class Stage {
     
                     this.platforms.push(
                         new ShrinkingPlatform(x, y,
-                            this.meshPlatformBottom,
-                            this.meshPlatformTop,
-                            this.meshPlatformShadow,
+                            this.meshBuilder.getMesh(StageMesh.PlatformBottom),
+                            this.meshBuilder.getMesh(StageMesh.PlatformTop),
+                            this.meshBuilder.getMesh(StageMesh.PlatformShadow),
                             TURN_TIME));
                     break;
     
@@ -270,8 +120,8 @@ export class Stage {
                     
                     this.orbs.push(
                         new Orb(x, y,
-                            this.meshOrb, 
-                            this.meshOrbShadow));
+                            this.meshBuilder.getMesh(StageMesh.OrbBody), 
+                            this.meshBuilder.getMesh(StageMesh.OrbShadow)));
                     break;
 
                 default:
@@ -347,7 +197,15 @@ export class Stage {
     private drawObjectShadows(canvas : Canvas) {
 
         canvas.setColor(0, 0, 0, SHADOW_ALPHA);
-        this.objectBuffer.drawShadows(canvas, TILE_WIDTH, TILE_HEIGHT);
+
+        canvas.setStencilOperation(StencilOperation.Zero);
+        for (let o of this.orbs) {
+
+            o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
+        }
+
+        canvas.setStencilOperation(StencilOperation.Keep);
+        this.player.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
     }
 
 
