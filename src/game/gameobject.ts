@@ -2,7 +2,28 @@ import { Canvas } from "../core/canvas.js";
 import { Vector2 } from "../core/vector.js";
 
 
-export class GameObject {
+export class ExistingObject {
+
+    protected exist : boolean;
+
+
+    constructor(exist = false) {
+
+        this.exist = exist;
+    }
+
+
+    public doesExist = () : boolean => this.exist;
+
+
+    public kill() {
+
+        this.exist = false;
+    }
+}
+
+
+export class GameObject extends ExistingObject {
 
 
     protected pos : Vector2;
@@ -12,19 +33,14 @@ export class GameObject {
 
     constructor(x = 0, y = 0, exist = false) {
 
+        super(exist);
+
         this.pos = new Vector2(x, y);
         this.exist = exist;
     }
 
 
-    public doesExist = () : boolean => this.exist;
     public getPosition = () : Vector2 => this.pos.clone();
-
-
-    public kill() {
-
-        this.exist = false;
-    }
 
 
     public recreate(x : number, y : number) {}
@@ -42,7 +58,7 @@ export class GameObject {
 }
 
 
-export function nextObject<T extends GameObject> (arr : Array<T>) {
+export function nextObject<T extends ExistingObject> (arr : Array<T>) {
 
     let o : T;
 

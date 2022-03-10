@@ -122,6 +122,46 @@ export class ShapeGenerator {
     }
 
 
+    public addStar(cx : number, cy : number,
+        innerRadius : number, outerRadius : number,
+        corners : number, color = new RGBA(),
+        angleOffset = 0.0) : ShapeGenerator {
+
+        let angleStep = Math.PI*2 / corners;
+        let angle : number;
+
+        for (let i = 0; i < corners; ++ i) {
+
+            angle = angleOffset + i * angleStep;
+
+            this.addTriangle(
+                new Vector2(
+                    cx + Math.cos(angle) * outerRadius, 
+                    cy + Math.sin(angle) * outerRadius
+                ),
+                new Vector2(
+                    cx + Math.cos(angle - angleStep/2) * innerRadius, 
+                    cy + Math.sin(angle - angleStep/2) * innerRadius
+                ),
+                new Vector2(cx, cy),
+                color);
+
+            this.addTriangle(
+                new Vector2(
+                    cx + Math.cos(angle) * outerRadius, 
+                    cy + Math.sin(angle) * outerRadius
+                ),
+                new Vector2(
+                    cx + Math.cos(angle + angleStep/2) * innerRadius, 
+                    cy + Math.sin(angle + angleStep/2) * innerRadius
+                ),
+                new Vector2(cx, cy),
+                color);
+        }
+        return this;
+    }
+
+
     public constructMesh(event : CoreEvent) : Mesh {
 
         let out = event.constructMesh(

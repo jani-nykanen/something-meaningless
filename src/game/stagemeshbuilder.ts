@@ -173,10 +173,21 @@ export class StageMeshBuilder {
     }
 
 
+    private generateStar(event : CoreEvent) {
+
+        const COLOR = new RGBA(0.50, 1.0, 0.40);
+
+        this.meshes[StageMesh.Star] = (new ShapeGenerator())
+            .addStar(0, 0, 0.1, 0.2, 5, COLOR)
+            .constructMesh(event);
+    }
+
+
     private generateMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         this.generatePlatformMeshes(tileWidth, tileHeight, event);
         this.generateOrbMeshes(event);
+        this.generateStar(event);
     }
 
 
