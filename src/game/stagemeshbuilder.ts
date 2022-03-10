@@ -175,10 +175,8 @@ export class StageMeshBuilder {
 
     private generateStar(event : CoreEvent) {
 
-        const COLOR = new RGBA(0.50, 1.0, 0.40);
-
         this.meshes[StageMesh.Star] = (new ShapeGenerator())
-            .addStar(0, 0, 0.1, 0.2, 5, COLOR)
+            .addStar(0, 0, 0.1, 0.2, 5, new RGBA(), -Math.PI*2 / 20)
             .constructMesh(event);
     }
 

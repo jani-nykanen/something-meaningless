@@ -2,7 +2,7 @@ import { Canvas } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
 import { Mesh } from "../core/mesh.js";
 import { Vector2 } from "../core/vector.js";
-import { ExistingObject } from "./gameobject.js";
+import { ExistingObject, nextObject } from "./gameobject.js";
 
 
 
@@ -56,6 +56,8 @@ class Star extends ExistingObject {
 
     public update(event : CoreEvent) {
 
+        const BASE_ANGLE_SPEED = 3.0;
+
         if (!this.exist) return;
 
         this.speed.y += this.gravity * event.step;
@@ -67,6 +69,8 @@ class Star extends ExistingObject {
 
             this.exist = false;
         }
+
+        this.angle += BASE_ANGLE_SPEED * this.speed.x * event.step;
     }
 
 
@@ -81,7 +85,8 @@ class Star extends ExistingObject {
             .scale(this.scale, this.scale)
             .use();
 
-        canvas.setColor(1, 1, 1, alpha);
+        // TODO: Pass the color in "spawn"
+        canvas.setColor(0.5, 1.0, 0.40, alpha);
         canvas.drawMesh(this.meshStar);
         canvas.setColor();
 
@@ -127,8 +132,28 @@ export class StarGenerator {
     }
 
 
-    public createStars(count : number) {
+    public createStars(count : number, x : number, y : number,
+        speed : number, jumpSpeed : number, gravity : number,
+        time : number, scale : number) {
 
-        // ...
+        let angle : number;
+        let angleStep = Math.PI*2 / count;
+        let o : Star;
+
+        for (let i = 0; i < count; ++ i) {
+
+            angle = angleStep * i;
+
+            o = nextObject<Star>(this.stars);
+            if (o == null) {
+
+                o = new Star(this.meshStar);
+                this.stars.push(o);
+            }
+            o.spawn(x, y, 
+                Math.cos(angle) * speed,
+                Math.sin(angle) * speed + jumpSpeed,
+                gravity, scale, time);
+        }
     }
 }

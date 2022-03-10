@@ -54,6 +54,8 @@ export class Orb extends GameObject {
             stage.getTile(1, px, py) != 4) {
 
             this.exist = false;
+
+            stage.spawnStars(this.pos.x, this.pos.y - 0.20, 6);
         }
 
         this.wave = (this.wave + WAVE_SPEED * event.step) % (Math.PI*2);

@@ -8,6 +8,7 @@ import { Orb } from "./orb.js";
 import { ShrinkingPlatform } from "./platform.js";
 import { Player } from "./player.js";
 import { StageMesh, StageMeshBuilder } from "./stagemeshbuilder.js";
+import { StarGenerator } from "./stargenerator.js";
 import { Terrain } from "./terrain.js";
 
 
@@ -39,6 +40,7 @@ export class Stage {
     private objectBuffer : ObjectBuffer;
 
     private terrain : Terrain;
+    private starGen : StarGenerator;
 
     private width : number;
     private height : number;
@@ -80,6 +82,7 @@ export class Stage {
 
         this.terrain = new Terrain(map, TILE_WIDTH, TILE_HEIGHT, event);
         this.meshBuilder = new StageMeshBuilder(TILE_WIDTH, TILE_HEIGHT, event);
+        this.starGen = new StarGenerator(this.meshBuilder.getMesh(StageMesh.Star));
 
         this.parseObjects(map);
     }
@@ -135,6 +138,8 @@ export class Stage {
 
 
     public update(event : CoreEvent) {
+
+        this.starGen.update(event);
 
         for (let o of this.platforms) {
 
@@ -251,6 +256,8 @@ export class Stage {
         canvas.toggleStencilTest(false);
 
         this.objectBuffer.draw(canvas, TILE_WIDTH, TILE_HEIGHT);
+
+        this.starGen.draw(canvas);
     
         canvas.transform.pop();
     }
@@ -384,5 +391,22 @@ export class Stage {
         this.activeLayers = this.baseMap.cloneLayers();
 
         this.resetObjects();
+    }
+
+
+    public spawnStars(x : number, y : number, count : number) {
+
+        const GRAVITY = 0.005;
+        const BASE_SPEED = 0.075;
+        const JUMP_SPEED = -0.060;
+        const TIME = 30;
+        const SCALE = 1.0;
+
+        x *= TILE_WIDTH;
+        y *= TILE_HEIGHT;
+
+        this.starGen.createStars(count, 
+            x, y, BASE_SPEED, JUMP_SPEED,
+            GRAVITY, TIME, SCALE);
     }
 }
