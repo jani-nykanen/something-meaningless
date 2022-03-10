@@ -1,8 +1,9 @@
 import { Canvas } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
 import { Mesh } from "../core/mesh.js";
-import { Vector2 } from "../core/vector.js";
+import { RGBA, Vector2 } from "../core/vector.js";
 import { ExistingObject, nextObject } from "./gameobject.js";
+import { ShapeGenerator } from "./shapegenerator.js";
 
 
 
@@ -85,8 +86,7 @@ class Star extends ExistingObject {
             .scale(this.scale, this.scale)
             .use();
 
-        // TODO: Pass the color in "spawn"
-        canvas.setColor(0.5, 1.0, 0.40, alpha);
+        canvas.setColor(1, 1, 1, alpha);
         canvas.drawMesh(this.meshStar);
         canvas.setColor();
 
@@ -103,14 +103,26 @@ export class StarGenerator {
 
     private stars : Array<Star>;
 
-    private readonly meshStar : Mesh;
+    private meshStar : Mesh;
 
 
-    constructor(meshStar : Mesh) {
+    constructor(event : CoreEvent) {
 
         this.stars = new Array<Star> ();
 
-        this.meshStar = meshStar;
+        this.generateStar(event);
+    }
+
+
+    private generateStar(event : CoreEvent) {
+
+        const COLOR_1 = new RGBA(0.25, 0.70, 0.20);
+        const COLOR_2 = new RGBA(0.50, 1.0, 0.40);
+
+        this.meshStar = (new ShapeGenerator())
+            .addStar(0, 0, 0.1, 0.2, 5, COLOR_1, -Math.PI*2 / 20)
+            .addStar(0, 0, 0.075, 0.15, 5, COLOR_2, -Math.PI*2 / 20)
+            .constructMesh(event);
     }
 
 

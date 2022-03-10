@@ -15,8 +15,6 @@ export const enum StageMesh {
 
     OrbBody = 3,
     OrbShadow = 4,
-
-    Star = 5
 };
 const STAGE_MESH_COUNT = 6
 
@@ -173,19 +171,10 @@ export class StageMeshBuilder {
     }
 
 
-    private generateStar(event : CoreEvent) {
-
-        this.meshes[StageMesh.Star] = (new ShapeGenerator())
-            .addStar(0, 0, 0.1, 0.2, 5, new RGBA(), -Math.PI*2 / 20)
-            .constructMesh(event);
-    }
-
-
     private generateMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         this.generatePlatformMeshes(tileWidth, tileHeight, event);
         this.generateOrbMeshes(event);
-        this.generateStar(event);
     }
 
 

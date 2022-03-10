@@ -82,7 +82,7 @@ export class Stage {
 
         this.terrain = new Terrain(map, TILE_WIDTH, TILE_HEIGHT, event);
         this.meshBuilder = new StageMeshBuilder(TILE_WIDTH, TILE_HEIGHT, event);
-        this.starGen = new StarGenerator(this.meshBuilder.getMesh(StageMesh.Star));
+        this.starGen = new StarGenerator(event);
 
         this.parseObjects(map);
     }
