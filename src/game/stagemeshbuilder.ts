@@ -15,9 +15,16 @@ export const enum StageMesh {
 
     OrbBody = 3,
     OrbShadow = 4,
+    
+    MovingPlatformBottom = 5,
+    MovingPlatformTop = 6,
+    MovingPlatformShadow = 7,
+    MovingPlatformArrow = 8,
 };
-const STAGE_MESH_COUNT = 6
+const STAGE_MESH_COUNT = 9
 
+
+const PLATFORM_SCALE = 0.90;
 
 
 export class StageMeshBuilder {
@@ -82,7 +89,6 @@ export class StageMeshBuilder {
 
     private generatePlatformMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
-        const PLATFORM_SCALE = 0.90;
         const PLATFORM_QUALITY = 32;
         const PLATFORM_COLOR_1 = new RGBA(0.70, 0.33, 0);
         const PLATFORM_COLOR_2 = new RGBA(1.0, 0.67, 0.33);
@@ -171,10 +177,27 @@ export class StageMeshBuilder {
     }
 
 
+    private generateMovingPlatformMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
+
+        const BLACK = new RGBA(0);
+
+        let dw = PLATFORM_SCALE * tileWidth;
+        let dh = (1.0 - tileHeight);
+        let dx = -dw/2;
+        let dy = -dh;
+
+        this.meshes[StageMesh.MovingPlatformBottom] = (new ShapeGenerator())
+            .addEllipse(0, 0, tileWidth, tileHeight, 6, BLACK)
+            .addEllipse(0, dy, tileWidth, tileHeight, 6, BLACK)
+            .constructMesh(event);
+    }
+
+
     private generateMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         this.generatePlatformMeshes(tileWidth, tileHeight, event);
         this.generateOrbMeshes(event);
+        this.generateMovingPlatformMeshes(tileWidth, tileHeight, event);
     }
 
 

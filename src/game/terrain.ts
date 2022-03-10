@@ -102,7 +102,7 @@ const generateWallMesh = (map : Tilemap,
         for (let x = 0; x < map.width; ++ x) {
 
             if (map.getTile(0, x, y) != 1 ||
-                map.getTile(0, x, y+1, 0) != 0)
+                map.getTile(0, x, y+1, 0) == 1)
                 continue;
 
             gen.addRectangle(

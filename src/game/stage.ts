@@ -5,11 +5,12 @@ import { Tilemap } from "../core/tilemap.js";
 import { GameObject, nextObject } from "./gameobject.js";
 import { ObjectBuffer } from "./objectbuffer.js";
 import { Orb } from "./orb.js";
-import { ShrinkingPlatform } from "./platform.js";
+import { ShrinkingPlatform } from "./shrinkingplatform.js";
 import { Player } from "./player.js";
 import { StageMesh, StageMeshBuilder } from "./stagemeshbuilder.js";
 import { StarGenerator } from "./stargenerator.js";
 import { Terrain } from "./terrain.js";
+import { MovingPlatform } from "./movingplatform.js";
 
 
 const TURN_TIME = 15;
@@ -34,7 +35,8 @@ export class Stage {
 
 
     private player : Player;
-    private platforms : Array<ShrinkingPlatform>;
+    private shrinkingPlatforms : Array<ShrinkingPlatform>;
+    private movingPlatforms : Array<MovingPlatform>;
     private orbs : Array<Orb>;
 
     private objectBuffer : ObjectBuffer;
@@ -58,7 +60,8 @@ export class Stage {
     constructor(event : CoreEvent, index : number) {
 
         this.player = new Player(0, 0, TURN_TIME, event);
-        this.platforms = new Array<ShrinkingPlatform> ();
+        this.shrinkingPlatforms = new Array<ShrinkingPlatform> ();
+        this.movingPlatforms = new Array<MovingPlatform> ();
         this.orbs = new Array<Orb> ();
 
         this.objectBuffer = new ObjectBuffer();
@@ -99,7 +102,7 @@ export class Stage {
                     
                 case 2:
     
-                    this.platforms.push(
+                    this.shrinkingPlatforms.push(
                         new ShrinkingPlatform(x, y,
                             this.meshBuilder.getMesh(StageMesh.PlatformBottom),
                             this.meshBuilder.getMesh(StageMesh.PlatformTop),
@@ -141,7 +144,7 @@ export class Stage {
 
         this.starGen.update(event);
 
-        for (let o of this.platforms) {
+        for (let o of this.shrinkingPlatforms) {
 
             o.update(this, event);
         }
@@ -167,7 +170,7 @@ export class Stage {
         this.player.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT, 1.0 - TILE_HEIGHT);
 
         canvas.setColor(0, 0, 0, SHADOW_ALPHA);
-        for (let o of this.platforms) {
+        for (let o of this.shrinkingPlatforms) {
 
             o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
@@ -181,7 +184,7 @@ export class Stage {
         
         canvas.setColor();
 
-        for (let o of this.platforms) {
+        for (let o of this.shrinkingPlatforms) {
 
             o.drawBottom(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
@@ -192,7 +195,7 @@ export class Stage {
 
         canvas.setColor();
 
-        for (let o of this.platforms) {
+        for (let o of this.shrinkingPlatforms) {
 
             o.drawTop(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
@@ -313,7 +316,7 @@ export class Stage {
 
     private resetObjects() {
 
-        for (let o of this.platforms)
+        for (let o of this.shrinkingPlatforms)
             o.kill();
 
         for (let o of this.orbs)
@@ -330,7 +333,7 @@ export class Stage {
                     
                 case 2:
     
-                    o = <GameObject> nextObject<ShrinkingPlatform> (this.platforms);
+                    o = <GameObject> nextObject<ShrinkingPlatform> (this.shrinkingPlatforms);
                     // Should not happen
                     if (o == null)
                         break;
