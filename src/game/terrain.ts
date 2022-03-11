@@ -18,6 +18,7 @@ const OUTLINE_WIDTH = 0.025;
 
 const generateFloorMesh = (map : Tilemap, 
     tileWidth : number, tileHeight : number, 
+    outlineFactor : number,
     event : CoreEvent) : Mesh => {
 
     let gen = new ShapeGenerator();
@@ -46,23 +47,25 @@ const generateFloorMesh = (map : Tilemap,
     let offset : number;
     let width : number;
 
+    let outlineWidth = OUTLINE_WIDTH * outlineFactor;
+
     for (let y = 0; y < map.height; ++ y) {
 
         for (let x = 0; x < map.width; ++ x) {
 
             if (map.getTile(0, x, y) != 1) continue;
 
-            dx = x * tileWidth - tileWidth/2 - OUTLINE_WIDTH/2; 
-            dy = y * tileHeight - tileHeight/2 - OUTLINE_WIDTH/2;
+            dx = x * tileWidth - tileWidth/2 - outlineWidth/2; 
+            dy = y * tileHeight - tileHeight/2 - outlineWidth/2;
 
             offset = 0;
-            width = tileWidth + OUTLINE_WIDTH;
+            width = tileWidth + outlineWidth;
 
             // Top
             if (map.getTile(0, x, y-1) != 1) {
 
                 gen.addRectangle(dx + offset, dy, 
-                    width, OUTLINE_WIDTH, black);
+                    width, outlineWidth, black);
             }
 
             // Left
@@ -70,8 +73,8 @@ const generateFloorMesh = (map : Tilemap,
 
                 gen.addRectangle(
                     dx, dy,
-                    OUTLINE_WIDTH, 
-                    tileHeight + OUTLINE_WIDTH, 
+                    outlineWidth, 
+                    tileHeight + outlineWidth, 
                     black);
             }
             // Right
@@ -79,8 +82,8 @@ const generateFloorMesh = (map : Tilemap,
 
                 gen.addRectangle(
                     dx + tileWidth, dy, 
-                    OUTLINE_WIDTH, 
-                    tileHeight + OUTLINE_WIDTH, 
+                    outlineWidth, 
+                    tileHeight + outlineWidth, 
                     black);
             }
         }
@@ -92,6 +95,7 @@ const generateFloorMesh = (map : Tilemap,
 
 const generateWallMesh = (map : Tilemap, 
     tileWidth : number, tileHeight : number, 
+    outlineFactor : number,
     event : CoreEvent) : Mesh => {
 
     let gen = new ShapeGenerator();
@@ -119,28 +123,30 @@ const generateWallMesh = (map : Tilemap,
 
     let black = new RGBA(0);
 
+    let outlineWidth = OUTLINE_WIDTH * outlineFactor;
+
     for (let y = 0; y < map.height; ++ y) {
 
         for (let x = 0; x < map.width; ++ x) {
 
             if (map.getTile(0, x, y) != 1) continue;
 
-            dx = x * tileWidth - tileWidth/2 - OUTLINE_WIDTH/2; 
+            dx = x * tileWidth - tileWidth/2 - outlineWidth/2; 
             dy = y * tileHeight - tileHeight/2;
 
             if (map.getTile(0, x, y+1) != 1) {
 
                 // Top
                 gen.addRectangle(dx, dy + 1.0, 
-                    tileWidth + OUTLINE_WIDTH, 
-                    OUTLINE_WIDTH, black);
+                    tileWidth + outlineWidth, 
+                    outlineWidth, black);
                     
                 // Left
                 if (map.getTile(0, x-1, y) != 1) {
 
                     gen.addRectangle(
                         dx, dy + tileHeight, 
-                        OUTLINE_WIDTH, 1.0 - tileHeight, black);
+                        outlineWidth, 1.0 - tileHeight, black);
                 }
 
                 if (map.getTile(0, x+1, y) != 1 &&
@@ -149,7 +155,7 @@ const generateWallMesh = (map : Tilemap,
                     gen.addRectangle(
                         dx + tileWidth, 
                         dy + tileHeight, 
-                        OUTLINE_WIDTH, 1.0 - tileHeight, black);
+                        outlineWidth, 1.0 - tileHeight, black);
                 }
             }
         }
@@ -162,6 +168,7 @@ const generateWallMesh = (map : Tilemap,
 
 const generateShadowMesh = (map : Tilemap, 
     tileWidth : number, tileHeight : number, 
+    outlineFactor : number,
     event : CoreEvent) : Mesh => {
 
     const SHADOW_OFFSET_X = 0.15;
@@ -177,6 +184,8 @@ const generateShadowMesh = (map : Tilemap,
     let tx : number;
     let ty : number;
 
+    let outlineWidth = OUTLINE_WIDTH * outlineFactor;
+
     for (let y = 0; y < map.height; ++ y) {
 
         for (let x = 0; x < map.width; ++ x) {
@@ -184,17 +193,17 @@ const generateShadowMesh = (map : Tilemap,
             if (map.getTile(0, x, y) != 1)
                 continue;
 
-            dx = x * tileWidth - tileWidth/2 - OUTLINE_WIDTH/2; 
-            dy = y * tileHeight - tileHeight/2 - OUTLINE_WIDTH/2;
+            dx = x * tileWidth - tileWidth/2 - outlineWidth/2; 
+            dy = y * tileHeight - tileHeight/2 - outlineWidth/2;
 
-            ty = dy + 1.0 + OUTLINE_WIDTH;
+            ty = dy + 1.0 + outlineWidth;
             gen.addTriangle(
                 new Vector2(dx, ty),
                 new Vector2(dx + SHADOW_OFFSET_X, ty),
                 new Vector2(dx + SHADOW_OFFSET_X, ty + SHADOW_OFFSET_Y),
                 black);
 
-            tx = dx + 1.0 + OUTLINE_WIDTH;
+            tx = dx + 1.0 + outlineWidth;
             ty = dy + (1.0 - tileHeight);
             gen.addTriangle(
                 new Vector2(tx, ty),
@@ -205,8 +214,8 @@ const generateShadowMesh = (map : Tilemap,
             gen.addRectangle(
                 dx + SHADOW_OFFSET_X, 
                 dy + SHADOW_OFFSET_Y + (1.0 - tileHeight),
-                tileWidth + OUTLINE_WIDTH, 
-                tileHeight + OUTLINE_WIDTH,
+                tileWidth + outlineWidth, 
+                tileHeight + outlineWidth,
                 black);
         }
     }
@@ -225,11 +234,12 @@ export class Terrain {
 
     constructor(map : Tilemap, 
         tileWidth : number, tileHeight : number, 
+        outlineFactor : number,
         event : CoreEvent) {
 
-        this.meshFloor = generateFloorMesh(map, tileWidth, tileHeight, event);
-        this.meshWalls = generateWallMesh(map, tileWidth, tileHeight, event);
-        this.meshShadows = generateShadowMesh(map, tileWidth, tileHeight, event);
+        this.meshFloor = generateFloorMesh(map, tileWidth, tileHeight, outlineFactor, event);
+        this.meshWalls = generateWallMesh(map, tileWidth, tileHeight, outlineFactor, event);
+        this.meshShadows = generateShadowMesh(map, tileWidth, tileHeight, outlineFactor, event);
     }
 
 

@@ -3,20 +3,14 @@ import { CoreEvent } from "../core/core.js";
 import { Mesh } from "../core/mesh.js";
 import { Vector2, RGBA } from "../core/vector.js";
 import { PlayerAnimator } from "./animator.js";
-import { GameObject } from "./gameobject.js";
+import { MovingObject } from "./gameobject.js";
 import { ShapeGenerator } from "./shapegenerator.js";
 import { Stage, TileType } from "./stage.js";
 
 
-export class Player extends GameObject {
+export class Player extends MovingObject {
 
 
-    private target : Vector2;
-    private renderPos : Vector2;
-
-    private moving : boolean;
-    private moveTimer : number;
-    private moveTime :number;
     private readonly baseMoveTime : number;
 
     private animator : PlayerAnimator;
@@ -149,23 +143,9 @@ export class Player extends GameObject {
     }
 
 
-    private move(event : CoreEvent) {
-
-        if (!this.moving) return;
-
-        if ((this.moveTimer -= event.step) <= 0) {
-
-            this.moving = false;
-            this.pos = this.target.clone();
-            this.renderPos = this.pos.clone();
-
-            this.rotationPhase = this.rotationPhase == 1 ? 0 : 1;
-
-            return;
-        }
-
-        let t = 1.0 - this.moveTimer / this.moveTime;
-        this.renderPos = Vector2.interpolate(this.pos, this.target, t);
+    protected stopMovementEvent(event : CoreEvent) {
+        
+        this.rotationPhase = this.rotationPhase == 1 ? 0 : 1;
     }
 
 

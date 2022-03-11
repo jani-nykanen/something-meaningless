@@ -83,7 +83,9 @@ export class Stage {
         this.stateBufferPointer = 0;
         this.stateBufferLength = 0;
 
-        this.terrain = new Terrain(map, TILE_WIDTH, TILE_HEIGHT, event);
+        let outlineScale = 1.0 + (this.height-4) * 0.1; // TODO: Compute elsewhere
+
+        this.terrain = new Terrain(map, TILE_WIDTH, TILE_HEIGHT, outlineScale, event);
         this.meshBuilder = new StageMeshBuilder(TILE_WIDTH, TILE_HEIGHT, event);
         this.starGen = new StarGenerator(event);
 
@@ -135,7 +137,7 @@ export class Stage {
                             this.meshBuilder.getMesh(StageMesh.MovingPlatformTop),
                             this.meshBuilder.getMesh(StageMesh.MovingPlatformShadow),
                             this.meshBuilder.getMesh(StageMesh.MovingPlatformArrow),
-                            TURN_TIME, direction));
+                            TURN_TIME, direction, tid));
                     break;
     
                 default:
@@ -179,7 +181,7 @@ export class Stage {
 
         for (let o of this.movingPlatforms) {
 
-            o.update(this, event);
+            o.update(this.player, this, event);
         }
 
         for (let o of this.orbs) {
@@ -369,18 +371,22 @@ export class Stage {
 
         for (let o of this.shrinkingPlatforms)
             o.kill();
-
+        for (let o of this.movingPlatforms)
+            o.kill();
         for (let o of this.orbs)
             o.kill();
 
         let o : GameObject;
+        let direction : Direction;
+        let tid : number;
 
         for (let y = 0; y < this.height; ++ y) {
 
             for (let x = 0; x < this.width; ++ x) {
 
                 // Bottom layer
-                switch (this.activeLayers[0][y * this.width + x]) {
+                tid = this.activeLayers[0][y * this.width + x];
+                switch (tid) {
                     
                 case 2:
     
@@ -388,9 +394,28 @@ export class Stage {
                     // Should not happen
                     if (o == null)
                         break;
-
                     (<ShrinkingPlatform> o).recreate(x, y);
 
+                    break;
+
+                case 5:
+                case 6:
+
+                    if (tid == 5) {
+
+                        direction = x % 2 == 0 ? Direction.Left : Direction.Right;
+                    }
+                    else {
+
+                        direction = y % 2 == 0 ? Direction.Up : Direction.Down;
+                    }
+    
+                    o = <GameObject> nextObject<MovingPlatform> (this.movingPlatforms);
+                    // Should not happen
+                    if (o == null)
+                        break;
+                    (<MovingPlatform> o).recreate(x, y, direction, tid);
+                    
                     break;
     
                 default:
