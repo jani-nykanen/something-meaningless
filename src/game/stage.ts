@@ -10,7 +10,7 @@ import { Player } from "./player.js";
 import { StageMesh, StageMeshBuilder } from "./stagemeshbuilder.js";
 import { StarGenerator } from "./stargenerator.js";
 import { Terrain } from "./terrain.js";
-import { MovingPlatform } from "./movingplatform.js";
+import { Direction, MovingPlatform } from "./movingplatform.js";
 
 
 const TURN_TIME = 15;
@@ -93,13 +93,19 @@ export class Stage {
 
     private parseObjects(map : Tilemap) {
 
+        let direction : number;
+        let tid : number;
+
         for (let y = 0; y < map.height; ++ y) {
 
             for (let x = 0; x < map.width; ++ x) {
 
+                tid = map.getTile(0, x, y);
+
                 // Bottom layer
-                switch (map.getTile(0, x, y)) {
-                    
+                switch (tid) {
+
+                // Shrinking platforms
                 case 2:
     
                     this.shrinkingPlatforms.push(
@@ -108,6 +114,28 @@ export class Stage {
                             this.meshBuilder.getMesh(StageMesh.PlatformTop),
                             this.meshBuilder.getMesh(StageMesh.PlatformShadow),
                             TURN_TIME));
+                    break;
+
+                // Moving platforms
+                case 5:
+                case 6:
+
+                    if (tid == 5) {
+
+                        direction = x % 2 == 0 ? Direction.Left : Direction.Right;
+                    }
+                    else {
+
+                        direction = y % 2 == 0 ? Direction.Up : Direction.Down;
+                    }
+
+                    this.movingPlatforms.push(
+                        new MovingPlatform(x, y,
+                            this.meshBuilder.getMesh(StageMesh.MovingPlatformBottom),
+                            this.meshBuilder.getMesh(StageMesh.MovingPlatformTop),
+                            this.meshBuilder.getMesh(StageMesh.MovingPlatformShadow),
+                            this.meshBuilder.getMesh(StageMesh.MovingPlatformArrow),
+                            TURN_TIME, direction));
                     break;
     
                 default:
@@ -149,6 +177,11 @@ export class Stage {
             o.update(this, event);
         }
 
+        for (let o of this.movingPlatforms) {
+
+            o.update(this, event);
+        }
+
         for (let o of this.orbs) {
 
             o.update(this.player, this, event);
@@ -174,6 +207,10 @@ export class Stage {
 
             o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
+        for (let o of this.movingPlatforms) {
+
+            o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
+        }
 
         canvas.toggleStencilTest(false);
         canvas.setColor();
@@ -188,6 +225,11 @@ export class Stage {
 
             o.drawBottom(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
+
+        for (let o of this.movingPlatforms) {
+
+            o.drawBottom(canvas, TILE_WIDTH, TILE_HEIGHT);
+        }
     }
 
 
@@ -196,6 +238,11 @@ export class Stage {
         canvas.setColor();
 
         for (let o of this.shrinkingPlatforms) {
+
+            o.drawTop(canvas, TILE_WIDTH, TILE_HEIGHT);
+        }
+
+        for (let o of this.movingPlatforms) {
 
             o.drawTop(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
@@ -285,6 +332,10 @@ export class Stage {
             return TileType.Floor;
 
         case 2:
+            return TileType.Platform;
+
+        case 5:
+        case 6:
             return TileType.Platform;
 
         default:

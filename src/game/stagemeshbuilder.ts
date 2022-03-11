@@ -179,16 +179,68 @@ export class StageMeshBuilder {
 
     private generateMovingPlatformMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
+        const OUTLINE_WIDTH = 0.033;
+
+        const MAGIC_OFFSET = OUTLINE_WIDTH/4; // Good grief
+
+        const ARROW_WIDTH = 0.50;
+        const ARROW_TOP = 0.25;
+        const ARROW_BOTTOM = -0.125;
+
         const BLACK = new RGBA(0);
+        const BOTTOM_COLOR_1 = new RGBA(0.33, 0.1, 0.67);
+        const BOTTOM_COLOR_2 = new RGBA(0.50, 0.25, 0.80);
+        const BOTTOM_COLOR_3 = new RGBA(0.1, 0.0, 0.33);
+        const TOP_COLOR = new RGBA(0.90, 0.60, 1.0);
+        const ARROW_COLOR = new RGBA(0.05, 0.0, 0.1);
 
         let dw = PLATFORM_SCALE * tileWidth;
-        let dh = (1.0 - tileHeight);
+        let dh = PLATFORM_SCALE * tileHeight;
         let dx = -dw/2;
-        let dy = -dh;
+        let dy = -(1.0 - tileHeight);
+
+        let midh = 1.0 - tileHeight;
+        let midw = 0.5 * PLATFORM_SCALE;
+        let midx = dx + (PLATFORM_SCALE - midw)/2
 
         this.meshes[StageMesh.MovingPlatformBottom] = (new ShapeGenerator())
-            .addEllipse(0, 0, tileWidth, tileHeight, 6, BLACK)
-            .addEllipse(0, dy, tileWidth, tileHeight, 6, BLACK)
+            .addEllipse(0, 0, dw, dh, 6, BLACK)
+            .addEllipse(0, dy, dw, dh, 6, BLACK)
+            .addRectangle(dx, dy, dw, midh, BLACK)
+            .addRectangle(midx + OUTLINE_WIDTH/2, 0, midw - OUTLINE_WIDTH, midh + MAGIC_OFFSET, BOTTOM_COLOR_1)
+            .addRectangle(dx + OUTLINE_WIDTH, dy, dw/2 - OUTLINE_WIDTH*2, midh, BOTTOM_COLOR_2)
+            .addRectangle(dx + dw/2, dy, dw/2 - OUTLINE_WIDTH, midh, BOTTOM_COLOR_3)
+            .addTriangle(
+                new Vector2(dx + OUTLINE_WIDTH, dy + midh),
+                new Vector2(midx + OUTLINE_WIDTH/2, dy + midh),
+                new Vector2(midx + OUTLINE_WIDTH/2, midh + MAGIC_OFFSET),
+                BOTTOM_COLOR_2)
+            .addTriangle(
+                new Vector2(dx + 0.75 * PLATFORM_SCALE - OUTLINE_WIDTH/2, dy + midh),
+                new Vector2(dx + dw - OUTLINE_WIDTH, dy + midh),
+                new Vector2(dx + 0.75 * PLATFORM_SCALE - OUTLINE_WIDTH/2, midh + MAGIC_OFFSET),
+                BOTTOM_COLOR_3)
+            .constructMesh(event);
+
+        this.meshes[StageMesh.MovingPlatformTop] = (new ShapeGenerator())
+            .addEllipse(0, dy, dw - OUTLINE_WIDTH*2, dh - OUTLINE_WIDTH*2, 6, TOP_COLOR)
+            .constructMesh(event);
+
+        this.meshes[StageMesh.MovingPlatformArrow] = (new ShapeGenerator())
+            .addTriangle(
+                new Vector2(-ARROW_WIDTH/2, ARROW_BOTTOM),
+                new Vector2(0, ARROW_TOP),
+                new Vector2(0, 0),
+                ARROW_COLOR)
+            .addTriangle(
+                new Vector2(ARROW_WIDTH/2, ARROW_BOTTOM),
+                new Vector2(0, ARROW_TOP),
+                new Vector2(0, 0),
+                ARROW_COLOR)
+            .constructMesh(event);
+
+        this.meshes[StageMesh.MovingPlatformShadow] = (new ShapeGenerator())
+            .addEllipse(0.075, 0.1, dw, dh, 6, BLACK)
             .constructMesh(event);
     }
 

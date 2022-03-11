@@ -5,7 +5,7 @@ import { GameObject } from "./gameobject.js";
 import { Stage } from "./stage.js";
 
 
-const enum Direction {
+export const enum Direction {
 
     Left = 0,
     Right = 1,
@@ -113,8 +113,9 @@ export class MovingPlatform extends GameObject {
 
         canvas.drawMesh(this.meshTop);
 
-        // TODO: Draw arrow
         canvas.transform    
+            .translate(0, -(1.0 - tileHeight))
+            .scale(tileWidth, tileHeight)
             .rotate(Math.PI/2 * ANGLE[this.direction])
             .use();
 
