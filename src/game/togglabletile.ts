@@ -46,4 +46,40 @@ export class TogglableTile extends PlatformObject {
         }
     }
 
+
+    public drawBottom(canvas : Canvas, tileWidth : number, tileHeight : number) {
+
+        if (!this.exist) return;
+
+        this.applyBaseTransform(canvas, tileWidth, tileHeight);
+
+        canvas.setColor(1, 1, 1, this.alpha);
+
+        canvas.drawMesh(this.meshBottom);
+        if (!this.enabled)
+            canvas.drawMesh(this.meshTop);
+            
+        canvas.setColor();
+
+        canvas.transform   
+            .pop()
+            .use();
+    }
+
+
+    public drawTop(canvas : Canvas, tileWidth : number, tileHeight : number) {
+
+        if (!this.exist || !this.enabled) return;
+
+        this.applyBaseTransform(canvas, tileWidth, tileHeight);
+
+        canvas.setColor(1, 1, 1, this.alpha);
+        canvas.drawMesh(this.meshTop);
+        canvas.setColor();
+
+        canvas.transform   
+            .pop()
+            .use();
+    }
+
 }

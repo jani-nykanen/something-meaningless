@@ -151,7 +151,7 @@ export class Stage {
                         new TogglableTile(x, y,
                             this.meshBuilder.getMesh(StageMesh.TogglableTileBottom),
                             this.meshBuilder.getMesh(StageMesh.TogglableTileTop),
-                            this.meshBuilder.getMesh(StageMesh.MovingPlatformShadow),
+                            this.meshBuilder.getMesh(StageMesh.TogglableTileShadow),
                             tid == 7));        
                     break;
 
@@ -225,6 +225,10 @@ export class Stage {
         this.player.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT, 1.0 - TILE_HEIGHT);
 
         canvas.setColor(0, 0, 0, SHADOW_ALPHA);
+        for (let o of this.togglablePlatforms) {
+
+            o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
+        }
         for (let o of this.shrinkingPlatforms) {
 
             o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
@@ -364,15 +368,22 @@ export class Stage {
             return TileType.Floor;
 
         case 2:
-            return TileType.Platform;
-
         case 5:
         case 6:
+        case 7:
             return TileType.Platform;
 
         default:
             return TileType.Invalid;
         }
+    }
+
+
+    public isBottomTileEmpty(x : number, y : number) : boolean {
+
+        let tile = this.getTile(0, x, y, -1);
+
+        return tile == 0 || tile == 8;
     }
 
 

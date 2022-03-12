@@ -22,9 +22,10 @@ export const enum StageMesh {
     MovingPlatformArrow = 8,
 
     TogglableTileBottom = 9,
-    TogglableTileTop = 10
+    TogglableTileTop = 10,
+    TogglableTileShadow = 11
 };
-const STAGE_MESH_COUNT = 11
+const STAGE_MESH_COUNT = 12
 
 
 const PLATFORM_SCALE = 0.90;
@@ -254,7 +255,10 @@ export class StageMeshBuilder {
 
     private generateTogglableTileMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
-        const BASE_SCALE = 0.75;
+        const SHADOW_OFFSET_X = 0.15;
+        const SHADOW_OFFSET_Y = 0.15;
+
+        const BASE_SCALE = 0.70;
         const BASE_OUTLINE_WIDTH = 0.025;
 
         const BLACK = new RGBA(0);
@@ -262,7 +266,7 @@ export class StageMeshBuilder {
         const COLOR_2 = new RGBA(0.75, 0.1, 0.50);
 
         let dx = -BASE_SCALE * tileWidth / 2.0;
-        let dy = -(BASE_SCALE * tileHeight)/2.0 - (1.0 - tileHeight) * BASE_SCALE;
+        let dy = -(BASE_SCALE * tileHeight)/2.0 - (1.0 - tileHeight);
         let dw = BASE_SCALE * tileWidth;
         let dh = BASE_SCALE * tileHeight;
 
@@ -282,6 +286,35 @@ export class StageMeshBuilder {
             .addRectangle(dx, dy + (1.0 - tileHeight - ow), dw, ow, BLACK)
             .addRectangle(dx - ow, dy, ow, 1.0 - tileHeight, BLACK)
             .addRectangle(dx + dw, dy, ow, 1.0 - tileHeight, BLACK)
+            .constructMesh(event);   
+
+        let sx = SHADOW_OFFSET_X * PLATFORM_SCALE;
+        let sy = SHADOW_OFFSET_Y * PLATFORM_SCALE;
+
+        dh = BASE_SCALE * tileHeight;
+        dy = -dh / 2;
+
+        this.meshes[StageMesh.TogglableTileShadow] = (new ShapeGenerator())
+            .addRectangle(
+                dx - ow, 
+                dy - ow, 
+                dw + ow*2, 
+                dh + ow*2, COLOR_1)
+            .addRectangle(
+                dx - ow + sx, 
+                dy - ow + sy, 
+                dw + ow*2, 
+                dh + ow*2, COLOR_1)
+            .addTriangle(
+                new Vector2(dx - ow, dy + dh),
+                new Vector2(dx - ow + sx, dy + dh),
+                new Vector2(dx - ow + sx, dy + dh + ow + sy),
+                BLACK)
+            .addTriangle(
+                new Vector2(dx + dw + ow, dy - ow),
+                new Vector2(dx + dw + ow + sx, dy - ow + sy),
+                new Vector2(dx + dw + ow, dy - ow + sy),
+                BLACK)
             .constructMesh(event);   
     }
 

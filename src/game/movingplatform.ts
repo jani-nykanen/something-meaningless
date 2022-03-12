@@ -88,13 +88,13 @@ export class MovingPlatform extends PlatformObject {
         if (stage.getTile(1, px, py) == 3)
             return;
 
-        if (stage.getTile(0, px + dirx, py + diry, -1) != 0) {
+        if (!stage.isBottomTileEmpty(px + dirx, py + diry)) {
 
             this.direction = oppositeDirection(this.direction);
             dirx = DIRX[this.direction];
             diry = DIRY[this.direction];
 
-            if (stage.getTile(0, px + dirx, py + diry, -1) != 0) {
+            if (!stage.isBottomTileEmpty(px + dirx, py + diry)) {
 
                 return;
             }
