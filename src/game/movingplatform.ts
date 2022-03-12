@@ -2,7 +2,7 @@ import { Canvas } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
 import { Mesh } from "../core/mesh.js";
 import { Vector2 } from "../core/vector.js";
-import { MovingObject } from "./gameobject.js";
+import { MovingObject, PlatformObject } from "./gameobject.js";
 import { Player } from "./player.js";
 import { Stage } from "./stage.js";
 
@@ -20,12 +20,9 @@ const oppositeDirection = (dir : Direction) =>
     [Direction.Right, Direction.Left, Direction.Down, Direction.Up] [dir];
 
 
-export class MovingPlatform extends MovingObject {
+export class MovingPlatform extends PlatformObject {
 
 
-    private readonly meshBottom : Mesh;
-    private readonly meshTop : Mesh;
-    private readonly meshShadow : Mesh;
     private readonly meshArrow : Mesh;
 
     private direction : Direction;
@@ -41,11 +38,8 @@ export class MovingPlatform extends MovingObject {
         moveTime : number, direction : Direction,
         id : number) {
 
-        super(x, y, true);
+        super(x, y, meshBottom, meshTop, meshShadow);
 
-        this.meshBottom = meshBottom;
-        this.meshTop = meshTop;
-        this.meshShadow = meshShadow;
         this.meshArrow = meshArrow;
 
         this.moveTimer = 0.0;
@@ -139,41 +133,13 @@ export class MovingPlatform extends MovingObject {
     }
 
 
-    private applyBaseTransform(canvas : Canvas, tileWidth : number, tileHeight : number) {
+    protected applyBaseTransform(canvas : Canvas, tileWidth : number, tileHeight : number) {
 
         canvas.transform
             .push()
             .translate(
                 this.renderPos.x * tileWidth, 
                 this.renderPos.y * tileHeight + (1.0 - tileHeight))
-            .use();
-    }
-
-
-    public drawShadow(canvas : Canvas, tileWidth : number, tileHeight : number) {
-
-        if (!this.exist) return;
-
-        this.applyBaseTransform(canvas, tileWidth, tileHeight);
-
-        canvas.drawMesh(this.meshShadow);
-
-        canvas.transform   
-            .pop()
-            .use();
-    }
-
-
-    public drawBottom(canvas : Canvas, tileWidth : number, tileHeight : number) {
-
-        if (!this.exist) return;
-
-        this.applyBaseTransform(canvas, tileWidth, tileHeight);
-
-        canvas.drawMesh(this.meshBottom);
-
-        canvas.transform   
-            .pop()
             .use();
     }
 

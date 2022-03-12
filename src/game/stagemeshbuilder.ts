@@ -20,8 +20,11 @@ export const enum StageMesh {
     MovingPlatformTop = 6,
     MovingPlatformShadow = 7,
     MovingPlatformArrow = 8,
+
+    TogglableTileBottom = 9,
+    TogglableTileTop = 10
 };
-const STAGE_MESH_COUNT = 9
+const STAGE_MESH_COUNT = 11
 
 
 const PLATFORM_SCALE = 0.90;
@@ -32,10 +35,14 @@ export class StageMeshBuilder {
 
     private meshes : Array<Mesh>;
 
+    private outlineScale : number;
 
-    constructor(tileWidth : number, tileHeight : number, event : CoreEvent) {
+
+    constructor(tileWidth : number, tileHeight : number, outlineScale : number, event : CoreEvent) {
 
         this.meshes = new Array<Mesh> (STAGE_MESH_COUNT);
+
+        this.outlineScale = outlineScale;
 
         this.generateMeshes(tileWidth, tileHeight, event);
     }
@@ -245,11 +252,46 @@ export class StageMeshBuilder {
     }
 
 
+    private generateTogglableTileMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
+
+        const BASE_SCALE = 0.75;
+        const BASE_OUTLINE_WIDTH = 0.025;
+
+        const BLACK = new RGBA(0);
+        const COLOR_1 = new RGBA(1.0, 0.40, 0.80);
+        const COLOR_2 = new RGBA(0.75, 0.1, 0.50);
+
+        let dx = -BASE_SCALE * tileWidth / 2.0;
+        let dy = -(BASE_SCALE * tileHeight)/2.0 - (1.0 - tileHeight) * BASE_SCALE;
+        let dw = BASE_SCALE * tileWidth;
+        let dh = BASE_SCALE * tileHeight;
+
+        let ow = this.outlineScale * BASE_OUTLINE_WIDTH;
+
+        this.meshes[StageMesh.TogglableTileTop] = (new ShapeGenerator())
+            .addRectangle(dx, dy, dw, dh, COLOR_1)
+            .addRectangle(dx - ow, dy - ow, ow, dh + ow, BLACK)
+            .addRectangle(dx + dw, dy - ow, ow, dh + ow, BLACK)
+            .addRectangle(dx, dy - ow, dw, ow, BLACK)
+            .constructMesh(event);
+
+        dy += BASE_SCALE * tileHeight;
+
+        this.meshes[StageMesh.TogglableTileBottom] = (new ShapeGenerator())
+            .addRectangle(dx, dy, dw, 1.0 - tileHeight - ow, COLOR_2)
+            .addRectangle(dx, dy + (1.0 - tileHeight - ow), dw, ow, BLACK)
+            .addRectangle(dx - ow, dy, ow, 1.0 - tileHeight, BLACK)
+            .addRectangle(dx + dw, dy, ow, 1.0 - tileHeight, BLACK)
+            .constructMesh(event);   
+    }
+
+
     private generateMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         this.generatePlatformMeshes(tileWidth, tileHeight, event);
         this.generateOrbMeshes(event);
         this.generateMovingPlatformMeshes(tileWidth, tileHeight, event);
+        this.generateTogglableTileMeshes(tileWidth, tileHeight, event);
     }
 
 

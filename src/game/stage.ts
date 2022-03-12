@@ -11,6 +11,7 @@ import { StageMesh, StageMeshBuilder } from "./stagemeshbuilder.js";
 import { StarGenerator } from "./stargenerator.js";
 import { Terrain } from "./terrain.js";
 import { Direction, MovingPlatform } from "./movingplatform.js";
+import { TogglableTile } from "./togglabletile.js";
 
 
 const TURN_TIME = 15;
@@ -37,6 +38,7 @@ export class Stage {
     private player : Player;
     private shrinkingPlatforms : Array<ShrinkingPlatform>;
     private movingPlatforms : Array<MovingPlatform>;
+    private togglablePlatforms : Array<TogglableTile>;
     private orbs : Array<Orb>;
 
     private objectBuffer : ObjectBuffer;
@@ -62,6 +64,7 @@ export class Stage {
         this.player = new Player(0, 0, TURN_TIME, event);
         this.shrinkingPlatforms = new Array<ShrinkingPlatform> ();
         this.movingPlatforms = new Array<MovingPlatform> ();
+        this.togglablePlatforms = new Array<TogglableTile> ();
         this.orbs = new Array<Orb> ();
 
         this.objectBuffer = new ObjectBuffer();
@@ -86,7 +89,7 @@ export class Stage {
         let outlineScale = 1.0 + (this.height-4) * 0.1; // TODO: Compute elsewhere
 
         this.terrain = new Terrain(map, TILE_WIDTH, TILE_HEIGHT, outlineScale, event);
-        this.meshBuilder = new StageMeshBuilder(TILE_WIDTH, TILE_HEIGHT, event);
+        this.meshBuilder = new StageMeshBuilder(TILE_WIDTH, TILE_HEIGHT, outlineScale, event);
         this.starGen = new StarGenerator(event);
 
         this.parseObjects(map);
@@ -140,6 +143,18 @@ export class Stage {
                             TURN_TIME, direction, tid));
                     break;
     
+                // Togglable platforms
+                case 7:
+                case 8:
+
+                    this.togglablePlatforms.push(
+                        new TogglableTile(x, y,
+                            this.meshBuilder.getMesh(StageMesh.TogglableTileBottom),
+                            this.meshBuilder.getMesh(StageMesh.TogglableTileTop),
+                            this.meshBuilder.getMesh(StageMesh.MovingPlatformShadow),
+                            tid == 7));        
+                    break;
+
                 default:
                     break;
                 }
@@ -184,6 +199,11 @@ export class Stage {
             o.update(this.player, this, event);
         }
 
+        for (let o of this.togglablePlatforms) {
+
+            o.update(this, event);
+        }
+
         for (let o of this.orbs) {
 
             o.update(this.player, this, event);
@@ -223,6 +243,11 @@ export class Stage {
         
         canvas.setColor();
 
+        for (let o of this.togglablePlatforms) {
+
+            o.drawBottom(canvas, TILE_WIDTH, TILE_HEIGHT);
+        }
+
         for (let o of this.shrinkingPlatforms) {
 
             o.drawBottom(canvas, TILE_WIDTH, TILE_HEIGHT);
@@ -238,6 +263,11 @@ export class Stage {
     private drawBottomLayerObjectsTop(canvas : Canvas) {
 
         canvas.setColor();
+
+        for (let o of this.togglablePlatforms) {
+
+            o.drawTop(canvas, TILE_WIDTH, TILE_HEIGHT);
+        }
 
         for (let o of this.shrinkingPlatforms) {
 

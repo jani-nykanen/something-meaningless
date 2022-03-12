@@ -1,18 +1,14 @@
 import { Canvas } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
 import { Mesh } from "../core/mesh.js";
-import { GameObject } from "./gameobject.js";
+import { GameObject, PlatformObject } from "./gameobject.js";
 import { Player } from "./player.js";
 import { Stage } from "./stage.js";
 
 
-export class ShrinkingPlatform extends GameObject {
+export class ShrinkingPlatform extends PlatformObject {
 
-
-    private readonly meshBottom : Mesh;
-    private readonly meshTop : Mesh;
-    private readonly meshShadow : Mesh;
-
+    
     private shrinking : boolean;
     private shrinkTimer : number;
     private readyToShrink : boolean;
@@ -23,11 +19,7 @@ export class ShrinkingPlatform extends GameObject {
         meshBottom : Mesh, meshTop : Mesh, meshShadow : Mesh,
         shrinkTime : number) {
 
-        super(x, y, true);
-
-        this.meshBottom = meshBottom;
-        this.meshTop = meshTop;
-        this.meshShadow = meshShadow;
+        super(x, y, meshBottom, meshTop, meshShadow);
 
         this.shrinking = false;
         this.shrinkTimer = 0.0;
@@ -53,7 +45,10 @@ export class ShrinkingPlatform extends GameObject {
 
         if (!this.exist) return;
 
+        this.scale = 1.0;
         if (this.shrinking) {
+                
+            this.scale = this.shrinkTimer / this.shrinkTime;
 
             if ((this.shrinkTimer -= event.step) <= 0) {
 
@@ -83,65 +78,5 @@ export class ShrinkingPlatform extends GameObject {
                 stage.setTile(0, px, py, 0);
             }
         }
-    }
-
-
-    private applyBaseTransform(canvas : Canvas, tileWidth : number, tileHeight : number) {
-
-        let scale = 1.0;
-        if (this.shrinking) {
-
-            scale = this.shrinkTimer / this.shrinkTime;
-        }
-
-        canvas.transform
-            .push()
-            .translate(
-                this.pos.x * tileWidth, 
-                this.pos.y * tileHeight + (1.0 - tileHeight))
-            .scale(scale, scale)
-            .use();
-    }
-
-
-    public drawShadow(canvas : Canvas, tileWidth : number, tileHeight : number) {
-
-        if (!this.exist) return;
-
-        this.applyBaseTransform(canvas, tileWidth, tileHeight);
-
-        canvas.drawMesh(this.meshShadow);
-
-        canvas.transform   
-            .pop()
-            .use();
-    }
-
-
-    public drawBottom(canvas : Canvas, tileWidth : number, tileHeight : number) {
-
-        if (!this.exist) return;
-
-        this.applyBaseTransform(canvas, tileWidth, tileHeight);
-
-        canvas.drawMesh(this.meshBottom);
-
-        canvas.transform   
-            .pop()
-            .use();
-    }
-
-
-    public drawTop(canvas : Canvas, tileWidth : number, tileHeight : number) {
-
-        if (!this.exist) return;
-
-        this.applyBaseTransform(canvas, tileWidth, tileHeight);
-
-        canvas.drawMesh(this.meshTop);
-
-        canvas.transform   
-            .pop()
-            .use();
     }
 }

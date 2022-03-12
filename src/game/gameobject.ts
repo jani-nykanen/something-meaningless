@@ -1,5 +1,6 @@
 import { Canvas } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
+import { Mesh } from "../core/mesh.js";
 import { Vector2 } from "../core/vector.js";
 
 
@@ -104,6 +105,93 @@ export class MovingObject extends GameObject {
 
         let t = 1.0 - this.moveTimer / this.moveTime;
         this.renderPos = Vector2.interpolate(this.pos, this.target, t);
+    }
+}
+
+
+
+export class PlatformObject extends MovingObject {
+
+
+    protected readonly meshBottom : Mesh;
+    protected readonly meshTop : Mesh;
+    protected readonly meshShadow : Mesh;
+
+
+    protected scale : number;
+    protected alpha : number;
+
+
+    constructor(x : number, y : number,
+        meshBottom : Mesh, meshTop : Mesh, meshShadow : Mesh,
+        exist = true) {
+
+        super(x, y, exist);
+
+        this.meshBottom = meshBottom;
+        this.meshTop = meshTop;
+        this.meshShadow = meshShadow;
+
+        this.scale = 1.0;
+        this.alpha = 1.0;
+    }
+
+
+    protected applyBaseTransform(canvas : Canvas, tileWidth : number, tileHeight : number, yoff = 0.0) {
+
+        canvas.transform
+            .push()
+            .translate(
+                this.pos.x * tileWidth, 
+                this.pos.y * tileHeight + (1.0 - tileHeight) + yoff)
+            .scale(this.scale, this.scale)
+            .use();
+    }
+
+
+    public drawShadow(canvas : Canvas, tileWidth : number, tileHeight : number) {
+
+        if (!this.exist) return;
+
+        this.applyBaseTransform(canvas, tileWidth, tileHeight);
+
+        canvas.drawMesh(this.meshShadow);
+
+        canvas.transform   
+            .pop()
+            .use();
+    }
+
+
+    public drawBottom(canvas : Canvas, tileWidth : number, tileHeight : number) {
+
+        if (!this.exist) return;
+
+        this.applyBaseTransform(canvas, tileWidth, tileHeight);
+
+        canvas.setColor(1, 1, 1, this.alpha);
+        canvas.drawMesh(this.meshBottom);
+        canvas.setColor();
+
+        canvas.transform   
+            .pop()
+            .use();
+    }
+
+
+    public drawTop(canvas : Canvas, tileWidth : number, tileHeight : number) {
+
+        if (!this.exist) return;
+
+        this.applyBaseTransform(canvas, tileWidth, tileHeight);
+
+        canvas.setColor(1, 1, 1, this.alpha);
+        canvas.drawMesh(this.meshTop);
+        canvas.setColor();
+
+        canvas.transform   
+            .pop()
+            .use();
     }
 }
 
