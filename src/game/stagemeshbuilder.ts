@@ -5,6 +5,7 @@ import { RGBA, Vector2 } from "../core/vector.js";
 import { ShapeGenerator } from "./shapegenerator.js";
 
 
+const BLACK = new RGBA(0);
 
 
 export const enum StageMesh {
@@ -23,9 +24,13 @@ export const enum StageMesh {
 
     TogglableTileBottom = 9,
     TogglableTileTop = 10,
-    TogglableTileShadow = 11
+    TogglableTileShadow = 11,
+
+    ButtonOn = 12,
+    ButtonOff = 13,
+    ButtonBottom = 14,
 };
-const STAGE_MESH_COUNT = 12
+const STAGE_MESH_COUNT = 15
 
 
 const PLATFORM_SCALE = 0.90;
@@ -167,7 +172,7 @@ export class StageMeshBuilder {
         const INNER_RADIUS = 0.15;
         const OUTLINE_WIDTH = 0.033;
 
-        const BLACK = new RGBA(0);
+        
         const ORB_COLOR_1 = new RGBA(0.25, 0.70, 0.20);
         const ORB_COLOR_2 = new RGBA(0.50, 1.0, 0.40);
 
@@ -195,7 +200,7 @@ export class StageMeshBuilder {
         const ARROW_TOP = 0.25;
         const ARROW_BOTTOM = -0.125;
 
-        const BLACK = new RGBA(0);
+        
         const BOTTOM_COLOR_1 = new RGBA(0.33, 0.1, 0.67);
         const BOTTOM_COLOR_2 = new RGBA(0.50, 0.25, 0.80);
         const BOTTOM_COLOR_3 = new RGBA(0.1, 0.0, 0.33);
@@ -261,7 +266,6 @@ export class StageMeshBuilder {
         const BASE_SCALE = 0.70;
         const BASE_OUTLINE_WIDTH = 0.025;
 
-        const BLACK = new RGBA(0);
         const COLOR_1 = new RGBA(1.0, 0.40, 0.80);
         const COLOR_2 = new RGBA(0.75, 0.1, 0.50);
 
@@ -319,12 +323,22 @@ export class StageMeshBuilder {
     }
 
 
+    private generateButton(ratio : number, event : CoreEvent) {
+
+        const COLOR_1 = new RGBA(1.0, 0.40, 0.80);
+        const COLOR_2 = new RGBA(0.75, 0.1, 0.50);
+
+        
+    }
+
+
     private generateMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         this.generatePlatformMeshes(tileWidth, tileHeight, event);
         this.generateOrbMeshes(event);
         this.generateMovingPlatformMeshes(tileWidth, tileHeight, event);
         this.generateTogglableTileMeshes(tileWidth, tileHeight, event);
+        this.generateButton(tileWidth / tileHeight, event);
     }
 
 
