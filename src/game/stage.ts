@@ -2,7 +2,7 @@ import { Canvas, StencilCondition, StencilOperation } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
 import { negMod } from "../core/math.js";
 import { Tilemap } from "../core/tilemap.js";
-import { GameObject, nextObject } from "./gameobject.js";
+import { ExistingObject, GameObject, nextObject } from "./gameobject.js";
 import { ObjectBuffer } from "./objectbuffer.js";
 import { Orb } from "./orb.js";
 import { ShrinkingPlatform } from "./shrinkingplatform.js";
@@ -84,6 +84,9 @@ export class Stage {
 
     private meshBuilder : StageMeshBuilder;
 
+    private waiting : boolean;
+    private waitTimer : number;
+
     private readonly baseMap : Tilemap;
     
 
@@ -103,6 +106,9 @@ export class Stage {
 
         this.width = map.width;
         this.height = map.height;
+
+        this.waitTimer = 0.0;
+        this.waiting = false;
 
         this.activeLayers = map.cloneLayers();
 
@@ -180,7 +186,7 @@ export class Stage {
                             this.meshBuilder.getMesh(StageMesh.TogglableTileBottom),
                             this.meshBuilder.getMesh(StageMesh.TogglableTileTop),
                             this.meshBuilder.getMesh(StageMesh.TogglableTileShadow),
-                            tid == 7));        
+                            tid == 7, TURN_TIME));        
                     break;
 
                 default:
@@ -237,7 +243,17 @@ export class Stage {
             o.update(this.player, this, event);
         }
 
-        this.player.update(this, event);
+        if (this.waiting) {
+
+            if ((this.waitTimer -= event.step) <= 0) {
+
+                this.waiting = false;
+            }
+        }
+        else {
+        
+            this.player.update(this, event);
+        }
     }
 
 
@@ -490,7 +506,7 @@ export class Stage {
 
         let tile = this.getTile(0, x, y, -1);
 
-        return tile == 0 || tile == 8;
+        return tile == 0; // || tile == 8;
     }
 
 
@@ -515,14 +531,21 @@ export class Stage {
     }
 
 
+    private killObjects(arr : Array<ExistingObject>) {
+
+        for (let o of arr) {
+
+            o.kill();
+        }
+    }
+
+
     private resetObjects() {
 
-        for (let o of this.shrinkingPlatforms)
-            o.kill();
-        for (let o of this.movingPlatforms)
-            o.kill();
-        for (let o of this.orbs)
-            o.kill();
+        this.killObjects(this.shrinkingPlatforms);
+        this.killObjects(this.movingPlatforms);
+        this.killObjects(this.orbs);
+        this.killObjects(this.togglablePlatforms);
 
         let o : GameObject;
         let direction : Direction;
@@ -564,6 +587,16 @@ export class Stage {
                         break;
                     (<MovingPlatform> o).recreate(x, y, direction, tid);
                     
+                    break;
+
+                case 7:
+                case 8:
+
+                    o = <GameObject> nextObject<TogglableTile> (this.togglablePlatforms);
+                    // Should not happen
+                    if (o == null)
+                        break;
+                    (<TogglableTile> o).recreate(x, y, tid == 7);
                     break;
     
                 default:
@@ -642,6 +675,7 @@ export class Stage {
 
         switch (this.getTile(0, x, y)) {
             
+        // Button pressed
         case 9:
 
             replaceInArray(this.activeLayers[0], 10, 9);
@@ -652,6 +686,9 @@ export class Stage {
 
                 o.toggle();
             }
+
+            this.waiting = true;
+            this.waitTimer = TURN_TIME;
 
             break;
 

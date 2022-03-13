@@ -199,7 +199,6 @@ export class StageMeshBuilder {
         const ARROW_WIDTH = 0.50;
         const ARROW_TOP = 0.25;
         const ARROW_BOTTOM = -0.125;
-
         
         const BOTTOM_COLOR_1 = new RGBA(0.33, 0.1, 0.67);
         const BOTTOM_COLOR_2 = new RGBA(0.50, 0.25, 0.80);
@@ -266,8 +265,13 @@ export class StageMeshBuilder {
         const BASE_SCALE = 0.70;
         const BASE_OUTLINE_WIDTH = 0.025;
 
-        const COLOR_1 = new RGBA(1.0, 0.40, 0.80);
-        const COLOR_2 = new RGBA(0.75, 0.1, 0.50);
+        const DOT_DIAMETER = 0.15;
+
+        const COLOR_1 = new RGBA(1.0, 0.55, 0.80);
+        const COLOR_2 = new RGBA(0.67, 0.15, 0.40);
+        const COLOR_3 = new RGBA(0.40, 0.0, 0.20);
+
+        let ratio = tileHeight / tileWidth;
 
         let dx = -BASE_SCALE * tileWidth / 2.0;
         let dy = -(BASE_SCALE * tileHeight)/2.0 - (1.0 - tileHeight);
@@ -281,6 +285,27 @@ export class StageMeshBuilder {
             .addRectangle(dx - ow, dy - ow, ow, dh + ow, BLACK)
             .addRectangle(dx + dw, dy - ow, ow, dh + ow, BLACK)
             .addRectangle(dx, dy - ow, dw, ow, BLACK)
+            .addEllipse(0, dy + dh * 3 / 4, 
+                DOT_DIAMETER, DOT_DIAMETER * ratio, 
+                12, COLOR_3)
+            // This is ugly but meh
+            .addTriangle(
+                new Vector2(dx + dw/2 - DOT_DIAMETER, dy + dh/8),
+                new Vector2(dx + dw/2 + DOT_DIAMETER, dy + dh/8),
+                new Vector2(dx + dw/2 - DOT_DIAMETER/3, dy + dh/1.75),
+                COLOR_3)
+            .addTriangle(
+                new Vector2(dx + dw/2 - DOT_DIAMETER, dy + dh/8),
+                new Vector2(dx + dw/2 + DOT_DIAMETER, dy + dh/8),
+                new Vector2(dx + dw/2 + DOT_DIAMETER/3, dy + dh/1.75),
+                COLOR_3)
+            .addRectangle(
+                dx + dw/2 - 
+                DOT_DIAMETER/3, 
+                dy + dh/8, 
+                DOT_DIAMETER/3*2, 
+                dh/1.7 - dh/8, 
+                COLOR_3)
             .constructMesh(event);
 
         dy += BASE_SCALE * tileHeight;
@@ -333,8 +358,8 @@ export class StageMeshBuilder {
         const SHADOW_OFFSET_X = 0.025;
         const SHADOW_OFFSET_Y = 0.05;
 
-        const COLOR_1 = new RGBA(1.0, 0.40, 0.80);
-        const COLOR_2 = new RGBA(0.75, 0.1, 0.50);
+        const COLOR_1 = new RGBA(1.0, 0.55, 0.80);
+        const COLOR_2 = new RGBA(0.67, 0.15, 0.40);
 
         let ow = BASE_OUTLINE_WIDTH * this.outlineScale;
 
