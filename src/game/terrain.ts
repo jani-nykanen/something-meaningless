@@ -193,7 +193,7 @@ const generateShadowMesh = (map : Tilemap,
 
         for (let x = 0; x < map.width; ++ x) {
 
-            if (map.getTile(0, x, y) != 1)
+            if (!isFloorTile(map.getTile(0, x, y)))
                 continue;
 
             dx = x * tileWidth - tileWidth/2 - outlineWidth/2; 

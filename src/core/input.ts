@@ -234,5 +234,5 @@ export class InputListener {
     }
 
 
-    public anyPressed = () : boolean => (this.keyboard.isAnyPressed() || this.gamepad.isAnyButtonPressed());
+    public anyPressed = () : boolean => (this.keyboard.isAnyPressed() || this.gamepad.isAnyButtonDown());
 }

@@ -182,7 +182,7 @@ export class GamePadListener {
     }
 
 
-    public isAnyButtonPressed = () : boolean => this.anyPressed;
+    public isAnyButtonDown = () : boolean => this.anyPressed;
     public getStick = () : Vector2 => this.stick.clone();
 
 }

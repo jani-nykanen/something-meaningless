@@ -82,4 +82,12 @@ export class TogglableTile extends PlatformObject {
             .use();
     }
 
+    
+    public toggle() {
+
+        this.enabled = !this.enabled;
+
+        // TODO: also start animation
+    }
+
 }

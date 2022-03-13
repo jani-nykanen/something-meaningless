@@ -2,6 +2,7 @@ import { Canvas } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
 import { Mesh } from "../core/mesh.js";
 import { Vector2 } from "../core/vector.js";
+import { Stage } from "./stage.js";
 
 
 export class ExistingObject {
@@ -85,10 +86,10 @@ export class MovingObject extends GameObject {
 
 
 
-    protected stopMovementEvent(event : CoreEvent) {}
+    protected stopMovementEvent(stage : Stage, event : CoreEvent) {}
 
 
-    protected move(event : CoreEvent) {
+    protected move(stage : Stage, event : CoreEvent) {
 
         if (!this.moving) return;
 
@@ -98,7 +99,7 @@ export class MovingObject extends GameObject {
             this.pos = this.target.clone();
             this.renderPos = this.pos.clone();
 
-            this.stopMovementEvent(event);
+            this.stopMovementEvent(stage, event);
 
             return;
         }

@@ -143,8 +143,9 @@ export class Player extends MovingObject {
     }
 
 
-    protected stopMovementEvent(event : CoreEvent) {
+    protected stopMovementEvent(stage : Stage, event : CoreEvent) {
         
+        stage.checkUnderlyingTiles(this.pos.x | 0, this.pos.y | 0);
         this.rotationPhase = this.rotationPhase == 1 ? 0 : 1;
     }
 
@@ -183,7 +184,7 @@ export class Player extends MovingObject {
     public update(stage : Stage, event : CoreEvent) {
 
         this.control(stage, event);
-        this.move(event);
+        this.move(stage, event);
         this.animate(event);
     }
 

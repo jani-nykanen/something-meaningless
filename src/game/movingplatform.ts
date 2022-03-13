@@ -129,7 +129,7 @@ export class MovingPlatform extends PlatformObject {
             this.checkMovement(stage, event);
         }
 
-        this.move(event);
+        this.move(stage, event);
     }
 
 

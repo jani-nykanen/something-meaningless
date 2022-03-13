@@ -32,6 +32,34 @@ export const enum TileType {
 };
 
 
+const replaceInArray = (arr : Array<number>, replacedItem : number, newValue : number) : void => {
+
+    for (let i = 0; i < arr.length; ++ i) {
+
+        if (arr[i] == replacedItem) {
+
+            arr[i] = newValue;
+        }
+    }
+}
+
+
+const swapItemsInArray = (arr : Array<number>, a : number, b : number) : void => {
+
+    for (let i = 0; i < arr.length; ++ i) {
+
+        if (arr[i] == a) {
+
+            arr[i] = b;
+        }
+        else if (arr[i] == b) {
+
+            arr[i] = a;
+        }
+    }
+}
+
+
 export class Stage {
 
 
@@ -213,17 +241,14 @@ export class Stage {
     }
 
 
-    private drawButton(canvas : Canvas, x : number, y : number, pressed : boolean) {
+    private drawButton(canvas : Canvas, x : number, y : number, meshType : StageMesh) {
 
         canvas.transform
             .push()
             .translate(x * TILE_WIDTH, y * TILE_HEIGHT)
             .use();
 
-        canvas.drawMesh(
-            this.meshBuilder.getMesh(
-                pressed ? StageMesh.ButtonPressed : StageMesh.ButtonBottom)
-        );
+        canvas.drawMesh(this.meshBuilder.getMesh(meshType));
 
         canvas.transform
             .pop()
@@ -231,9 +256,7 @@ export class Stage {
     }
 
 
-    private drawStaticObjectsBottom(canvas : Canvas) {
-
-        canvas.setColor();
+    private iterateStaticObjects(operation : (tid : number, x : number, y : number) => void) {
 
         let tid : number;
         for (let y = 0; y < this.height; ++ y) {
@@ -242,21 +265,53 @@ export class Stage {
 
                 tid = this.getTile(0, x, y, -1);
 
-                switch (tid) {
-
-                // Button
-                case 9:
-                case 10:
-
-                    this.drawButton(canvas, x, y, tid == 10);
-
-                    break;
-
-                default:
-                    break;
-                }
+                operation(tid, x, y);
             }
         }
+    }
+
+
+    private drawStaticObjectsBottom(canvas : Canvas) {
+
+        canvas.setColor();
+
+        this.iterateStaticObjects((tid, x, y) => {
+
+            switch (tid) {
+
+            // Button
+            case 9:
+            case 10:
+
+                this.drawButton(canvas, x, y, 
+                    tid == 10 ? StageMesh.ButtonDown : StageMesh.ButtonUp);
+
+                break;
+
+            default:
+                break;
+            }
+        });
+    }
+
+
+    private drawStaticObjectsShadows(canvas : Canvas) {
+
+        this.iterateStaticObjects((tid, x, y) => {
+
+            switch (tid) {
+
+            // Button
+            case 9:
+
+                this.drawButton(canvas, x, y, StageMesh.ButtonShadow);
+
+                break;
+
+            default:
+                break;
+            }
+        });
     }
 
 
@@ -342,6 +397,8 @@ export class Stage {
             o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
 
+        this.drawStaticObjectsShadows(canvas);
+
         canvas.setStencilOperation(StencilOperation.Keep);
         this.player.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
     }
@@ -381,7 +438,6 @@ export class Stage {
 
         this.drawBottomLayerObjectsTop(canvas);
         this.terrain.drawTop(canvas);
-        this.drawStaticObjectsBottom(canvas);
 
         canvas.setStencilCondition(StencilCondition.Equal);
         this.drawObjectShadows(canvas);
@@ -389,6 +445,7 @@ export class Stage {
 
         canvas.toggleStencilTest(false);
 
+        this.drawStaticObjectsBottom(canvas);
         this.objectBuffer.draw(canvas, TILE_WIDTH, TILE_HEIGHT);
 
         this.starGen.draw(canvas);
@@ -413,6 +470,7 @@ export class Stage {
         switch (tile) {
 
         case 1:
+        case 10:
             return TileType.Floor;
 
         case 2:
@@ -577,5 +635,28 @@ export class Stage {
         this.starGen.createStars(count, 
             x, y, BASE_SPEED, JUMP_SPEED,
             GRAVITY, TIME, SCALE);
+    }
+
+
+    public checkUnderlyingTiles(x : number, y : number, isPlayer = true) {
+
+        switch (this.getTile(0, x, y)) {
+            
+        case 9:
+
+            replaceInArray(this.activeLayers[0], 10, 9);
+            this.setTile(0, x, y, 10);
+            swapItemsInArray(this.activeLayers[0], 7, 8);
+
+            for (let o of this.togglablePlatforms) {
+
+                o.toggle();
+            }
+
+            break;
+
+        default:
+            break;
+        }
     }
 }
