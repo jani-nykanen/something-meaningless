@@ -213,6 +213,53 @@ export class Stage {
     }
 
 
+    private drawButton(canvas : Canvas, x : number, y : number, pressed : boolean) {
+
+        canvas.transform
+            .push()
+            .translate(x * TILE_WIDTH, y * TILE_HEIGHT)
+            .use();
+
+        canvas.drawMesh(
+            this.meshBuilder.getMesh(
+                pressed ? StageMesh.ButtonPressed : StageMesh.ButtonBottom)
+        );
+
+        canvas.transform
+            .pop()
+            .use();
+    }
+
+
+    private drawStaticObjectsBottom(canvas : Canvas) {
+
+        canvas.setColor();
+
+        let tid : number;
+        for (let y = 0; y < this.height; ++ y) {
+
+            for (let x = 0; x < this.width; ++ x) {
+
+                tid = this.getTile(0, x, y, -1);
+
+                switch (tid) {
+
+                // Button
+                case 9:
+                case 10:
+
+                    this.drawButton(canvas, x, y, tid == 10);
+
+                    break;
+
+                default:
+                    break;
+                }
+            }
+        }
+    }
+
+
     private drawShadowLayer(canvas : Canvas) {
 
         canvas.toggleStencilTest(true);
@@ -334,6 +381,7 @@ export class Stage {
 
         this.drawBottomLayerObjectsTop(canvas);
         this.terrain.drawTop(canvas);
+        this.drawStaticObjectsBottom(canvas);
 
         canvas.setStencilCondition(StencilCondition.Equal);
         this.drawObjectShadows(canvas);

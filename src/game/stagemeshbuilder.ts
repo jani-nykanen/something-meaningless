@@ -26,9 +26,9 @@ export const enum StageMesh {
     TogglableTileTop = 10,
     TogglableTileShadow = 11,
 
-    ButtonOn = 12,
-    ButtonOff = 13,
-    ButtonBottom = 14,
+    ButtonTop = 12,
+    ButtonBottom = 13,
+    ButtonPressed = 14,
 };
 const STAGE_MESH_COUNT = 15
 
@@ -325,10 +325,33 @@ export class StageMeshBuilder {
 
     private generateButton(ratio : number, event : CoreEvent) {
 
+        const BASE_OUTLINE_WIDTH = 0.25;
+        const RADIUS = 0.25;
+        const HEIGHT = 0.15;
+
         const COLOR_1 = new RGBA(1.0, 0.40, 0.80);
         const COLOR_2 = new RGBA(0.75, 0.1, 0.50);
 
-        
+        let ow = BASE_OUTLINE_WIDTH * this.outlineScale;
+
+        this.meshes[StageMesh.ButtonPressed] = (new ShapeGenerator())
+            .addEllipse(0, 0, RADIUS*2, 
+                RADIUS*2 * ratio, 24,
+                BLACK)
+            .addEllipse(0, 0, RADIUS*2 - ow*2, 
+                RADIUS*2 * ratio - ow*2, 24,
+                COLOR_1)
+            .constructMesh(event);
+
+        this.meshes[StageMesh.ButtonBottom] = (new ShapeGenerator())
+            .addEllipse(0, 0, RADIUS*2, 
+                RADIUS*2 * ratio, 24,
+                BLACK)
+            .addEllipse(0, -HEIGHT, RADIUS*2, 
+                RADIUS*2 * ratio, 24,
+                BLACK)
+            .addRectangle(-RADIUS, -HEIGHT, RADIUS*2, HEIGHT, BLACK)
+            .constructMesh(event);
     }
 
 
@@ -338,12 +361,21 @@ export class StageMeshBuilder {
         this.generateOrbMeshes(event);
         this.generateMovingPlatformMeshes(tileWidth, tileHeight, event);
         this.generateTogglableTileMeshes(tileWidth, tileHeight, event);
-        this.generateButton(tileWidth / tileHeight, event);
+        this.generateButton(tileHeight / tileWidth, event);
     }
 
 
     public getMesh(type : StageMesh) : Mesh {
 
         return this.meshes[type];
+    }
+
+
+    public dispose(event : CoreEvent) {
+
+        for (let i = 0; i < this.meshes.length; ++ i) {
+
+            event.disposeMesh(this.meshes[i]);
+        }
     }
 }
