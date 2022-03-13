@@ -16,6 +16,9 @@ const COLORS = [
 const OUTLINE_WIDTH = 0.025;
 
 
+const isFloorTile = (id : number) => [1, 9].includes(id);
+
+
 const generateFloorMesh = (map : Tilemap, 
     tileWidth : number, tileHeight : number, 
     outlineFactor : number,
@@ -28,7 +31,7 @@ const generateFloorMesh = (map : Tilemap,
 
         for (let x = 0; x < map.width; ++ x) {
 
-            if (map.getTile(0, x, y) != 1) continue;
+            if (!isFloorTile(map.getTile(0, x, y))) continue;
 
             gen.addRectangle(
                 x * tileWidth - tileWidth/2, 
@@ -53,7 +56,7 @@ const generateFloorMesh = (map : Tilemap,
 
         for (let x = 0; x < map.width; ++ x) {
 
-            if (map.getTile(0, x, y) != 1) continue;
+            if (!isFloorTile(map.getTile(0, x, y))) continue;
 
             dx = x * tileWidth - tileWidth/2 - outlineWidth/2; 
             dy = y * tileHeight - tileHeight/2 - outlineWidth/2;
@@ -62,14 +65,14 @@ const generateFloorMesh = (map : Tilemap,
             width = tileWidth + outlineWidth;
 
             // Top
-            if (map.getTile(0, x, y-1) != 1) {
+            if (!isFloorTile(map.getTile(0, x, y-1))) {
 
                 gen.addRectangle(dx + offset, dy, 
                     width, outlineWidth, black);
             }
 
             // Left
-            if (map.getTile(0, x-1, y) != 1) {
+            if (!isFloorTile(map.getTile(0, x-1, y))) {
 
                 gen.addRectangle(
                     dx, dy,
@@ -78,7 +81,7 @@ const generateFloorMesh = (map : Tilemap,
                     black);
             }
             // Right
-            if (map.getTile(0, x+1, y) != 1) {
+            if (!isFloorTile(map.getTile(0, x+1, y))) {
 
                 gen.addRectangle(
                     dx + tileWidth, dy, 
@@ -105,8 +108,8 @@ const generateWallMesh = (map : Tilemap,
 
         for (let x = 0; x < map.width; ++ x) {
 
-            if (map.getTile(0, x, y) != 1 ||
-                map.getTile(0, x, y+1, 0) == 1)
+            if (!isFloorTile(map.getTile(0, x, y)) ||
+                isFloorTile(map.getTile(0, x, y+1)))
                 continue;
 
             gen.addRectangle(
@@ -129,12 +132,12 @@ const generateWallMesh = (map : Tilemap,
 
         for (let x = 0; x < map.width; ++ x) {
 
-            if (map.getTile(0, x, y) != 1) continue;
+            if (!isFloorTile(map.getTile(0, x, y))) continue;
 
             dx = x * tileWidth - tileWidth/2 - outlineWidth/2; 
             dy = y * tileHeight - tileHeight/2;
 
-            if (map.getTile(0, x, y+1) != 1) {
+            if (!isFloorTile(map.getTile(0, x, y+1))) {
 
                 // Top
                 gen.addRectangle(dx, dy + 1.0, 
@@ -142,15 +145,15 @@ const generateWallMesh = (map : Tilemap,
                     outlineWidth, black);
                     
                 // Left
-                if (map.getTile(0, x-1, y) != 1) {
+                if (!isFloorTile(map.getTile(0, x-1, y))) {
 
                     gen.addRectangle(
                         dx, dy + tileHeight, 
                         outlineWidth, 1.0 - tileHeight, black);
                 }
 
-                if (map.getTile(0, x+1, y) != 1 &&
-                    map.getTile(0, x+1, y+1) != 1) {
+                if (!isFloorTile(map.getTile(0, x+1, y)) &&
+                    !isFloorTile(map.getTile(0, x+1, y+1))) {
 
                     gen.addRectangle(
                         dx + tileWidth, 

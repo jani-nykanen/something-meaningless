@@ -371,6 +371,7 @@ export class Stage {
         case 5:
         case 6:
         case 7:
+        case 9:
             return TileType.Platform;
 
         default:
