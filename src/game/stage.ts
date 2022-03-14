@@ -296,11 +296,31 @@ export class Stage {
             switch (tid) {
 
             // Button
-            case 9:
             case 10:
 
-                this.drawButton(canvas, x, y, 
-                    tid == 10 ? StageMesh.ButtonDown : StageMesh.ButtonUp);
+                this.drawButton(canvas, x, y, StageMesh.ButtonDown);
+
+                break;
+
+            default:
+                break;
+            }
+        });
+    }
+
+
+    private drawStaticObjects(canvas : Canvas) {
+
+        canvas.setColor();
+
+        this.iterateStaticObjects((tid, x, y) => {
+
+            switch (tid) {
+
+            // Button
+            case 9:
+
+                this.drawButton(canvas, x, y, StageMesh.ButtonUp);
 
                 break;
 
@@ -454,6 +474,7 @@ export class Stage {
 
         this.drawBottomLayerObjectsTop(canvas);
         this.terrain.drawTop(canvas);
+        this.drawStaticObjectsBottom(canvas);
 
         canvas.setStencilCondition(StencilCondition.Equal);
         this.drawObjectShadows(canvas);
@@ -461,7 +482,7 @@ export class Stage {
 
         canvas.toggleStencilTest(false);
 
-        this.drawStaticObjectsBottom(canvas);
+        this.drawStaticObjects(canvas);
         this.objectBuffer.draw(canvas, TILE_WIDTH, TILE_HEIGHT);
 
         this.starGen.draw(canvas);
