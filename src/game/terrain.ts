@@ -9,14 +9,17 @@ import { ShapeGenerator } from "./shapegenerator.js";
 
 const COLORS = [
     new RGBA(0.95, 0.70, 0.33),
-    new RGBA(1.0, 0.925, 0.67)
+    new RGBA(1.0, 0.925, 0.67),
+
+    new RGBA(0.45, 0.75, 0.20),
+    new RGBA(0.75, 1.0, 0.33),
 ];
 
 
 const OUTLINE_WIDTH = 0.025;
 
 
-const isFloorTile = (id : number) => [1, 9].includes(id);
+const isFloorTile = (id : number) => [1, 9, 11].includes(id);
 
 
 const generateFloorMesh = (map : Tilemap, 
@@ -26,18 +29,26 @@ const generateFloorMesh = (map : Tilemap,
 
     let gen = new ShapeGenerator();
 
+    let colorIndex : number;
+    let tid : number;
+
     // Base tiles
     for (let y = 0; y < map.height; ++ y) {
 
         for (let x = 0; x < map.width; ++ x) {
 
-            if (!isFloorTile(map.getTile(0, x, y))) continue;
+            tid = map.getTile(0, x, y);
+            if (!isFloorTile(tid)) continue;
+
+            colorIndex = x % 2 == y % 2 ? 1 : 0;
+            if (tid == 11)
+                colorIndex += 2;
 
             gen.addRectangle(
                 x * tileWidth - tileWidth/2, 
                 y * tileHeight - tileHeight/2,
                 tileWidth, tileHeight,
-                COLORS[x % 2 == y % 2 ? 1 : 0]);
+                COLORS[colorIndex]);
         }
     }
 
@@ -103,20 +114,29 @@ const generateWallMesh = (map : Tilemap,
 
     let gen = new ShapeGenerator();
 
+    let tid : number;
+    let colorIndex : number;
+
     // Wall tiles
     for (let y = 0; y < map.height; ++ y) {
 
         for (let x = 0; x < map.width; ++ x) {
 
-            if (!isFloorTile(map.getTile(0, x, y)) ||
+            tid = map.getTile(0, x, y);
+
+            if (!isFloorTile(tid) ||
                 isFloorTile(map.getTile(0, x, y+1)))
                 continue;
+
+            colorIndex = x % 2 == y % 2 ? 1 : 0;
+            if (tid == 11)
+                colorIndex += 2;
 
             gen.addRectangle(
                 x * tileWidth - tileWidth/2, 
                 (y+1) * tileHeight - tileHeight/2,
                 tileWidth, (1.0 - tileHeight),
-                RGBA.scalarMultiply(COLORS[x % 2 == y % 2 ? 1 : 0], 0.67));
+                RGBA.scalarMultiply(COLORS[colorIndex], 0.67));
         }
     }
 

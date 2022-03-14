@@ -32,6 +32,14 @@ export const enum TileType {
 };
 
 
+export const enum UnderlyingEffectType {
+
+    None = 0,
+    Button = 1,
+    JumpTile = 2
+};
+
+
 const replaceInArray = (arr : Array<number>, replacedItem : number, newValue : number) : void => {
 
     for (let i = 0; i < arr.length; ++ i) {
@@ -87,6 +95,8 @@ export class Stage {
     private waiting : boolean;
     private waitTimer : number;
 
+    private starAnimationTimer : number;
+
     private readonly baseMap : Tilemap;
     
 
@@ -109,6 +119,8 @@ export class Stage {
 
         this.waitTimer = 0.0;
         this.waiting = false;
+
+        this.starAnimationTimer = 0.0;
 
         this.activeLayers = map.cloneLayers();
 
@@ -221,6 +233,8 @@ export class Stage {
 
     public update(event : CoreEvent) {
 
+        const STAR_ANIMATION_SPEED = 1.0 / 30.0;
+
         this.starGen.update(event);
 
         for (let o of this.shrinkingPlatforms) {
@@ -254,6 +268,8 @@ export class Stage {
         
             this.player.update(this, event);
         }
+
+        this.starAnimationTimer = (this.starAnimationTimer + STAR_ANIMATION_SPEED * event.step) % 1.0;
     }
 
 
@@ -287,6 +303,34 @@ export class Stage {
     }
 
 
+    private drawFloorStar(canvas : Canvas, x : number, y : number) {
+
+        const MAX_SCALE = 0.49;
+        const COUNT = 3;
+
+        let t : number;
+
+        for (let i = 0; i < COUNT; ++ i) {
+
+            t = ((this.starAnimationTimer + i * 1.0) / COUNT) % 1.0;
+
+            canvas.transform
+                .push()
+                .translate(x, y - TILE_HEIGHT)
+                .scale(MAX_SCALE * t, MAX_SCALE * t)
+                .use();
+
+            canvas.setColor(0.0, 0.33, 1.0, Math.sin((1.0 - t) * Math.PI/2));
+
+            canvas.drawMesh(this.meshBuilder.getMesh(StageMesh.FloorStar));
+
+            canvas.transform
+                .pop()
+                .use();
+        }
+    }
+
+
     private drawStaticObjectsBottom(canvas : Canvas) {
 
         canvas.setColor();
@@ -294,12 +338,17 @@ export class Stage {
         this.iterateStaticObjects((tid, x, y) => {
 
             switch (tid) {
-
+   
             // Button
             case 10:
 
                 this.drawButton(canvas, x, y, StageMesh.ButtonDown);
+                break;
 
+            // Floor star
+            case 11:
+
+                this.drawFloorStar(canvas, x, y);
                 break;
 
             default:
@@ -508,6 +557,7 @@ export class Stage {
 
         case 1:
         case 10:
+        case 11:
             return TileType.Floor;
 
         case 2:
@@ -692,7 +742,7 @@ export class Stage {
     }
 
 
-    public checkUnderlyingTiles(x : number, y : number, isPlayer = true) {
+    public checkUnderlyingTiles(x : number, y : number, isPlayer = true) : UnderlyingEffectType {
 
         switch (this.getTile(0, x, y)) {
             
@@ -711,10 +761,15 @@ export class Stage {
             this.waiting = true;
             this.waitTimer = TURN_TIME;
 
-            break;
+            return UnderlyingEffectType.Button;
+
+        case 11:
+            return UnderlyingEffectType.JumpTile;
 
         default:
             break;
         }
+
+        return UnderlyingEffectType.None;
     }
 }

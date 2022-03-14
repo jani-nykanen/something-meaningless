@@ -5,7 +5,7 @@ import { Vector2, RGBA } from "../core/vector.js";
 import { PlayerAnimator } from "./animator.js";
 import { MovingObject } from "./gameobject.js";
 import { ShapeGenerator } from "./shapegenerator.js";
-import { Stage, TileType } from "./stage.js";
+import { Stage, TileType, UnderlyingEffectType } from "./stage.js";
 
 
 export class Player extends MovingObject {
@@ -21,6 +21,8 @@ export class Player extends MovingObject {
 
     private jumping : boolean;
     private jumpHeight : number;
+
+    private moveDir : Vector2;
 
 
     constructor(x : number, y : number, moveTime : number, event : CoreEvent) {
@@ -44,6 +46,8 @@ export class Player extends MovingObject {
     
         this.jumping = false;
         this.jumpHeight = 1.0;
+
+        this.moveDir = new Vector2();
     }
 
     
@@ -62,6 +66,90 @@ export class Player extends MovingObject {
     
         this.jumping = false;
         this.jumpHeight = 1.0;
+    }
+
+
+    private jump() {
+
+        this.jumping = true;
+        this.jumpHeight = 2.0;
+
+        if (this.rotationPhase == 0) {
+
+            this.rotationPhase = 1;
+        }
+    }
+
+
+    private moveTo(dirx : number, diry : number, stage : Stage, event : CoreEvent, forceJump = false) {
+
+        let px = this.pos.x | 0;
+        let py = this.pos.y | 0;
+
+        this.jumping = false;
+        this.jumpHeight = 1.0;
+
+        let moveTimeFactor = 1.0;
+
+        // Check if free
+        let tileType = stage.getBottomTileType(px + dirx, py + diry);
+        if (tileType == TileType.Invalid) {
+
+            // Check if can jump
+            dirx *= 2;
+            diry *= 2;
+
+            if (stage.getBottomTileType(px + dirx, py + diry) == TileType.Invalid) {
+
+                return;
+            }
+
+            this.jump();
+            moveTimeFactor = 2;
+        }
+        else if (forceJump) {
+
+            dirx *= 2;
+            diry *= 2;
+
+            if (stage.getBottomTileType(px + dirx, py + diry) != TileType.Invalid) {
+
+                this.jump();
+                moveTimeFactor = 2;
+            }
+            else {
+
+                dirx /= 2;
+                diry /= 2;
+
+                dirx |= 0;
+                diry |= 0;
+            }
+        }
+
+        this.jumping = forceJump ||
+            this.jumping || 
+            tileType == TileType.Platform ||
+            stage.getBottomTileType(px, py) == TileType.Platform;
+
+        this.target = Vector2.add(this.pos, new Vector2(dirx, diry));
+
+        this.target.x |= 0;
+        this.target.y |= 0;
+
+        this.moving = true;
+        this.moveTime = this.baseMoveTime * moveTimeFactor;
+
+        this.moveTimer = this.moveTime;
+
+        // Store state before updating tiles
+        stage.storeState();
+
+        stage.setTile(1, px, py, 0);
+        // TODO: Check if needs to update after movement animation stops?
+        stage.setTile(1, px + dirx, py + diry, 3);
+
+        this.moveDir = (new Vector2(dirx, diry)).normalize();
     }
 
 
@@ -90,62 +178,28 @@ export class Player extends MovingObject {
             diry = Math.sign(stick.y) | 0;
         }
 
-        let tileType : number;
-        let moveTimeFactor = 1;
         if (dirx != 0 || diry != 0) {
 
-            this.jumping = false;
-            this.jumpHeight = 1.0;
-
-            // Check if free
-            tileType = stage.getBottomTileType(px + dirx, py + diry);
-            if (tileType == TileType.Invalid) {
-
-                // Check if can jump
-                dirx *= 2;
-                diry *= 2;
-
-                if (stage.getBottomTileType(px + dirx, py + diry) == TileType.Invalid) {
-
-                    return;
-                }
-
-                this.jumping = true;
-                this.jumpHeight = 2.0;
-                moveTimeFactor = 2;
-
-                if (this.rotationPhase == 0) {
-
-                    this.rotationPhase = 1;
-                }
-            }
-
-            this.jumping = this.jumping || tileType == TileType.Platform ||
-                stage.getBottomTileType(px, py) == TileType.Platform;
-
-            this.target = Vector2.add(this.pos, new Vector2(dirx, diry));
-
-            this.target.x |= 0;
-            this.target.y |= 0;
-
-            this.moving = true;
-            this.moveTime = this.baseMoveTime * moveTimeFactor;
-
-            this.moveTimer = this.moveTime;
-
-            // Store state before updating tiles
-            stage.storeState();
-
-            stage.setTile(1, px, py, 0);
-            // TODO: Check if needs to update after movement animation stops?
-            stage.setTile(1, px + dirx, py + diry, 3);
+            this.moveTo(dirx, diry, stage, event);
         }
     }
 
 
     protected stopMovementEvent(stage : Stage, event : CoreEvent) {
         
-        stage.checkUnderlyingTiles(this.pos.x | 0, this.pos.y | 0);
+        let effect = stage.checkUnderlyingTiles(this.pos.x | 0, this.pos.y | 0);
+        
+        switch (effect) {
+
+        case UnderlyingEffectType.JumpTile:
+
+            this.moveTo(this.moveDir.x, this.moveDir.y, stage, event, true);
+            break;
+
+        default:
+            break;
+        }
+
         this.rotationPhase = this.rotationPhase == 1 ? 0 : 1;
     }
 

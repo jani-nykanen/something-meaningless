@@ -125,7 +125,7 @@ export class ShapeGenerator {
     public addStar(cx : number, cy : number,
         innerRadius : number, outerRadius : number,
         corners : number, color = new RGBA(),
-        angleOffset = 0.0) : ShapeGenerator {
+        angleOffset = 0.0, scalex = 1.0, scaley = 1.0) : ShapeGenerator {
 
         let angleStep = Math.PI*2 / corners;
         let angle : number;
@@ -136,24 +136,24 @@ export class ShapeGenerator {
 
             this.addTriangle(
                 new Vector2(
-                    cx + Math.cos(angle) * outerRadius, 
-                    cy + Math.sin(angle) * outerRadius
+                    cx + Math.cos(angle) * outerRadius * scalex, 
+                    cy + Math.sin(angle) * outerRadius * scaley
                 ),
                 new Vector2(
-                    cx + Math.cos(angle - angleStep/2) * innerRadius, 
-                    cy + Math.sin(angle - angleStep/2) * innerRadius
+                    cx + Math.cos(angle - angleStep/2) * innerRadius * scalex, 
+                    cy + Math.sin(angle - angleStep/2) * innerRadius * scaley
                 ),
                 new Vector2(cx, cy),
                 color);
 
             this.addTriangle(
                 new Vector2(
-                    cx + Math.cos(angle) * outerRadius, 
-                    cy + Math.sin(angle) * outerRadius
+                    cx + Math.cos(angle) * outerRadius * scalex, 
+                    cy + Math.sin(angle) * outerRadius * scaley
                 ),
                 new Vector2(
-                    cx + Math.cos(angle + angleStep/2) * innerRadius, 
-                    cy + Math.sin(angle + angleStep/2) * innerRadius
+                    cx + Math.cos(angle + angleStep/2) * innerRadius * scalex, 
+                    cy + Math.sin(angle + angleStep/2) * innerRadius * scaley
                 ),
                 new Vector2(cx, cy),
                 color);
