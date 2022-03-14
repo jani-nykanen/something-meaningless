@@ -130,6 +130,7 @@ export class Player extends MovingObject {
         this.jumping = forceJump ||
             this.jumping || 
             tileType == TileType.Platform ||
+            tileType == TileType.JumpTile ||
             stage.getBottomTileType(px, py) == TileType.Platform;
 
         this.target = Vector2.add(this.pos, new Vector2(dirx, diry));
@@ -142,8 +143,12 @@ export class Player extends MovingObject {
 
         this.moveTimer = this.moveTime;
 
-        // Store state before updating tiles
-        stage.storeState();
+        // To avoid cases where the player is standing on a "jump tile"
+        if (!forceJump) {
+
+            // Store state before updating tiles
+            stage.storeState();
+        }
 
         stage.setTile(1, px, py, 0);
         // TODO: Check if needs to update after movement animation stops?
@@ -162,9 +167,6 @@ export class Player extends MovingObject {
         let stick = event.input.getStick();
         if (stick.length() < MOVE_EPS)
             return;
-
-        let px = this.pos.x | 0;
-        let py = this.pos.y | 0;
 
         let dirx = 0;
         let diry = 0;

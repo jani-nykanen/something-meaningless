@@ -28,7 +28,8 @@ export const enum TileType {
 
     Invalid = -1,
     Floor = 0,
-    Platform = 1
+    Platform = 1,
+    JumpTile = 2,
 };
 
 
@@ -96,6 +97,7 @@ export class Stage {
     private waitTimer : number;
 
     private starAnimationTimer : number;
+    private specialStarScale : number;
 
     private readonly baseMap : Tilemap;
     
@@ -121,6 +123,7 @@ export class Stage {
         this.waiting = false;
 
         this.starAnimationTimer = 0.0;
+        this.specialStarScale = 0.0;
 
         this.activeLayers = map.cloneLayers();
 
@@ -234,6 +237,7 @@ export class Stage {
     public update(event : CoreEvent) {
 
         const STAR_ANIMATION_SPEED = 1.0 / 30.0;
+        const STAR_SPECIAL_SCALE_SPEED = 1.0 / TURN_TIME;
 
         this.starGen.update(event);
 
@@ -270,6 +274,11 @@ export class Stage {
         }
 
         this.starAnimationTimer = (this.starAnimationTimer + STAR_ANIMATION_SPEED * event.step) % 1.0;
+        if (this.specialStarScale) {
+
+            this.specialStarScale = Math.max(0.0,
+                this.specialStarScale - STAR_SPECIAL_SCALE_SPEED*event.step);
+        }
     }
 
 
@@ -309,6 +318,7 @@ export class Stage {
         const COUNT = 3;
 
         let t : number;
+        let baseScale = 1.0 + this.specialStarScale;
 
         for (let i = 0; i < COUNT; ++ i) {
 
@@ -317,7 +327,7 @@ export class Stage {
             canvas.transform
                 .push()
                 .translate(x, y - TILE_HEIGHT)
-                .scale(MAX_SCALE * t, MAX_SCALE * t)
+                .scale(baseScale * MAX_SCALE * t, baseScale * MAX_SCALE * t)
                 .use();
 
             canvas.setColor(0.0, 0.33, 1.0, Math.sin((1.0 - t) * Math.PI/2));
@@ -557,7 +567,6 @@ export class Stage {
 
         case 1:
         case 10:
-        case 11:
             return TileType.Floor;
 
         case 2:
@@ -566,6 +575,9 @@ export class Stage {
         case 7:
         case 9:
             return TileType.Platform;
+
+        case 11:
+            return TileType.JumpTile;
 
         default:
             return TileType.Invalid;
@@ -764,6 +776,9 @@ export class Stage {
             return UnderlyingEffectType.Button;
 
         case 11:
+            
+            this.specialStarScale = 1.0;
+
             return UnderlyingEffectType.JumpTile;
 
         default:
@@ -771,5 +786,11 @@ export class Stage {
         }
 
         return UnderlyingEffectType.None;
+    }
+
+
+    public popState() {
+
+        this.stateBuffer.pop();
     }
 }
