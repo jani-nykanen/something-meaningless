@@ -147,7 +147,6 @@ export class Stage {
 
     private parseObjects(map : Tilemap) {
 
-        let direction : number;
         let tid : number;
 
         for (let y = 0; y < map.height; ++ y) {
@@ -173,15 +172,8 @@ export class Stage {
                 // Moving platforms
                 case 5:
                 case 6:
-
-                    if (tid == 5) {
-
-                        direction = x % 2 == 0 ? Direction.Left : Direction.Right;
-                    }
-                    else {
-
-                        direction = y % 2 == 0 ? Direction.Up : Direction.Down;
-                    }
+                case 7:
+                case 8:
 
                     this.movingPlatforms.push(
                         new MovingPlatform(x, y,
@@ -189,19 +181,19 @@ export class Stage {
                             this.meshBuilder.getMesh(StageMesh.MovingPlatformTop),
                             this.meshBuilder.getMesh(StageMesh.MovingPlatformShadow),
                             this.meshBuilder.getMesh(StageMesh.MovingPlatformArrow),
-                            TURN_TIME, direction, tid));
+                            TURN_TIME, tid - 5));
                     break;
     
                 // Togglable platforms
-                case 7:
-                case 8:
+                case 9:
+                case 10:
 
                     this.togglablePlatforms.push(
                         new TogglableTile(x, y,
                             this.meshBuilder.getMesh(StageMesh.TogglableTileBottom),
                             this.meshBuilder.getMesh(StageMesh.TogglableTileTop),
                             this.meshBuilder.getMesh(StageMesh.TogglableTileShadow),
-                            tid == 7, TURN_TIME));        
+                            tid == 9, TURN_TIME));        
                     break;
 
                 default:
@@ -350,13 +342,13 @@ export class Stage {
             switch (tid) {
    
             // Button
-            case 10:
+            case 12:
 
                 this.drawButton(canvas, x, y, StageMesh.ButtonDown);
                 break;
 
             // Floor star
-            case 11:
+            case 13:
 
                 this.drawFloorStar(canvas, x, y);
                 break;
@@ -377,7 +369,7 @@ export class Stage {
             switch (tid) {
 
             // Button
-            case 9:
+            case 11:
 
                 this.drawButton(canvas, x, y, StageMesh.ButtonUp);
 
@@ -397,7 +389,7 @@ export class Stage {
             switch (tid) {
 
             // Button
-            case 9:
+            case 11:
 
                 this.drawButton(canvas, x, y, StageMesh.ButtonShadow);
 
@@ -566,17 +558,19 @@ export class Stage {
         switch (tile) {
 
         case 1:
-        case 10:
+        case 12:
             return TileType.Floor;
 
         case 2:
         case 5:
         case 6:
         case 7:
+        case 8:
         case 9:
+        case 11:
             return TileType.Platform;
 
-        case 11:
+        case 13:
             return TileType.JumpTile;
 
         default:
@@ -631,7 +625,6 @@ export class Stage {
         this.killObjects(this.togglablePlatforms);
 
         let o : GameObject;
-        let direction : Direction;
         let tid : number;
 
         for (let y = 0; y < this.height; ++ y) {
@@ -654,32 +647,25 @@ export class Stage {
 
                 case 5:
                 case 6:
+                case 7:
+                case 8:
 
-                    if (tid == 5) {
-
-                        direction = x % 2 == 0 ? Direction.Left : Direction.Right;
-                    }
-                    else {
-
-                        direction = y % 2 == 0 ? Direction.Up : Direction.Down;
-                    }
-    
                     o = <GameObject> nextObject<MovingPlatform> (this.movingPlatforms);
                     // Should not happen
                     if (o == null)
                         break;
-                    (<MovingPlatform> o).recreate(x, y, direction, tid);
+                    (<MovingPlatform> o).recreate(x, y, tid - 5);
                     
                     break;
 
-                case 7:
-                case 8:
+                case 9:
+                case 10:
 
                     o = <GameObject> nextObject<TogglableTile> (this.togglablePlatforms);
                     // Should not happen
                     if (o == null)
                         break;
-                    (<TogglableTile> o).recreate(x, y, tid == 7);
+                    (<TogglableTile> o).recreate(x, y, tid == 10);
                     break;
     
                 default:
@@ -759,11 +745,11 @@ export class Stage {
         switch (this.getTile(0, x, y)) {
             
         // Button pressed
-        case 9:
+        case 11:
 
-            replaceInArray(this.activeLayers[0], 10, 9);
-            this.setTile(0, x, y, 10);
-            swapItemsInArray(this.activeLayers[0], 7, 8);
+            replaceInArray(this.activeLayers[0], 12, 11);
+            this.setTile(0, x, y, 12);
+            swapItemsInArray(this.activeLayers[0], 9, 10);
 
             for (let o of this.togglablePlatforms) {
 
@@ -775,7 +761,7 @@ export class Stage {
 
             return UnderlyingEffectType.Button;
 
-        case 11:
+        case 13:
             
             this.specialStarScale = 1.0;
 

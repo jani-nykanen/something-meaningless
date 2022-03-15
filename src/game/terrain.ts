@@ -19,7 +19,7 @@ const COLORS = [
 const OUTLINE_WIDTH = 0.025;
 
 
-const isFloorTile = (id : number) => [1, 9, 11].includes(id);
+const isFloorTile = (id : number) => [1, 11, 13].includes(id);
 
 
 const generateFloorMesh = (map : Tilemap, 
@@ -41,7 +41,7 @@ const generateFloorMesh = (map : Tilemap,
             if (!isFloorTile(tid)) continue;
 
             colorIndex = x % 2 == y % 2 ? 1 : 0;
-            if (tid == 11)
+            if (tid == 13)
                 colorIndex += 2;
 
             gen.addRectangle(
@@ -129,7 +129,7 @@ const generateWallMesh = (map : Tilemap,
                 continue;
 
             colorIndex = x % 2 == y % 2 ? 1 : 0;
-            if (tid == 11)
+            if (tid == 13)
                 colorIndex += 2;
 
             gen.addRectangle(

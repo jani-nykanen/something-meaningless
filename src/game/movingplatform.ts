@@ -9,15 +9,15 @@ import { Stage } from "./stage.js";
 
 export const enum Direction {
 
-    Left = 0,
-    Right = 1,
-    Up = 2,
+    Right = 0,
+    Up = 1,
+    Left = 2,
     Down = 3
 };
 
 
 const oppositeDirection = (dir : Direction) => 
-    [Direction.Right, Direction.Left, Direction.Down, Direction.Up] [dir];
+    [Direction.Left, Direction.Down, Direction.Right, Direction.Up] [dir];
 
 
 export class MovingPlatform extends PlatformObject {
@@ -29,14 +29,11 @@ export class MovingPlatform extends PlatformObject {
 
     private movementChecked : boolean;
 
-    private id : number;
-
 
     constructor(x : number, y : number,
         meshBottom : Mesh, meshTop : Mesh, 
         meshShadow : Mesh, meshArrow : Mesh,
-        moveTime : number, direction : Direction,
-        id : number) {
+        moveTime : number, direction : Direction) {
 
         super(x, y, meshBottom, meshTop, meshShadow);
 
@@ -48,12 +45,10 @@ export class MovingPlatform extends PlatformObject {
         this.direction = direction;
 
         this.movementChecked = false;
-
-        this.id = id;
     }
 
 
-    public recreate(x : number, y : number, direction : Direction, id : number) {
+    public recreate(x : number, y : number, direction : Direction) {
 
         this.pos.x = x;
         this.pos.y = y;
@@ -66,7 +61,6 @@ export class MovingPlatform extends PlatformObject {
         this.movementChecked = false;
 
         this.direction = direction;
-        this.id = id;
 
         this.exist = true;
     }
@@ -74,8 +68,8 @@ export class MovingPlatform extends PlatformObject {
 
     private checkMovement(stage : Stage, event : CoreEvent) {
 
-        const DIRX = [-1, 1, 0, 0];
-        const DIRY = [0, 0, -1, 1];
+        const DIRX = [1, 0, -1, 0];
+        const DIRY = [0, -1, 0, 1];
 
         let dirx = DIRX[this.direction];
         let diry = DIRY[this.direction];
@@ -105,7 +99,7 @@ export class MovingPlatform extends PlatformObject {
         this.moving = true;
 
         stage.setTile(0, px, py, 0);
-        stage.setTile(0, px + dirx, py + diry, this.id);
+        stage.setTile(0, px + dirx, py + diry, this.direction + 5);
     }
 
 
@@ -146,7 +140,7 @@ export class MovingPlatform extends PlatformObject {
 
     public drawTop(canvas : Canvas, tileWidth : number, tileHeight : number) {
 
-        const ANGLE = [1, -1, 2, 0];
+        const ANGLE = [-1, 2, 1, 0];
 
         if (!this.exist) return;
 
