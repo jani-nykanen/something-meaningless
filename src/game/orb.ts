@@ -50,12 +50,18 @@ export class Orb extends GameObject {
         let px = this.pos.x | 0;
         let py = this.pos.y | 0;
 
+        let p = player.getPosition();
+
+        p.x |= 0;
+        p.y |= 0;
+
         if (!player.isMoving() &&
             stage.getTile(1, px, py) != 4) {
 
             this.exist = false;
 
             stage.spawnStars(this.pos.x, this.pos.y - 0.20, 6);
+            stage.recomputeOrbs();
         }
 
         this.wave = (this.wave + WAVE_SPEED * event.step) % (Math.PI*2);

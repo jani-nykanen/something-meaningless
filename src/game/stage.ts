@@ -10,7 +10,7 @@ import { Player } from "./player.js";
 import { StageMesh, StageMeshBuilder } from "./stagemeshbuilder.js";
 import { StarGenerator } from "./stargenerator.js";
 import { Terrain } from "./terrain.js";
-import { Direction, MovingPlatform } from "./movingplatform.js";
+import { MovingPlatform } from "./movingplatform.js";
 import { TogglableTile } from "./togglabletile.js";
 
 
@@ -99,7 +99,10 @@ export class Stage {
     private starAnimationTimer : number;
     private specialStarScale : number;
 
-    private readonly baseMap : Tilemap;
+    private orbsLeft : number;
+
+    private baseMap : Tilemap;
+    private stageIndex : number;
     
 
     constructor(event : CoreEvent, index : number) {
@@ -114,6 +117,7 @@ export class Stage {
 
         let map = event.assets.getTilemap(String(index));
 
+        this.stageIndex = index;
         this.baseMap = map;
 
         this.width = map.width;
@@ -138,10 +142,54 @@ export class Stage {
         let outlineScale = 1.0 + (this.height-4) * 0.1; // TODO: Compute elsewhere
 
         this.terrain = new Terrain(map, TILE_WIDTH, TILE_HEIGHT, outlineScale, event);
-        this.meshBuilder = new StageMeshBuilder(TILE_WIDTH, TILE_HEIGHT, outlineScale, event);
+        this.meshBuilder = new StageMeshBuilder(TILE_WIDTH, TILE_HEIGHT, event);
         this.starGen = new StarGenerator(event);
 
         this.parseObjects(map);
+        this.recomputeOrbs();
+    }
+
+
+    public nextStage(event : CoreEvent) {
+
+        this.shrinkingPlatforms.length = 0;
+        this.movingPlatforms.length = 0;
+        this.togglablePlatforms.length = 0;
+        this.orbs.length = 0;
+
+        this.objectBuffer.flush();
+
+        ++ this.stageIndex;
+        this.baseMap = event.assets.getTilemap(String(this.stageIndex));
+
+        this.width = this.baseMap.width;
+        this.height = this.baseMap.height;
+
+        this.waitTimer = 0.0;
+        this.waiting = false;
+
+        this.starAnimationTimer = 0.0;
+        this.specialStarScale = 0.0;
+
+        this.activeLayers = null;
+        this.activeLayers = this.baseMap.cloneLayers();
+
+        this.stateBuffer = null;
+        this.stateBuffer = new Array<Array<Array<number>>> (STATE_BUFFER_SIZE);
+        for (let i = 0; i < this.stateBuffer.length; ++ i) {
+
+            this.stateBuffer[i] = new Array<Array<number>> (2);
+        }
+        this.stateBufferPointer = 0;
+        this.stateBufferLength = 0;
+
+        let outlineScale = 1.0 + (this.height-4) * 0.1; // TODO: Compute elsewhere
+
+        this.terrain.dispose(event);
+        this.terrain = new Terrain(this.baseMap, TILE_WIDTH, TILE_HEIGHT, outlineScale, event);
+
+        this.parseObjects(this.baseMap);
+        this.recomputeOrbs();
     }
 
 
@@ -223,15 +271,27 @@ export class Stage {
             }
         }
     }
-    
 
 
-    public update(event : CoreEvent) {
+    private animate(event : CoreEvent) {
 
         const STAR_ANIMATION_SPEED = 1.0 / 30.0;
         const STAR_SPECIAL_SCALE_SPEED = 1.0 / TURN_TIME;
 
         this.starGen.update(event);
+
+        this.starAnimationTimer = (this.starAnimationTimer + STAR_ANIMATION_SPEED * event.step) % 1.0;
+        if (this.specialStarScale) {
+
+            this.specialStarScale = Math.max(0.0,
+                this.specialStarScale - STAR_SPECIAL_SCALE_SPEED*event.step);
+        }
+    }
+
+
+    public update(event : CoreEvent, updatePlayer = true) {
+
+        this.animate(event);
 
         for (let o of this.shrinkingPlatforms) {
 
@@ -260,16 +320,14 @@ export class Stage {
                 this.waiting = false;
             }
         }
-        else {
-        
+
+        if (updatePlayer && !this.waiting) {
+
             this.player.update(this, event);
         }
+        else {
 
-        this.starAnimationTimer = (this.starAnimationTimer + STAR_ANIMATION_SPEED * event.step) % 1.0;
-        if (this.specialStarScale) {
-
-            this.specialStarScale = Math.max(0.0,
-                this.specialStarScale - STAR_SPECIAL_SCALE_SPEED*event.step);
+            this.player.animate(event);
         }
     }
 
@@ -310,7 +368,13 @@ export class Stage {
         const COUNT = 3;
 
         let t : number;
-        let baseScale = 1.0 + this.specialStarScale;
+        let baseScale = 1.0;
+
+        let p = this.player.getPosition();
+        if ((x | 0) == (p.x | 0) && (y | 0) == (p.y | 0)) {
+
+            baseScale += this.specialStarScale;
+        }
 
         for (let i = 0; i < COUNT; ++ i) {
 
@@ -318,11 +382,11 @@ export class Stage {
 
             canvas.transform
                 .push()
-                .translate(x, y - TILE_HEIGHT)
+                .translate(x * TILE_WIDTH, y * TILE_HEIGHT)
                 .scale(baseScale * MAX_SCALE * t, baseScale * MAX_SCALE * t)
                 .use();
 
-            canvas.setColor(0.0, 0.33, 1.0, Math.sin((1.0 - t) * Math.PI/2));
+            canvas.setColor(1.0, 1.0, 0.67, Math.sin((1.0 - t) * Math.PI/2));
 
             canvas.drawMesh(this.meshBuilder.getMesh(StageMesh.FloorStar));
 
@@ -330,6 +394,7 @@ export class Stage {
                 .pop()
                 .use();
         }
+        canvas.setColor();
     }
 
 
@@ -491,7 +556,7 @@ export class Stage {
     }
 
 
-    public draw(canvas : Canvas) {
+    public draw(canvas : Canvas, scaleOut = 1.0) {
 
         this.objectBuffer.flush();
         this.objectBuffer.addObject(this.player);
@@ -501,7 +566,7 @@ export class Stage {
         let scaleFactor = (this.height + 2.5) * TILE_HEIGHT;
 
         canvas.transform
-            .fitGivenDimension(scaleFactor, canvas.width/canvas.height)
+            .fitGivenDimension(scaleFactor * scaleOut, canvas.width/canvas.height)
             .use();
 
         let view = canvas.transform.getViewport();
@@ -665,7 +730,7 @@ export class Stage {
                     // Should not happen
                     if (o == null)
                         break;
-                    (<TogglableTile> o).recreate(x, y, tid == 10);
+                    (<TogglableTile> o).recreate(x, y, tid == 9);
                     break;
     
                 default:
@@ -720,6 +785,19 @@ export class Stage {
         this.activeLayers = this.baseMap.cloneLayers();
 
         this.resetObjects();
+    }
+
+
+    public recomputeOrbs() {
+
+        this.orbsLeft = 0;
+        for (let a of this.activeLayers[1]) {
+
+            if (a == 4) {
+
+                ++ this.orbsLeft;
+            }
+        }
     }
 
 
@@ -778,5 +856,17 @@ export class Stage {
     public popState() {
 
         this.stateBuffer.pop();
+    }
+
+
+    public isCleared() : boolean {
+
+        return this.orbsLeft == 0;
+    }
+
+
+    public stopPlayerAnimation() {
+
+        this.player.stopAnimation();
     }
 }

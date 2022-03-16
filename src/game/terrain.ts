@@ -6,13 +6,15 @@ import { RGBA, Vector2 } from "../core/vector.js";
 import { ShapeGenerator } from "./shapegenerator.js";
 
 
+const JUMP_FLOOR_COLOR = new RGBA(0.80, 0.33, 0.10);
+
 
 const COLORS = [
     new RGBA(0.95, 0.70, 0.33),
     new RGBA(1.0, 0.925, 0.67),
 
-    new RGBA(0.45, 0.75, 0.20),
-    new RGBA(0.75, 1.0, 0.33),
+    JUMP_FLOOR_COLOR,
+    JUMP_FLOOR_COLOR,
 ];
 
 
@@ -281,5 +283,13 @@ export class Terrain {
     public drawTop(canvas : Canvas) {
 
         canvas.drawMesh(this.meshFloor);
+    }
+
+
+    public dispose(event : CoreEvent) {
+
+        event.disposeMesh(this.meshFloor);
+        event.disposeMesh(this.meshShadows);
+        event.disposeMesh(this.meshWalls);
     }
 }

@@ -206,7 +206,7 @@ export class Player extends MovingObject {
     }
 
 
-    private animate(event : CoreEvent) {
+    public animate(event : CoreEvent) {
 
         let bodyRotationSpeed = Math.PI / this.moveTime;
 
@@ -311,6 +311,12 @@ export class Player extends MovingObject {
 
     public setPosition(x : number, y : number, reset = true) {
 
+        if (reset) {
+
+            this.recreate(x, y);
+            return;
+        }
+
         this.pos = new Vector2(x, y);
         this.target = this.pos.clone();
         this.renderPos = this.pos.clone();
@@ -331,4 +337,9 @@ export class Player extends MovingObject {
 
     public isMoving = () : boolean => this.moving;
 
+
+    public stopAnimation() {
+
+        this.moving = false;
+    }
 }

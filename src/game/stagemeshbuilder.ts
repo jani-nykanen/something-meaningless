@@ -43,14 +43,10 @@ export class StageMeshBuilder {
 
     private meshes : Array<Mesh>;
 
-    private outlineScale : number;
 
-
-    constructor(tileWidth : number, tileHeight : number, outlineScale : number, event : CoreEvent) {
+    constructor(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         this.meshes = new Array<Mesh> (STAGE_MESH_COUNT);
-
-        this.outlineScale = outlineScale;
 
         this.generateMeshes(tileWidth, tileHeight, event);
     }
@@ -107,12 +103,6 @@ export class StageMeshBuilder {
         const PLATFORM_QUALITY = 32;
         const PLATFORM_COLOR_1 = new RGBA(0.70, 0.33, 0);
         const PLATFORM_COLOR_2 = new RGBA(1.0, 0.67, 0.33);
-        
-        /*
-        const CROSS_WIDTH = 0.20;
-        const CROSS_HEIGHT = 0.80;
-        const CROSS_COLOR = new RGBA(0.33, 0, 0);
-        */
 
         const SHADOW_OFFSET_X = 0.15;
         const SHADOW_OFFSET_Y = 0.15;
@@ -206,7 +196,7 @@ export class StageMeshBuilder {
         const BOTTOM_COLOR_2 = new RGBA(0.50, 0.25, 0.80);
         const BOTTOM_COLOR_3 = new RGBA(0.1, 0.0, 0.33);
         const TOP_COLOR = new RGBA(0.90, 0.60, 1.0);
-        const ARROW_COLOR = new RGBA(0.05, 0.0, 0.1);
+        const ARROW_COLOR = new RGBA(0.2, 0.0, 0.4);
 
         let dw = PLATFORM_SCALE * tileWidth;
         let dh = PLATFORM_SCALE * tileHeight;
@@ -280,7 +270,7 @@ export class StageMeshBuilder {
         let dw = BASE_SCALE * tileWidth;
         let dh = BASE_SCALE * tileHeight;
 
-        let ow = this.outlineScale * BASE_OUTLINE_WIDTH;
+        let ow = BASE_OUTLINE_WIDTH;
 
         this.meshes[StageMesh.TogglableTileTop] = (new ShapeGenerator())
             .addRectangle(dx, dy, dw, dh, COLOR_1)
@@ -363,7 +353,7 @@ export class StageMeshBuilder {
         const COLOR_1 = new RGBA(1.0, 0.55, 0.80);
         const COLOR_2 = new RGBA(0.67, 0.15, 0.40);
 
-        let ow = BASE_OUTLINE_WIDTH * this.outlineScale;
+        let ow = BASE_OUTLINE_WIDTH;
 
         this.meshes[StageMesh.ButtonDown] = (new ShapeGenerator())
             .addEllipse(0, 0, RADIUS*2, 

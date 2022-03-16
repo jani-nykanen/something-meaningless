@@ -14,7 +14,7 @@ export class TransitionEffectManager {
 
 
     private timer : number;
-    private fadeIn : boolean;
+    private fadeOut : boolean;
     private effectType : TransitionEffectType;
     private color : RGBA;
     private active : boolean;
@@ -26,7 +26,7 @@ export class TransitionEffectManager {
     constructor() {
 
         this.timer = 0;
-        this.fadeIn = false;
+        this.fadeOut = false;
         this.effectType = TransitionEffectType.None;
         this.color = new RGBA();
         this.active = false;
@@ -36,10 +36,10 @@ export class TransitionEffectManager {
     }
 
 
-    public activate(fadeIn : boolean, type : TransitionEffectType, speed : number, 
+    public activate(fadeOut : boolean, type : TransitionEffectType, speed : number, 
         callback : (event : CoreEvent) => any, color = new RGBA()) : TransitionEffectManager {
 
-        this.fadeIn = fadeIn;
+        this.fadeOut = fadeOut;
         this.speed = speed;
         this.timer = 1.0;
         this.callback = callback;
@@ -58,8 +58,8 @@ export class TransitionEffectManager {
 
         if ((this.timer -= this.speed * ev.step) <= 0) {
 
-            this.fadeIn = !this.fadeIn;
-            if (!this.fadeIn) {
+            this.fadeOut = !this.fadeOut;
+            if (!this.fadeOut) {
 
                 this.timer += 1.0;
                 this.callback(ev);
@@ -86,7 +86,7 @@ export class TransitionEffectManager {
             .use();
 
         let t = this.timer;
-        if (this.fadeIn)
+        if (this.fadeOut)
             t = 1.0 - t;
 
         switch (this.effectType) {
@@ -108,7 +108,7 @@ export class TransitionEffectManager {
     public isActive = () : boolean => this.active;
     public getSpeed = () : number => this.speed;
     public getTime = () : number => this.timer;
-    public isFadingIn = () : boolean => this.fadeIn;
+    public isFadingOut = () : boolean => this.fadeOut;
 
 
     public deactivate() {
