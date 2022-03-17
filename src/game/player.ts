@@ -6,6 +6,7 @@ import { PlayerAnimator } from "./animator.js";
 import { MovingObject } from "./gameobject.js";
 import { ShapeGenerator } from "./shapegenerator.js";
 import { Stage, TileType, UnderlyingEffectType } from "./stage.js";
+import { Direction } from "./types.js";
 
 
 export class Player extends MovingObject {
@@ -23,6 +24,7 @@ export class Player extends MovingObject {
     private jumpHeight : number;
 
     private moveDir : Vector2;
+    private automaticMovement : boolean;
 
 
     constructor(x : number, y : number, moveTime : number, event : CoreEvent) {
@@ -48,6 +50,7 @@ export class Player extends MovingObject {
         this.jumpHeight = 1.0;
 
         this.moveDir = new Vector2();
+        this.automaticMovement = false;
     }
 
     
@@ -81,7 +84,9 @@ export class Player extends MovingObject {
     }
 
 
-    private moveTo(dirx : number, diry : number, stage : Stage, event : CoreEvent, forceJump = false) {
+    private moveTo(dirx : number, diry : number, 
+        stage : Stage, event : CoreEvent, 
+        forceJump = false, doNotStoreState = false) {
 
         let px = this.pos.x | 0;
         let py = this.pos.y | 0;
@@ -144,7 +149,7 @@ export class Player extends MovingObject {
         this.moveTimer = this.moveTime;
 
         // To avoid cases where the player is standing on a "jump tile"
-        if (!forceJump) {
+        if (!doNotStoreState) {
 
             // Store state before updating tiles
             stage.storeState();
@@ -165,11 +170,12 @@ export class Player extends MovingObject {
         if (this.moving) return;
 
         let stick = event.input.getStick();
-        if (stick.length() < MOVE_EPS)
-            return;
 
         let dirx = 0;
         let diry = 0;
+
+        if (stick.length() < MOVE_EPS)
+            return;
 
         if (Math.abs(stick.x) > Math.abs(stick.y)) {
 
@@ -179,10 +185,35 @@ export class Player extends MovingObject {
 
             diry = Math.sign(stick.y) | 0;
         }
-
+        
         if (dirx != 0 || diry != 0) {
 
+            this.automaticMovement = false;
             this.moveTo(dirx, diry, stage, event);
+        }
+    }
+
+
+    private checkAutomaticMovement(stage : Stage, event : CoreEvent) {
+
+        const DIR_X = [1, 0, -1, 0];
+        const DIR_Y = [0, -1, 0, 1];
+
+        let dirx = 0;
+        let diry = 0;
+
+        let automaticDir = stage.checkAutomaticMovement(this.pos.x | 0, this.pos.y | 0);
+        if (automaticDir != Direction.None) {
+
+            dirx = DIR_X[automaticDir];
+            diry = DIR_Y[automaticDir];
+
+            if (dirx != 0 || diry != 0) {
+
+                this.moveTo(dirx, diry, stage, event, false, true);
+                if (this.moving)
+                    this.automaticMovement = true;
+            }
         }
     }
 
@@ -195,7 +226,8 @@ export class Player extends MovingObject {
 
         case UnderlyingEffectType.JumpTile:
 
-            this.moveTo(this.moveDir.x, this.moveDir.y, stage, event, true);
+            this.automaticMovement = false;
+            this.moveTo(this.moveDir.x, this.moveDir.y, stage, event, true, true);
             break;
 
         default:
@@ -203,6 +235,11 @@ export class Player extends MovingObject {
         }
 
         this.rotationPhase = this.rotationPhase == 1 ? 0 : 1;
+
+        if (!this.moving) {
+
+            this.checkAutomaticMovement(stage, event);
+        }
     }
 
 
@@ -210,7 +247,7 @@ export class Player extends MovingObject {
 
         let bodyRotationSpeed = Math.PI / this.moveTime;
 
-        if (!this.moving) {
+        if (!this.moving || (this.automaticMovement && !this.jumping)) {
 
             this.animator.setEyeTarget(new Vector2());
             this.bodyAngle = 0;

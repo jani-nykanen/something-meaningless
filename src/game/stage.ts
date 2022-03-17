@@ -10,9 +10,10 @@ import { Player } from "./player.js";
 import { StageMesh, StageMeshBuilder } from "./stagemeshbuilder.js";
 import { StarGenerator } from "./stargenerator.js";
 import { Terrain } from "./terrain.js";
-import { Direction, MovingPlatform } from "./movingplatform.js";
+import { MovingPlatform } from "./movingplatform.js";
 import { TogglableTile } from "./togglabletile.js";
 import { RGBA, Vector3 } from "../core/vector.js";
+import { Direction } from "./types.js";
 
 
 const TURN_TIME = 15;
@@ -410,8 +411,8 @@ export class Stage {
         const OFFSET = 0.20;
         const ANGLE = [3, 2, 1, 0];
 
-        const COLOR_1 = new Vector3(0.10, 0.40, 0);
-        const COLOR_2 = new Vector3(0.33, 1.0, 0);
+        const COLOR_1 = new Vector3(0.0, 0.33, 0.67);
+        const COLOR_2 = new Vector3(0.10, 0.60, 0.90);
 
         canvas.transform
             .push()
@@ -423,7 +424,6 @@ export class Stage {
         let t : number;
         let col : Vector3;
 
-        let j = 0;
         for (let i = -1; i <= 1; i += 2) {
 
             t = (this.arrowAnimationTimer + (i + 1.0)/2.0 * 0.5) % 1.0;            
@@ -444,6 +444,8 @@ export class Stage {
         canvas.transform   
             .pop()
             .use();
+
+        canvas.setColor();
     }
 
 
@@ -937,5 +939,16 @@ export class Stage {
     public stopPlayerAnimation() {
 
         this.player.stopAnimation();
+    }
+
+
+    public checkAutomaticMovement(x : number, y : number) : Direction {
+
+        let tid = this.getTile(0, x, y);
+        if (tid >= 17 && tid <= 21) {
+
+            return tid - 17;
+        }
+        return Direction.None;
     }
 }

@@ -5,15 +5,7 @@ import { Vector2 } from "../core/vector.js";
 import { MovingObject, PlatformObject } from "./gameobject.js";
 import { Player } from "./player.js";
 import { Stage } from "./stage.js";
-
-
-export const enum Direction {
-
-    Right = 0,
-    Up = 1,
-    Left = 2,
-    Down = 3
-};
+import { Direction } from "./types.js";
 
 
 const oppositeDirection = (dir : Direction) => 

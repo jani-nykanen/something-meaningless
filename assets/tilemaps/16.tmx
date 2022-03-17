@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.8" tiledversion="1.8.1" orientation="orthogonal" renderorder="right-down" width="4" height="4" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="1">
+ <tileset firstgid="1" source="../../tiled/editor_tiles.tsx"/>
+ <layer id="1" name="bottom" width="4" height="4">
+  <data encoding="csv">
+11,2,0,1,
+17,1,20,20,
+17,13,0,1,
+11,0,10,9
+</data>
+ </layer>
+ <layer id="2" name="top" width="4" height="4">
+  <data encoding="csv">
+0,0,0,3,
+0,0,0,0,
+0,0,0,0,
+0,0,4,4
+</data>
+ </layer>
+</map>
