@@ -3,16 +3,16 @@
  <tileset firstgid="1" source="../../tiled/editor_tiles.tsx"/>
  <layer id="1" name="bottom" width="4" height="3">
   <data encoding="csv">
-0,1,0,2,
-1,13,0,1,
-0,2,0,0
+2,0,1,0,
+1,0,13,1,
+0,0,2,0
 </data>
  </layer>
  <layer id="2" name="top" width="4" height="3">
   <data encoding="csv">
 0,0,0,0,
-3,0,0,0,
-0,4,0,0
+0,0,0,3,
+0,0,4,0
 </data>
  </layer>
 </map>

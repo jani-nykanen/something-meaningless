@@ -386,7 +386,7 @@ export class Stage {
                 .scale(baseScale * MAX_SCALE * t, baseScale * MAX_SCALE * t)
                 .use();
 
-            canvas.setColor(1.0, 1.0, 0.67, Math.sin((1.0 - t) * Math.PI/2));
+            canvas.setColor(1.0, 1.0, 0.20, Math.sin((1.0 - t) * Math.PI/2));
 
             canvas.drawMesh(this.meshBuilder.getMesh(StageMesh.FloorStar));
 
@@ -818,7 +818,7 @@ export class Stage {
     }
 
 
-    public checkUnderlyingTiles(x : number, y : number, isPlayer = true) : UnderlyingEffectType {
+    public checkUnderlyingTiles(x : number, y : number, event : CoreEvent) : UnderlyingEffectType {
 
         switch (this.getTile(0, x, y)) {
             
@@ -841,6 +841,13 @@ export class Stage {
 
         case 13:
             
+            // To avoid certain bugs
+            this.player.stopMoving();
+            for (let o of this.orbs) {
+
+                o.update(this.player, this, event);
+            }
+
             this.specialStarScale = 1.0;
 
             return UnderlyingEffectType.JumpTile;

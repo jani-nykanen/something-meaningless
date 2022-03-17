@@ -189,7 +189,7 @@ export class Player extends MovingObject {
 
     protected stopMovementEvent(stage : Stage, event : CoreEvent) {
         
-        let effect = stage.checkUnderlyingTiles(this.pos.x | 0, this.pos.y | 0);
+        let effect = stage.checkUnderlyingTiles(this.pos.x | 0, this.pos.y | 0, event);
         
         switch (effect) {
 
@@ -339,6 +339,12 @@ export class Player extends MovingObject {
 
 
     public stopAnimation() {
+
+        this.moving = false;
+    }
+
+
+    public stopMoving() {
 
         this.moving = false;
     }

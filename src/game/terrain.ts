@@ -6,12 +6,12 @@ import { RGBA, Vector2 } from "../core/vector.js";
 import { ShapeGenerator } from "./shapegenerator.js";
 
 
-const JUMP_FLOOR_COLOR = new RGBA(0.80, 0.33, 0.10);
+const JUMP_FLOOR_COLOR = new RGBA(0.90, 0.40, 0.15);
 
 
 const COLORS = [
-    new RGBA(0.95, 0.70, 0.33),
-    new RGBA(1.0, 0.925, 0.67),
+    new RGBA(0.95, 0.70, 0.40),
+    new RGBA(1.0, 0.95, 0.67),
 
     JUMP_FLOOR_COLOR,
     JUMP_FLOOR_COLOR,

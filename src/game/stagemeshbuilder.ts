@@ -56,7 +56,7 @@ export class StageMeshBuilder {
         tileWidth : number, tileHeight : number,
         baseScale : number, tx = 0.0, ty = 0.0) {
 
-        const COLOR = new RGBA(0.33, 0.0, 0.0);
+        const COLOR = new RGBA(0.33, 0.10, 0.05);
 
         const RADIUS = 0.35;
         const WIDTH = 0.15;
@@ -101,8 +101,8 @@ export class StageMeshBuilder {
     private generatePlatformMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         const PLATFORM_QUALITY = 32;
-        const PLATFORM_COLOR_1 = new RGBA(0.70, 0.33, 0);
-        const PLATFORM_COLOR_2 = new RGBA(1.0, 0.67, 0.33);
+        const PLATFORM_COLOR_1 = new RGBA(0.50, 0.40, 0.30);
+        const PLATFORM_COLOR_2 = new RGBA(0.90, 0.80, 0.60);
 
         const SHADOW_OFFSET_X = 0.15;
         const SHADOW_OFFSET_Y = 0.15;
