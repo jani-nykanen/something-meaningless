@@ -10,8 +10,9 @@ import { Player } from "./player.js";
 import { StageMesh, StageMeshBuilder } from "./stagemeshbuilder.js";
 import { StarGenerator } from "./stargenerator.js";
 import { Terrain } from "./terrain.js";
-import { MovingPlatform } from "./movingplatform.js";
+import { Direction, MovingPlatform } from "./movingplatform.js";
 import { TogglableTile } from "./togglabletile.js";
+import { RGBA, Vector3 } from "../core/vector.js";
 
 
 const TURN_TIME = 15;
@@ -98,6 +99,7 @@ export class Stage {
 
     private starAnimationTimer : number;
     private specialStarScale : number;
+    private arrowAnimationTimer : number;
 
     private orbsLeft : number;
 
@@ -128,6 +130,7 @@ export class Stage {
 
         this.starAnimationTimer = 0.0;
         this.specialStarScale = 0.0;
+        this.arrowAnimationTimer = 0.0;
 
         this.activeLayers = map.cloneLayers();
 
@@ -170,6 +173,7 @@ export class Stage {
 
         this.starAnimationTimer = 0.0;
         this.specialStarScale = 0.0;
+        this.arrowAnimationTimer = 0.0;
 
         this.activeLayers = null;
         this.activeLayers = this.baseMap.cloneLayers();
@@ -277,6 +281,7 @@ export class Stage {
 
         const STAR_ANIMATION_SPEED = 1.0 / 30.0;
         const STAR_SPECIAL_SCALE_SPEED = 1.0 / TURN_TIME;
+        const ARROW_ANIM_SPEED = 0.025;
 
         this.starGen.update(event);
 
@@ -286,6 +291,8 @@ export class Stage {
             this.specialStarScale = Math.max(0.0,
                 this.specialStarScale - STAR_SPECIAL_SCALE_SPEED*event.step);
         }
+
+        this.arrowAnimationTimer = (this.arrowAnimationTimer + ARROW_ANIM_SPEED * event.step) % 1.0;
     }
 
 
@@ -398,6 +405,48 @@ export class Stage {
     }
 
 
+    private drawFloorArrow(canvas : Canvas, dir : Direction,  x : number, y : number) {
+
+        const OFFSET = 0.20;
+        const ANGLE = [3, 2, 1, 0];
+
+        const COLOR_1 = new Vector3(0.10, 0.40, 0);
+        const COLOR_2 = new Vector3(0.33, 1.0, 0);
+
+        canvas.transform
+            .push()
+            .translate(x * TILE_WIDTH, y * TILE_HEIGHT)
+            .scale(TILE_WIDTH, TILE_HEIGHT)
+            .rotate(ANGLE[dir] * Math.PI/2)
+            .use();
+
+        let t : number;
+        let col : Vector3;
+
+        let j = 0;
+        for (let i = -1; i <= 1; i += 2) {
+
+            t = (this.arrowAnimationTimer + (i + 1.0)/2.0 * 0.5) % 1.0;            
+
+            col = Vector3.interpolate(COLOR_1, COLOR_2, Math.sin(t * Math.PI));
+
+            canvas.transform
+                .push()
+                .translate(0, i * OFFSET)
+                .use();
+
+            canvas.setColor(col.x, col.y, col.z);
+            canvas.drawMesh(this.meshBuilder.getMesh(StageMesh.FlooArrow));
+
+            canvas.transform.pop();
+        }
+        
+        canvas.transform   
+            .pop()
+            .use();
+    }
+
+
     private drawStaticObjectsBottom(canvas : Canvas) {
 
         canvas.setColor();
@@ -416,6 +465,15 @@ export class Stage {
             case 13:
 
                 this.drawFloorStar(canvas, x, y);
+                break;
+
+            // Floor arrow
+            case 17:
+            case 18:
+            case 19:
+            case 20:
+
+                this.drawFloorArrow(canvas, tid-17, x, y);
                 break;
 
             default:
@@ -624,6 +682,10 @@ export class Stage {
 
         case 1:
         case 12:
+        case 17:
+        case 18:
+        case 19:
+        case 20:
             return TileType.Floor;
 
         case 2:

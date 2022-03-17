@@ -31,8 +31,9 @@ export const enum StageMesh {
     ButtonShadow = 14,
 
     FloorStar = 15,
+    FlooArrow = 16,
 };
-const STAGE_MESH_COUNT = 16;
+const STAGE_MESH_COUNT = 17;
 
 
 const PLATFORM_SCALE = 0.90;
@@ -56,7 +57,7 @@ export class StageMeshBuilder {
         tileWidth : number, tileHeight : number,
         baseScale : number, tx = 0.0, ty = 0.0) {
 
-        const COLOR = new RGBA(0.33, 0.10, 0.05);
+        const COLOR = new RGBA(0.40, 0.05, 0.0);
 
         const RADIUS = 0.35;
         const WIDTH = 0.15;
@@ -101,8 +102,8 @@ export class StageMeshBuilder {
     private generatePlatformMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         const PLATFORM_QUALITY = 32;
-        const PLATFORM_COLOR_1 = new RGBA(0.50, 0.40, 0.30);
-        const PLATFORM_COLOR_2 = new RGBA(0.90, 0.80, 0.60);
+        const PLATFORM_COLOR_1 = new RGBA(0.40, 0.167, 0.0);
+        const PLATFORM_COLOR_2 = new RGBA(0.85, 0.50, 0.10);
 
         const SHADOW_OFFSET_X = 0.15;
         const SHADOW_OFFSET_Y = 0.15;
@@ -405,6 +406,30 @@ export class StageMeshBuilder {
     }
 
 
+    private generateFloorArrow(event : CoreEvent) {
+
+        const WIDTH = 0.50;
+        const HEIGHT = 0.25;
+        const OUTLINE_WIDTH = 0.040;
+        const BG_COLOR = new RGBA(0.33);
+
+        this.meshes[StageMesh.FlooArrow] = (new ShapeGenerator())
+            .addTriangle(
+                new Vector2(-WIDTH/2 - OUTLINE_WIDTH, -HEIGHT/2),
+                new Vector2(WIDTH/2 + OUTLINE_WIDTH, -HEIGHT/2),
+                new Vector2(0, HEIGHT/2 + OUTLINE_WIDTH),
+                BG_COLOR)
+            .addRectangle(
+                -WIDTH/2 - OUTLINE_WIDTH, -HEIGHT/2 - OUTLINE_WIDTH*0.67, 
+                WIDTH + OUTLINE_WIDTH*2, OUTLINE_WIDTH*0.67, BG_COLOR)
+            .addTriangle(
+                new Vector2(-WIDTH/2, -HEIGHT/2),
+                new Vector2(WIDTH/2, -HEIGHT/2),
+                new Vector2(0, HEIGHT/2))
+            .constructMesh(event);
+    }
+
+
     private generateMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         this.generatePlatformMeshes(tileWidth, tileHeight, event);
@@ -413,6 +438,7 @@ export class StageMeshBuilder {
         this.generateTogglableTileMeshes(tileWidth, tileHeight, event);
         this.generateButton(tileHeight / tileWidth, event);
         this.generateFloorStar(tileWidth, tileHeight, event);
+        this.generateFloorArrow(event);
     }
 
 

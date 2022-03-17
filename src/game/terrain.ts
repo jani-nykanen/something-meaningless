@@ -6,7 +6,7 @@ import { RGBA, Vector2 } from "../core/vector.js";
 import { ShapeGenerator } from "./shapegenerator.js";
 
 
-const JUMP_FLOOR_COLOR = new RGBA(0.90, 0.40, 0.15);
+const JUMP_FLOOR_COLOR = new RGBA(0.50, 0.50, 0.50);
 
 
 const COLORS = [
@@ -21,7 +21,7 @@ const COLORS = [
 const OUTLINE_WIDTH = 0.025;
 
 
-const isFloorTile = (id : number) => [1, 11, 13].includes(id);
+const isFloorTile = (id : number) => [1, 11, 13, 17, 18, 19, 20].includes(id);
 
 
 const generateFloorMesh = (map : Tilemap, 

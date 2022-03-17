@@ -14,6 +14,7 @@
         {"name": "11", "path": "11.tmx"},
         {"name": "12", "path": "12.tmx"},
         {"name": "13", "path": "13.tmx"},
-        {"name": "14", "path": "14.tmx"}
+        {"name": "14", "path": "14.tmx"},
+        {"name": "15", "path": "15.tmx"}
     ]
 }
