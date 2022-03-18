@@ -102,6 +102,7 @@ export class Stage {
     private starAnimationTimer : number;
     private specialStarScale : number;
     private arrowAnimationTimer : number;
+    private arrowRotationTimer : number;
 
     private orbsLeft : number;
 
@@ -133,6 +134,7 @@ export class Stage {
         this.starAnimationTimer = 0.0;
         this.specialStarScale = 0.0;
         this.arrowAnimationTimer = 0.0;
+        this.arrowRotationTimer = 0.0;
 
         this.activeLayers = map.cloneLayers();
 
@@ -176,6 +178,7 @@ export class Stage {
         this.starAnimationTimer = 0.0;
         this.specialStarScale = 0.0;
         this.arrowAnimationTimer = 0.0;
+        this.arrowRotationTimer = 0.0;
 
         this.activeLayers = null;
         this.activeLayers = this.baseMap.cloneLayers();
@@ -284,6 +287,7 @@ export class Stage {
         const STAR_ANIMATION_SPEED = 1.0 / 30.0;
         const STAR_SPECIAL_SCALE_SPEED = 1.0 / TURN_TIME;
         const ARROW_ANIM_SPEED = 0.025;
+        const ARROW_ROTATION_SPEED = 1.0 / TURN_TIME;
 
         this.starGen.update(event);
 
@@ -295,6 +299,12 @@ export class Stage {
         }
 
         this.arrowAnimationTimer = (this.arrowAnimationTimer + ARROW_ANIM_SPEED * event.step) % 1.0;
+
+        if (this.arrowRotationTimer > 0) {
+
+            this.arrowRotationTimer = Math.max(0.0,
+                this.arrowRotationTimer - ARROW_ROTATION_SPEED*event.step);
+        }
     }
 
 
@@ -410,20 +420,23 @@ export class Stage {
     private drawFloorArrow(canvas : Canvas, dir : Direction,  x : number, y : number) {
 
         const OFFSET = 0.20;
-        const ANGLE = [3, 2, 1, 0];
+        const BASE_ANGLE = [3, 2, 1, 0];
 
         const COLOR_1 = new Vector3(0.0, 0.33, 0.67);
         const COLOR_2 = new Vector3(0.10, 0.60, 0.90);
+
+        let angle = BASE_ANGLE[dir] * Math.PI/2 + this.arrowRotationTimer * Math.PI;
 
         canvas.transform
             .push()
             .translate(x * TILE_WIDTH, y * TILE_HEIGHT)
             .scale(TILE_WIDTH, TILE_HEIGHT)
-            .rotate(ANGLE[dir] * Math.PI/2)
+            .rotate(angle)
             .use();
 
         let t : number;
         let col : Vector3;
+
 
         for (let i = -1; i <= 1; i += 2) {
 
@@ -458,7 +471,7 @@ export class Stage {
 
             switch (tid) {
    
-            // Button
+            // Button, purple
             case 12:
 
                 this.drawButton(canvas, x, y, StageMesh.ButtonDown);
@@ -468,6 +481,12 @@ export class Stage {
             case 13:
 
                 this.drawFloorStar(canvas, x, y);
+                break;
+
+            // Button, blue
+            case 15:
+                
+                this.drawButton(canvas, x, y, StageMesh.BlueButtonDown);
                 break;
 
             // Floor arrow
@@ -486,7 +505,7 @@ export class Stage {
     }
 
 
-    private drawStaticObjects(canvas : Canvas) {
+    private drawStaticObjectsTop(canvas : Canvas) {
 
         canvas.setColor();
 
@@ -494,11 +513,16 @@ export class Stage {
 
             switch (tid) {
 
-            // Button
+            // Button, purple
             case 11:
 
                 this.drawButton(canvas, x, y, StageMesh.ButtonUp);
+                break;
 
+            // Button, blue
+            case 14:
+
+                this.drawButton(canvas, x, y, StageMesh.BlueButtonUp);
                 break;
 
             default:
@@ -514,11 +538,16 @@ export class Stage {
 
             switch (tid) {
 
-            // Button
+            // Button, purple
             case 11:
 
                 this.drawButton(canvas, x, y, StageMesh.ButtonShadow);
+                break;
 
+            // Button, blue
+            case 14:
+
+                this.drawButton(canvas, x, y, StageMesh.BlueButtonShadow);
                 break;
 
             default:
@@ -659,7 +688,7 @@ export class Stage {
 
         canvas.toggleStencilTest(false);
 
-        this.drawStaticObjects(canvas);
+        this.drawStaticObjectsTop(canvas);
         this.objectBuffer.draw(canvas, TILE_WIDTH, TILE_HEIGHT);
 
         this.starGen.draw(canvas);
@@ -698,6 +727,7 @@ export class Stage {
         case 8:
         case 9:
         case 11:
+        case 14:
             return TileType.Platform;
 
         case 13:
@@ -887,7 +917,7 @@ export class Stage {
 
         switch (this.getTile(0, x, y)) {
             
-        // Button pressed
+        // Button pressed, purple
         case 11:
 
             replaceInArray(this.activeLayers[0], 12, 11);
@@ -916,6 +946,21 @@ export class Stage {
             this.specialStarScale = 1.0;
 
             return UnderlyingEffectType.JumpTile;
+
+        // Button pressed, purple
+        case 14:
+
+            replaceInArray(this.activeLayers[0], 15, 14);
+            this.setTile(0, x, y, 15);
+
+            swapItemsInArray(this.activeLayers[0], 17, 19);
+            swapItemsInArray(this.activeLayers[0], 18, 20);
+
+            this.waiting = true;
+            this.waitTimer = TURN_TIME;
+            this.arrowRotationTimer = 1.0;
+
+            return UnderlyingEffectType.Button;
 
         case 17:
         case 18:

@@ -32,8 +32,12 @@ export const enum StageMesh {
 
     FloorStar = 15,
     FlooArrow = 16,
+
+    BlueButtonUp = 17,
+    BlueButtonDown = 18,
+    BlueButtonShadow = 19,
 };
-const STAGE_MESH_COUNT = 17;
+const STAGE_MESH_COUNT = 20;
 
 
 const PLATFORM_SCALE = 0.90;
@@ -430,6 +434,103 @@ export class StageMeshBuilder {
     }
 
 
+    private generateBlueButton(ratio : number, event : CoreEvent) {
+
+        const BASE_OUTLINE_WIDTH = 0.033;
+
+        const RADIUS = 0.45;
+        const HEIGHT = 0.15;
+ 
+        const COLOR_1 = new RGBA(0.075, 0.40, 0.70);
+        const COLOR_2 = new RGBA(0.50, 0.80, 1.0);
+        const COLOR_3 = new RGBA(0.0, 0.10, 0.33);
+
+        const SHADOW_OFFSET_X = 0.05;
+        const SHADOW_OFFSET_Y = 0.05;
+
+        let rw = RADIUS;
+        let rh = RADIUS * ratio;
+
+        let ow = BASE_OUTLINE_WIDTH;
+        let dy = -HEIGHT;
+
+        this.meshes[StageMesh.BlueButtonUp] = (new ShapeGenerator())
+            .addTriangle(
+                new Vector2(0, dy - rh/2 - ow),
+                new Vector2(-rw/2 - ow, dy),
+                new Vector2(rw/2 + ow, dy),
+                BLACK)
+            .addRectangle(-rw/2 - ow, dy, rw + ow*2, -dy, BLACK)
+            .addTriangle(
+                new Vector2(0, rh/2 + ow),
+                new Vector2(-rw/2 - ow, 0),
+                new Vector2(rw/2 + ow, 0),
+                BLACK)
+            .addRectangle(-rw/2, dy, rw/2 + ow, -dy, COLOR_1)
+            .addTriangle(
+                new Vector2(0, rh/2),
+                new Vector2(-rw/2, 0),
+                new Vector2(0, 0),
+                COLOR_1)
+            .addRectangle(0, dy, rw/2, -dy, COLOR_3)
+            .addTriangle(
+                new Vector2(0, rh/2),
+                new Vector2(rw/2, 0),
+                new Vector2(0, 0),
+                COLOR_3)
+            .addTriangle(
+                new Vector2(0, dy - rh/2),
+                new Vector2(-rw/2, dy),
+                new Vector2(rw/2, dy),
+                COLOR_2)
+            .addTriangle(
+                new Vector2(0, dy + rh/2),
+                new Vector2(-rw/2, dy),
+                new Vector2(rw/2, dy),
+                COLOR_2)  
+            .constructMesh(event);
+
+        this.meshes[StageMesh.BlueButtonDown] = (new ShapeGenerator())
+            .addTriangle(
+                new Vector2(0, -rh/2 - ow),
+                new Vector2(-rw/2 - ow, 0),
+                new Vector2(rw/2 + ow, 0),
+                BLACK)
+            .addTriangle(
+                new Vector2(0, rh/2 + ow),
+                new Vector2(-rw/2 - ow, 0),
+                new Vector2(rw/2 + ow, 0),
+                BLACK)
+            .addTriangle(
+                new Vector2(0, -rh/2),
+                new Vector2(-rw/2, 0),
+                new Vector2(rw/2, 0),
+                COLOR_2)
+            .addTriangle(
+                new Vector2(0, rh/2),
+                new Vector2(-rw/2, 0),
+                new Vector2(rw/2, 0),
+                COLOR_2)
+            .constructMesh(event);
+
+        let sx = SHADOW_OFFSET_X;
+        let sy = SHADOW_OFFSET_Y * ratio;
+
+        this.meshes[StageMesh.BlueButtonShadow] = (new ShapeGenerator())
+            .addTriangle(
+                new Vector2(sx, sy - rh/2 - ow),
+                new Vector2(sx -rw/2 - ow, sy),
+                new Vector2(sx + rw/2 + ow, sy),
+                BLACK)
+            .addTriangle(
+                new Vector2(sx, sy + rh/2 + ow),
+                new Vector2(sx - rw/2 - ow, sy),
+                new Vector2(sx + rw/2 + ow, sy),
+                BLACK)
+            .constructMesh(event);
+    }
+
+
     private generateMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         this.generatePlatformMeshes(tileWidth, tileHeight, event);
@@ -439,6 +540,7 @@ export class StageMeshBuilder {
         this.generateButton(tileHeight / tileWidth, event);
         this.generateFloorStar(tileWidth, tileHeight, event);
         this.generateFloorArrow(event);
+        this.generateBlueButton(tileHeight / tileWidth, event);
     }
 
 

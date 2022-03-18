@@ -18,6 +18,7 @@
         {"name": "15", "path": "15.tmx"},
         {"name": "16", "path": "16.tmx"},
         {"name": "17", "path": "17.tmx"},
-        {"name": "18", "path": "18.tmx"}
+        {"name": "18", "path": "18.tmx"},
+        {"name": "19", "path": "19.tmx"}
     ]
 }
