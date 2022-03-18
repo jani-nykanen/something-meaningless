@@ -728,6 +728,7 @@ export class Stage {
         case 9:
         case 11:
         case 14:
+        case 15:
             return TileType.Platform;
 
         case 13:
