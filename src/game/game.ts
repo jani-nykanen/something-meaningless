@@ -13,6 +13,7 @@ export class GameScene implements Scene {
     private stage : Stage;
 
     private scaleOutFactor : number;
+    private fadingOut : boolean;
 
 
     constructor(param : any, event : CoreEvent) {
@@ -26,7 +27,9 @@ export class GameScene implements Scene {
         if (event.transition.isActive()) {
 
             this.scaleOutFactor = event.transition.getTime();
-            if (event.transition.isFadingOut()) {
+            this.fadingOut = event.transition.isFadingOut();
+
+            if (this.fadingOut) {
 
                 this.scaleOutFactor = 1.0 - this.scaleOutFactor;
             }
@@ -65,8 +68,15 @@ export class GameScene implements Scene {
     public redraw(canvas: Canvas) : void {
 
         const SCALE_OUT = 0.33;
+        const TRANSLATION = 0.25;
 
         let scaleOut = 1.0 + this.scaleOutFactor * SCALE_OUT;
+
+        let yoff = TRANSLATION * Math.pow(this.scaleOutFactor, 2);
+        if (!this.fadingOut) {
+
+            yoff *= -1;
+        }
 
         canvas.changeShader(ShaderType.NoTexture);
         canvas.resetVertexAndFragmentTransforms();
@@ -78,7 +88,7 @@ export class GameScene implements Scene {
 
         canvas.clear(0.33, 0.67, 1.0);
 
-        this.stage.draw(canvas, scaleOut);
+        this.stage.draw(canvas, scaleOut, yoff);
     }
 
     

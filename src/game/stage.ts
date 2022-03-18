@@ -39,7 +39,8 @@ export const enum UnderlyingEffectType {
 
     None = 0,
     Button = 1,
-    JumpTile = 2
+    JumpTile = 2,
+    AutomaticArrow = 3,
 };
 
 
@@ -616,7 +617,7 @@ export class Stage {
     }
 
 
-    public draw(canvas : Canvas, scaleOut = 1.0) {
+    public draw(canvas : Canvas, scaleOut = 1.0, yoff = 0.0) {
 
         this.objectBuffer.flush();
         this.objectBuffer.addObject(this.player);
@@ -633,7 +634,7 @@ export class Stage {
 
         canvas.transform
             .push()
-            .translate(view.x/2, view.y/2)
+            .translate(view.x/2, view.y/2 + scaleFactor * yoff)
             .translate(
                 -(this.width-1) * TILE_WIDTH/2, 
                 -(this.height-1) * TILE_HEIGHT/2 + TILE_HEIGHT/4)
@@ -915,6 +916,19 @@ export class Stage {
             this.specialStarScale = 1.0;
 
             return UnderlyingEffectType.JumpTile;
+
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+
+            // For the same reason as above
+            this.player.stopMoving();
+            for (let o of this.orbs) {
+
+                o.update(this.player, this, event);
+            }
+            break;
 
         default:
             break;
