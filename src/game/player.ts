@@ -26,6 +26,8 @@ export class Player extends MovingObject {
     private moveDir : Vector2;
     private automaticMovement : boolean;
 
+    private startedToMove : boolean;
+
 
     constructor(x : number, y : number, moveTime : number, event : CoreEvent) {
 
@@ -160,6 +162,8 @@ export class Player extends MovingObject {
         stage.setTile(1, px + dirx, py + diry, 3);
 
         this.moveDir = (new Vector2(dirx, diry)).normalize();
+
+        this.startedToMove = true;
     }
 
 
@@ -276,6 +280,8 @@ export class Player extends MovingObject {
 
     public update(stage : Stage, event : CoreEvent) {
 
+        this.startedToMove = false;
+
         this.control(stage, event);
         this.move(stage, event);
         this.animate(event);
@@ -373,6 +379,7 @@ export class Player extends MovingObject {
 
 
     public isMoving = () : boolean => this.moving;
+    public didStartToMove = () : boolean => this.startedToMove;
 
 
     public stopAnimation() {

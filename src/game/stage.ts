@@ -263,9 +263,9 @@ export class Stage {
 
                     this.switchingPlatforms.push(
                         new SwitchingPlatform(x, y,
-                            this.meshBuilder.getMesh(StageMesh.TogglableTileBottom),
-                            this.meshBuilder.getMesh(StageMesh.TogglableTileTop),
-                            this.meshBuilder.getMesh(StageMesh.TogglableTileShadow),
+                            this.meshBuilder.getMesh(StageMesh.SwitchingPlatformBottom),
+                            this.meshBuilder.getMesh(StageMesh.SwitchingPlatformTop),
+                            this.meshBuilder.getMesh(StageMesh.SwitchingPlatformShadow),
                             tid == 21, TURN_TIME));   
                     break;
 
@@ -813,6 +813,7 @@ export class Stage {
         this.killObjects(this.movingPlatforms);
         this.killObjects(this.orbs);
         this.killObjects(this.togglablePlatforms);
+        this.killObjects(this.switchingPlatforms);
 
         let o : GameObject;
         let tid : number;
@@ -856,6 +857,16 @@ export class Stage {
                     if (o == null)
                         break;
                     (<TogglableTile> o).recreate(x, y, tid == 9);
+                    break;
+
+                case 21:
+                case 22:
+
+                    o = <GameObject> nextObject<SwitchingPlatform> (this.switchingPlatforms);
+                    // Should not happen
+                    if (o == null)
+                        break;
+                    (<TogglableTile> o).recreate(x, y, tid == 21);
                     break;
     
                 default:

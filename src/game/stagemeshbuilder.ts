@@ -36,8 +36,12 @@ export const enum StageMesh {
     BlueButtonUp = 17,
     BlueButtonDown = 18,
     BlueButtonShadow = 19,
+
+    SwitchingPlatformBottom = 20,
+    SwitchingPlatformTop = 21,
+    SwitchingPlatformShadow = 22
 };
-const STAGE_MESH_COUNT = 20;
+const STAGE_MESH_COUNT = 23;
 
 
 const PLATFORM_SCALE = 0.90;
@@ -322,15 +326,10 @@ export class StageMeshBuilder {
 
         this.meshes[StageMesh.TogglableTileShadow] = (new ShapeGenerator())
             .addRectangle(
-                dx - ow, 
-                dy - ow, 
-                dw + ow*2, 
-                dh + ow*2, COLOR_1)
-            .addRectangle(
                 dx - ow + sx, 
                 dy - ow + sy, 
                 dw + ow*2, 
-                dh + ow*2, COLOR_1)
+                dh + ow*2, BLACK)
             .addTriangle(
                 new Vector2(dx - ow, dy + dh),
                 new Vector2(dx - ow + sx, dy + dh),
@@ -531,6 +530,47 @@ export class StageMeshBuilder {
     }
 
 
+    private generateSwitchingPlatform(tileWidth : number, tileHeight : number, event : CoreEvent) {
+
+        const BASE_SCALE = 0.70;
+        const BASE_OUTLINE_WIDTH = 0.025;
+
+        const CIRCLE_OUTER_RADIUS = 0.70;
+        const CIRCLE_INNER_RADIUS = 0.40;
+
+        const COLOR_1 = new RGBA(0.80, 0.55, 1.0);
+        const COLOR_2 = new RGBA(0.40, 0.15, 0.67);
+        const COLOR_3 = new RGBA(0.20, 0.0, 0.40);
+
+        let ow = BASE_OUTLINE_WIDTH;
+
+        let dw = tileWidth * BASE_SCALE;
+        let dh = tileHeight * BASE_SCALE;
+
+        let th = 1.0 - tileHeight;
+        let dy = -th;
+
+        let ratio = tileHeight / tileWidth;
+        let rw1 = CIRCLE_OUTER_RADIUS * BASE_SCALE;
+        let rh1 = rw1 * ratio;
+        let rw2 = CIRCLE_INNER_RADIUS * BASE_SCALE;
+        let rh2 = rw2 * ratio;
+
+        this.meshes[StageMesh.SwitchingPlatformBottom] = (new ShapeGenerator)
+            .addRectangle(-dw/2 - ow, dy - dh/2 - ow, dw + ow*2, dh + th + ow*2, BLACK)
+            .addRectangle(-dw/2, dy - dh/2, dw, dh + th, COLOR_2)
+            .constructMesh(event);
+
+        this.meshes[StageMesh.SwitchingPlatformTop] = (new ShapeGenerator)
+            .addRectangle(-dw/2, dy - dh/2, dw, dh, COLOR_1)
+            .addEllipse(0, dy, rw1, rh1, 32, COLOR_3)
+            .addEllipse(0, dy, rw2, rh2, 32, COLOR_1)
+            .constructMesh(event);
+
+        this.meshes[StageMesh.SwitchingPlatformShadow] = this.meshes[StageMesh.TogglableTileShadow];
+    }
+
+
     private generateMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         this.generatePlatformMeshes(tileWidth, tileHeight, event);
@@ -541,6 +581,7 @@ export class StageMeshBuilder {
         this.generateFloorStar(tileWidth, tileHeight, event);
         this.generateFloorArrow(event);
         this.generateBlueButton(tileHeight / tileWidth, event);
+        this.generateSwitchingPlatform(tileWidth, tileHeight, event);
     }
 
 

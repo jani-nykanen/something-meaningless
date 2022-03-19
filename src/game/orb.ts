@@ -23,10 +23,13 @@ export class Orb extends GameObject {
         
         super(x, y, true);
 
+        const WAVE_BONUS_RANGE = Math.PI/2;
+
         this.meshOrb = meshOrb;
         this.meshShadow = meshShadow;
 
         this.wave = (x % 2 == y % 2) ? Math.PI : 0.0;
+        this.wave += (Math.random() * 2 - 1.0) * WAVE_BONUS_RANGE; 
     }
 
 
@@ -35,7 +38,7 @@ export class Orb extends GameObject {
         this.pos.x = x;
         this.pos.y = y;
 
-        this.wave = (x % 2 == y % 2) ? Math.PI : 0.0;
+        // this.wave = (x % 2 == y % 2) ? Math.PI : 0.0;
 
         this.exist = true;
     }

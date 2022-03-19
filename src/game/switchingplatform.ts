@@ -51,7 +51,7 @@ export class SwitchingPlatform extends PlatformObject {
         let t : number;
 
         
-        if (!this.growing && player.isMoving()) {
+        if (!this.growing && player.didStartToMove()) {
 
             if (stage.getTile(1, this.pos.x | 0, this.pos.y | 0) != 3) {
 
@@ -60,7 +60,7 @@ export class SwitchingPlatform extends PlatformObject {
                 this.growTimer = this.growTime;
 
                 stage.setTile(0, this.pos.x | 0, this.pos.y | 0,
-                    this.enabled ? 22 : 21)
+                    this.enabled ? 21 : 22)
             }
         }
         
