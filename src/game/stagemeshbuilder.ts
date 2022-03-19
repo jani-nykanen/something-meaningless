@@ -39,9 +39,11 @@ export const enum StageMesh {
 
     SwitchingPlatformBottom = 20,
     SwitchingPlatformTop = 21,
-    SwitchingPlatformShadow = 22
+    SwitchingPlatformShadow = 22,
+
+    Rectangle = 23,
 };
-const STAGE_MESH_COUNT = 23;
+const STAGE_MESH_COUNT = 24;
 
 
 const PLATFORM_SCALE = 0.90;
@@ -398,13 +400,13 @@ export class StageMeshBuilder {
     }
 
 
-    private generateFloorStar(tileWidth : number, tileHeight : number, event : CoreEvent) {
+    private generateFloorStar(event : CoreEvent) {
 
         const COLOR = new RGBA();
 
         this.meshes[StageMesh.FloorStar] = (new ShapeGenerator())
             .addStar(0, 0, 0.60, 1.0, 6, COLOR, -Math.PI*2 / 12,
-                tileWidth, tileHeight)
+                1.0, 1.0)
             .constructMesh(event);
     }
 
@@ -578,10 +580,14 @@ export class StageMeshBuilder {
         this.generateMovingPlatformMeshes(tileWidth, tileHeight, event);
         this.generateTogglableTileMeshes(tileWidth, tileHeight, event);
         this.generateButton(tileHeight / tileWidth, event);
-        this.generateFloorStar(tileWidth, tileHeight, event);
+        this.generateFloorStar(event);
         this.generateFloorArrow(event);
         this.generateBlueButton(tileHeight / tileWidth, event);
         this.generateSwitchingPlatform(tileWidth, tileHeight, event);
+
+        this.meshes[StageMesh.Rectangle] = (new ShapeGenerator())
+            .addRectangle(-0.5, -0.5, 1.0, 1.0)
+            .constructMesh(event);
     }
 
 

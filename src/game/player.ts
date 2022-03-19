@@ -225,13 +225,29 @@ export class Player extends MovingObject {
     protected stopMovementEvent(stage : Stage, event : CoreEvent) {
         
         let effect = stage.checkUnderlyingTiles(this.pos.x | 0, this.pos.y | 0, event);
-        
+        let p : Vector2;
+
         switch (effect) {
 
         case UnderlyingEffectType.JumpTile:
 
             this.automaticMovement = false;
             this.moveTo(this.moveDir.x, this.moveDir.y, stage, event, true, true);
+            break;
+
+        case UnderlyingEffectType.Teleport:
+
+            p = stage.findCorrespondingTeleportTile(this.pos.x | 0, this.pos.y | 0);
+            if (p != null) {
+
+                stage.setTile(1, this.pos.x | 0, this.pos.y | 0, 0);
+
+                this.pos = p.clone();
+                this.target = p.clone();
+                this.renderPos = p.clone();
+
+                stage.setTile(1, this.pos.x | 0, this.pos.y | 0, 3);
+            }
             break;
 
         default:

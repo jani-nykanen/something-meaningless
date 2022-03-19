@@ -7,6 +7,7 @@ import { ShapeGenerator } from "./shapegenerator.js";
 
 
 const JUMP_FLOOR_COLOR = new RGBA(0.50, 0.50, 0.50);
+const TELEPORT_FLOOR_COLOR = new RGBA(0.90, 0.20, 0);
 
 
 const COLORS = [
@@ -15,13 +16,16 @@ const COLORS = [
 
     JUMP_FLOOR_COLOR,
     JUMP_FLOOR_COLOR,
+
+    TELEPORT_FLOOR_COLOR,
+    TELEPORT_FLOOR_COLOR
 ];
 
 
 const OUTLINE_WIDTH = 0.025;
 
 
-const isFloorTile = (id : number) => [1, 11, 13, 14, 17, 18, 19, 20].includes(id);
+const isFloorTile = (id : number) => [1, 11, 13, 14, 16, 17, 18, 19, 20].includes(id);
 
 
 const generateFloorMesh = (map : Tilemap, 
@@ -45,6 +49,8 @@ const generateFloorMesh = (map : Tilemap,
             colorIndex = x % 2 == y % 2 ? 1 : 0;
             if (tid == 13)
                 colorIndex += 2;
+            else if (tid == 16)
+                colorIndex += 4;
 
             gen.addRectangle(
                 x * tileWidth - tileWidth/2, 
@@ -133,6 +139,8 @@ const generateWallMesh = (map : Tilemap,
             colorIndex = x % 2 == y % 2 ? 1 : 0;
             if (tid == 13)
                 colorIndex += 2;
+            else if (tid == 16)
+                colorIndex += 4;
 
             gen.addRectangle(
                 x * tileWidth - tileWidth/2, 

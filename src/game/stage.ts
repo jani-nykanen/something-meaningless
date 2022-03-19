@@ -12,7 +12,7 @@ import { StarGenerator } from "./stargenerator.js";
 import { Terrain } from "./terrain.js";
 import { MovingPlatform } from "./movingplatform.js";
 import { TogglableTile } from "./togglabletile.js";
-import { Vector3 } from "../core/vector.js";
+import { RGBA, Vector2, Vector3 } from "../core/vector.js";
 import { Direction } from "./types.js";
 import { SwitchingPlatform } from "./switchingplatform.js";
 
@@ -42,6 +42,7 @@ export const enum UnderlyingEffectType {
     Button = 1,
     JumpTile = 2,
     AutomaticArrow = 3,
+    Teleport = 4,
 };
 
 
@@ -402,10 +403,10 @@ export class Stage {
     }
 
 
-    private drawFloorStar(canvas : Canvas, x : number, y : number) {
-
-        const MAX_SCALE = 0.49;
-        const COUNT = 3;
+    private drawAnimatedFloor(canvas : Canvas, 
+        x : number, y : number, timer : number,
+        meshName : StageMesh, count : number, scale : number,
+        color = new RGBA(), specialScale = 0.0) {
 
         let t : number;
         let baseScale = 1.0;
@@ -413,28 +414,41 @@ export class Stage {
         let p = this.player.getPosition();
         if ((x | 0) == (p.x | 0) && (y | 0) == (p.y | 0)) {
 
-            baseScale += this.specialStarScale;
+            baseScale += specialScale;
         }
 
-        for (let i = 0; i < COUNT; ++ i) {
+        for (let i = 0; i < count; ++ i) {
 
-            t = ((this.starAnimationTimer + i * 1.0) / COUNT) % 1.0;
+            t = ((timer + i * 1.0) / count) % 1.0;
 
             canvas.transform
                 .push()
                 .translate(x * TILE_WIDTH, y * TILE_HEIGHT)
-                .scale(baseScale * MAX_SCALE * t, baseScale * MAX_SCALE * t)
+                .scale(
+                    TILE_WIDTH * baseScale * scale * t, 
+                    TILE_HEIGHT * baseScale * scale * t)
                 .use();
 
-            canvas.setColor(1.0, 1.0, 0.20, Math.sin((1.0 - t) * Math.PI/2));
+            canvas.setColor(color.r, color.g, color.b, color.a * Math.sin((1.0 - t) * Math.PI/2));
 
-            canvas.drawMesh(this.meshBuilder.getMesh(StageMesh.FloorStar));
+            canvas.drawMesh(this.meshBuilder.getMesh(meshName));
 
             canvas.transform
                 .pop()
                 .use();
         }
         canvas.setColor();
+    }
+
+
+
+    private drawFloorStar(canvas : Canvas, x : number, y : number) {
+
+        const COUNT = 3;
+
+        this.drawAnimatedFloor(canvas, x, y, 
+            this.starAnimationTimer, StageMesh.FloorStar,
+            COUNT, 0.49, new RGBA(1, 1, 0.33), this.specialStarScale);
     }
 
 
@@ -483,6 +497,16 @@ export class Stage {
     }
 
 
+    private drawTeleportTile(canvas : Canvas, x : number, y : number) {
+
+        const COUNT = 4;
+
+        this.drawAnimatedFloor(canvas, x, y, 
+            1.0 - this.starAnimationTimer, StageMesh.Rectangle,
+            COUNT, 0.95, new RGBA(0.25, 0.05, 0.0));
+    }
+
+
     private drawStaticObjectsBottom(canvas : Canvas) {
 
         canvas.setColor();
@@ -507,6 +531,12 @@ export class Stage {
             case 15:
                 
                 this.drawButton(canvas, x, y, StageMesh.BlueButtonDown);
+                break;
+
+            // Teleport
+            case 16:
+
+                this.drawTeleportTile(canvas, x, y);
                 break;
 
             // Floor arrow
@@ -742,6 +772,7 @@ export class Stage {
 
         case 1:
         case 12:
+        case 16:
         case 17:
         case 18:
         case 19:
@@ -1003,6 +1034,11 @@ export class Stage {
 
             return UnderlyingEffectType.Button;
 
+        // Teleport
+        case 16:
+
+            return UnderlyingEffectType.Teleport;
+
         case 17:
         case 18:
         case 19:
@@ -1026,7 +1062,12 @@ export class Stage {
 
     public popState() {
 
-        this.stateBuffer.pop();
+        if (this.stateBufferLength == 0) return;
+
+        -- this.stateBufferLength;
+        this.stateBufferPointer = negMod(
+            this.stateBufferPointer - 1, 
+            this.stateBuffer.length);
     }
 
 
@@ -1050,5 +1091,21 @@ export class Stage {
             return tid - 17;
         }
         return Direction.None;
+    }
+
+
+    public findCorrespondingTeleportTile(sx : number, sy :  number) : Vector2 {
+
+        for (let y = 0; y < this.height; ++ y) {
+
+            for (let x = 0; x < this.width; ++ x) {
+
+                if (sx == x && sy == y) continue;
+
+                if (this.getTile(0, x, y) == 16)
+                    return new Vector2(x, y);
+            }
+        }
+        return null;
     }
 }
