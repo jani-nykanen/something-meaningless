@@ -12,8 +12,9 @@ import { StarGenerator } from "./stargenerator.js";
 import { Terrain } from "./terrain.js";
 import { MovingPlatform } from "./movingplatform.js";
 import { TogglableTile } from "./togglabletile.js";
-import { RGBA, Vector3 } from "../core/vector.js";
+import { Vector3 } from "../core/vector.js";
 import { Direction } from "./types.js";
+import { SwitchingPlatform } from "./switchingplatform.js";
 
 
 const TURN_TIME = 15;
@@ -79,6 +80,7 @@ export class Stage {
     private shrinkingPlatforms : Array<ShrinkingPlatform>;
     private movingPlatforms : Array<MovingPlatform>;
     private togglablePlatforms : Array<TogglableTile>;
+    private switchingPlatforms : Array<SwitchingPlatform>;
     private orbs : Array<Orb>;
 
     private objectBuffer : ObjectBuffer;
@@ -116,6 +118,7 @@ export class Stage {
         this.shrinkingPlatforms = new Array<ShrinkingPlatform> ();
         this.movingPlatforms = new Array<MovingPlatform> ();
         this.togglablePlatforms = new Array<TogglableTile> ();
+        this.switchingPlatforms = new Array<SwitchingPlatform> ();
         this.orbs = new Array<Orb> ();
 
         this.objectBuffer = new ObjectBuffer();
@@ -162,6 +165,7 @@ export class Stage {
         this.shrinkingPlatforms.length = 0;
         this.movingPlatforms.length = 0;
         this.togglablePlatforms.length = 0;
+        this.switchingPlatforms.length = 0;
         this.orbs.length = 0;
 
         this.objectBuffer.flush();
@@ -253,6 +257,18 @@ export class Stage {
                             tid == 9, TURN_TIME));        
                     break;
 
+                // Switching platform
+                case 21:
+                case 22:
+
+                    this.switchingPlatforms.push(
+                        new SwitchingPlatform(x, y,
+                            this.meshBuilder.getMesh(StageMesh.TogglableTileBottom),
+                            this.meshBuilder.getMesh(StageMesh.TogglableTileTop),
+                            this.meshBuilder.getMesh(StageMesh.TogglableTileShadow),
+                            tid == 21, TURN_TIME));   
+                    break;
+
                 default:
                     break;
                 }
@@ -325,6 +341,11 @@ export class Stage {
         for (let o of this.togglablePlatforms) {
 
             o.update(this, event);
+        }
+
+        for (let o of this.switchingPlatforms) {
+
+            o.update(this.player, this, event);
         }
 
         for (let o of this.orbs) {
@@ -436,7 +457,6 @@ export class Stage {
 
         let t : number;
         let col : Vector3;
-
 
         for (let i = -1; i <= 1; i += 2) {
 
@@ -581,6 +601,10 @@ export class Stage {
 
             o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
+        for (let o of this.switchingPlatforms) {
+
+            o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
+        }
 
         canvas.toggleStencilTest(false);
         canvas.setColor();
@@ -595,13 +619,15 @@ export class Stage {
 
             o.drawBottom(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
-
         for (let o of this.shrinkingPlatforms) {
 
             o.drawBottom(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
-
         for (let o of this.movingPlatforms) {
+
+            o.drawBottom(canvas, TILE_WIDTH, TILE_HEIGHT);
+        }
+        for (let o of this.switchingPlatforms) {
 
             o.drawBottom(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
@@ -616,13 +642,15 @@ export class Stage {
 
             o.drawTop(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
-
         for (let o of this.shrinkingPlatforms) {
 
             o.drawTop(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
-
         for (let o of this.movingPlatforms) {
+
+            o.drawTop(canvas, TILE_WIDTH, TILE_HEIGHT);
+        }
+        for (let o of this.switchingPlatforms) {
 
             o.drawTop(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
@@ -729,6 +757,7 @@ export class Stage {
         case 11:
         case 14:
         case 15:
+        case 21:
             return TileType.Platform;
 
         case 13:
