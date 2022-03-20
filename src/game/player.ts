@@ -28,6 +28,12 @@ export class Player extends MovingObject {
 
     private startedToMove : boolean;
 
+    private teleporting : boolean;
+    private teleportingIn : boolean;
+    private teleportTimer : number;
+
+    private baseScale : number;
+
 
     constructor(x : number, y : number, moveTime : number, event : CoreEvent) {
 
@@ -53,6 +59,12 @@ export class Player extends MovingObject {
 
         this.moveDir = new Vector2();
         this.automaticMovement = false;
+
+        this.teleporting = false;
+        this.teleportTimer = 0;
+        this.teleportingIn = false;
+
+        this.baseScale = 1.0;
     }
 
     
@@ -71,6 +83,12 @@ export class Player extends MovingObject {
     
         this.jumping = false;
         this.jumpHeight = 1.0;
+
+        this.teleporting = false;
+        this.teleportTimer = 0;
+        this.teleportingIn = false;
+
+        this.baseScale = 1.0;
     }
 
 
@@ -242,11 +260,17 @@ export class Player extends MovingObject {
 
                 stage.setTile(1, this.pos.x | 0, this.pos.y | 0, 0);
 
+                this.renderPos = this.pos.clone();
                 this.pos = p.clone();
                 this.target = p.clone();
-                this.renderPos = p.clone();
 
                 stage.setTile(1, this.pos.x | 0, this.pos.y | 0, 3);
+
+                this.teleporting = true;
+                this.teleportingIn = true;
+                this.teleportTimer = this.baseMoveTime;
+
+                this.stopAnimation();
             }
             break;
 
@@ -294,7 +318,47 @@ export class Player extends MovingObject {
     }
 
 
+    private updateTeleporting(event : CoreEvent) {
+
+        const MIN_SCALE = 0.01;
+
+        this.animate(event);
+
+        this.teleportTimer -= event.step;
+        if (this.teleportTimer <= 0) {
+
+            if (this.teleportingIn) {
+
+                this.renderPos = this.pos.clone();
+                this.teleportingIn = false;
+
+                this.teleportTimer = this.baseMoveTime;
+
+                this.baseScale = 0.0;
+            }
+            else {
+
+                this.teleportTimer = 0;
+                this.teleporting = false;
+                this.baseScale = 1.0;
+            }
+        }
+        else {
+
+            this.baseScale = MIN_SCALE + this.teleportTimer / this.baseMoveTime * (1.0 - MIN_SCALE);
+            if (!this.teleportingIn)
+                this.baseScale = 1.0 - this.baseScale;
+        }
+    }
+
+
     public update(stage : Stage, event : CoreEvent) {
+
+        if (this.teleporting) {
+
+            this.updateTeleporting(event);
+            return;
+        }
 
         this.startedToMove = false;
 
@@ -317,7 +381,7 @@ export class Player extends MovingObject {
         const SCALE_Y_FACTOR = 0.50;
         
         let ratio = tileHeight / tileWidth;
-        let scale = this.computeScale(tileWidth, tileHeight) * SHADOW_SCALE_FACTOR;
+        let scale = this.baseScale * this.computeScale(tileWidth, tileHeight) * SHADOW_SCALE_FACTOR;
 
         canvas.transform
             .push()
@@ -349,16 +413,18 @@ export class Player extends MovingObject {
 
     public draw(canvas : Canvas, tileWidth : number, tileHeight : number) {
 
-        const OFFSET_Y = -0.50;
+        const OFFSET_Y = 0.50;
         const FIGURE_SCALE_FACTOR = 0.90;
 
-        let scale = this.computeScale(tileWidth, tileHeight) * FIGURE_SCALE_FACTOR;
+        let scale = this.baseScale * this.computeScale(tileWidth, tileHeight) * FIGURE_SCALE_FACTOR;
+
+        let extraYOffset = -OFFSET_Y + OFFSET_Y * (1.0 - this.baseScale);
 
         canvas.transform
             .push()
             .translate(
                 this.renderPos.x * tileWidth, 
-                this.renderPos.y * tileHeight + OFFSET_Y + this.computeJumpHeight())
+                this.renderPos.y * tileHeight + extraYOffset + this.computeJumpHeight())
             .scale(scale, scale)
             .use();
 
