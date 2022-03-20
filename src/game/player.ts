@@ -261,7 +261,6 @@ export class Player extends MovingObject {
                 stage.setTile(1, this.pos.x | 0, this.pos.y | 0, 0);
 
                 this.renderPos = this.pos.clone();
-                this.pos = p.clone();
                 this.target = p.clone();
 
                 stage.setTile(1, this.pos.x | 0, this.pos.y | 0, 3);
@@ -269,6 +268,8 @@ export class Player extends MovingObject {
                 this.teleporting = true;
                 this.teleportingIn = true;
                 this.teleportTimer = this.baseMoveTime;
+
+                this.moving = false;
 
                 this.stopAnimation();
             }
@@ -318,11 +319,12 @@ export class Player extends MovingObject {
     }
 
 
-    private updateTeleporting(event : CoreEvent) {
+    private updateTeleporting(stage : Stage, event : CoreEvent) {
 
         const MIN_SCALE = 0.01;
 
         this.animate(event);
+
 
         this.teleportTimer -= event.step;
         if (this.teleportTimer <= 0) {
@@ -335,6 +337,13 @@ export class Player extends MovingObject {
                 this.teleportTimer = this.baseMoveTime;
 
                 this.baseScale = 0.0;
+
+                stage.setTile(1, this.pos.x | 0, this.pos.y | 0, 0);
+
+                this.pos = this.target.clone();
+                this.renderPos = this.pos.clone();
+
+                stage.setTile(1, this.pos.x | 0, this.pos.y | 0, 3);
             }
             else {
 
@@ -356,7 +365,7 @@ export class Player extends MovingObject {
 
         if (this.teleporting) {
 
-            this.updateTeleporting(event);
+            this.updateTeleporting(stage, event);
             return;
         }
 
@@ -462,6 +471,7 @@ export class Player extends MovingObject {
 
     public isMoving = () : boolean => this.moving;
     public didStartToMove = () : boolean => this.startedToMove;
+    public isTeleporting = () : boolean => this.teleporting;
 
 
     public stopAnimation() {

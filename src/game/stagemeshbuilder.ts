@@ -42,6 +42,10 @@ export const enum StageMesh {
     SwitchingPlatformShadow = 22,
 
     Rectangle = 23,
+
+    RotationButtonDown = 24,
+    RotationButtonUp = 25,
+    RotationButtonShadow = 26,
 };
 const STAGE_MESH_COUNT = 24;
 
@@ -573,6 +577,64 @@ export class StageMeshBuilder {
     }
 
 
+    private generateRotationButton(tileWidth : number, tileHeight : number, event : CoreEvent) {
+
+        const BASE_OUTLINE_WIDTH = 0.025;
+
+        const RADIUS = 0.40;
+        const HEIGHT = 0.15;
+ 
+        const COLOR_1 = new RGBA(0.35, 0.10, 0.75);
+        const COLOR_2 = new RGBA(0.80, 0.60, 1.0);
+
+        const SHADOW_OFFSET_X = 0.05;
+        const SHADOW_OFFSET_Y = 0.05;
+
+        let rw = RADIUS;
+        let rh = RADIUS * (tileHeight / tileWidth);
+
+        let ow = BASE_OUTLINE_WIDTH;
+        let dy = -HEIGHT;
+
+        // .addRectangle(-rw/2 - ow, dy - rh/2 - ow, rw + ow*2, rh + ow*2, BLACK)
+
+        this.meshes[StageMesh.RotationButtonDown] = (new ShapeGenerator())
+            .addRectangle(-rw/2 - ow, -rh/2 - ow, rw + ow*2, rh + ow*2, BLACK)
+            .addRectangle(-rw/2, -rh/2, rw, rh, COLOR_2)
+            .constructMesh(event);
+
+        this.meshes[StageMesh.RotationButtonUp] = (new ShapeGenerator())
+            .addRectangle(-rw/2 - ow, dy - rh/2 - ow, rw + ow*2, rh + HEIGHT + ow*2, BLACK)
+            .addRectangle(-rw/2, dy - rh/2, rw, rh, COLOR_2)
+            .addRectangle(-rw/2, dy + rh/2, rw, HEIGHT, COLOR_1)
+            .constructMesh(event);
+
+        let sx = SHADOW_OFFSET_X * PLATFORM_SCALE;
+        let sy = SHADOW_OFFSET_Y * PLATFORM_SCALE;
+
+        let dx = -rw/2;
+        dy += ow;
+
+        this.meshes[StageMesh.RotationButtonShadow] = (new ShapeGenerator())
+            .addRectangle(
+                dx - ow + sx, 
+                dy - ow + sy, 
+                rw + ow*2, 
+                rh + ow*2, BLACK)
+            .addTriangle(
+                new Vector2(dx - ow, dy + rh),
+                new Vector2(dx - ow + sx, dy + rh),
+                new Vector2(dx - ow + sx, dy + rh + ow + sy),
+                BLACK)
+            .addTriangle(
+                new Vector2(dx + rw + ow, dy - ow),
+                new Vector2(dx + rw + ow + sx, dy - ow + sy),
+                new Vector2(dx + rw + ow, dy - ow + sy),
+                BLACK)
+            .constructMesh(event);  
+    }
+
+
     private generateMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         this.generatePlatformMeshes(tileWidth, tileHeight, event);
@@ -584,6 +646,7 @@ export class StageMeshBuilder {
         this.generateFloorArrow(event);
         this.generateBlueButton(tileHeight / tileWidth, event);
         this.generateSwitchingPlatform(tileWidth, tileHeight, event);
+        this.generateRotationButton(tileWidth, tileHeight, event);
 
         this.meshes[StageMesh.Rectangle] = (new ShapeGenerator())
             .addRectangle(-0.5, -0.5, 1.0, 1.0)

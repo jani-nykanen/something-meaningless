@@ -503,7 +503,7 @@ export class Stage {
 
         this.drawAnimatedFloor(canvas, x, y, 
             1.0 - this.starAnimationTimer, StageMesh.Rectangle,
-            COUNT, 0.95, new RGBA(0.25, 0.05, 0.0));
+            COUNT, 0.95, new RGBA(0.10, 0.15, 0.0));
     }
 
 
@@ -548,10 +548,10 @@ export class Stage {
                 this.drawFloorArrow(canvas, tid-17, x, y);
                 break;
 
-            // Button... some color
+            // Button something
             case 24:
                 
-                this.drawButton(canvas, x, y, StageMesh.ButtonDown);
+                this.drawButton(canvas, x, y, StageMesh.RotationButtonDown);
                 break;
 
             default:
@@ -584,7 +584,7 @@ export class Stage {
             // Button... something
             case 23:
 
-                this.drawButton(canvas, x, y, StageMesh.ButtonUp);
+                this.drawButton(canvas, x, y, StageMesh.RotationButtonUp);
                 break;    
 
             default:
@@ -615,7 +615,7 @@ export class Stage {
             // Button something
             case 23:
 
-                this.drawButton(canvas, x, y, StageMesh.ButtonShadow);
+                this.drawButton(canvas, x, y, StageMesh.RotationButtonShadow);
                 break;
 
             default:

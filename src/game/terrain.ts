@@ -6,8 +6,8 @@ import { RGBA, Vector2 } from "../core/vector.js";
 import { ShapeGenerator } from "./shapegenerator.js";
 
 
-const JUMP_FLOOR_COLOR = new RGBA(0.50, 0.50, 0.50);
-const TELEPORT_FLOOR_COLOR = new RGBA(0.90, 0.20, 0);
+const JUMP_FLOOR_COLOR = new RGBA(0.75, 0.30, 0.0);
+const TELEPORT_FLOOR_COLOR = new RGBA(0.67, 0.80, 0.20);
 
 
 const COLORS = [

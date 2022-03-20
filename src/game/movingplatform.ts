@@ -180,6 +180,17 @@ export class MovingPlatform extends PlatformObject {
 
     public rotate(stage : Stage, startIndex : number) {
 
+        this.movementChecked = false;
+        if (this.moving) {
+
+            this.pos = this.target.clone();
+            this.renderPos = this.pos.clone();
+            this.moving = false;
+        }
+
+        this.rotating = true;
+        this.rotateTimer = this.moveTime;
+
         this.direction = negMod(this.direction - 1, 4);
 
         stage.setTile(0, this.pos.x | 0, this.pos.y | 0, startIndex + this.direction);
