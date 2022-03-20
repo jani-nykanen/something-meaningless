@@ -1,5 +1,6 @@
 import { Canvas } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
+import { negMod } from "../core/math.js";
 import { Mesh } from "../core/mesh.js";
 import { Vector2 } from "../core/vector.js";
 import { MovingObject, PlatformObject } from "./gameobject.js";
@@ -21,6 +22,9 @@ export class MovingPlatform extends PlatformObject {
 
     private movementChecked : boolean;
 
+    private rotating : boolean;
+    private rotateTimer : number;
+
 
     constructor(x : number, y : number,
         meshBottom : Mesh, meshTop : Mesh, 
@@ -37,6 +41,9 @@ export class MovingPlatform extends PlatformObject {
         this.direction = direction;
 
         this.movementChecked = false;
+
+        this.rotating = false;
+        this.rotateTimer = 0.0;
     }
 
 
@@ -55,6 +62,9 @@ export class MovingPlatform extends PlatformObject {
         this.direction = direction;
 
         this.exist = true;
+
+        this.rotating = false;
+        this.rotateTimer = 0.0;
     }
 
 
@@ -99,6 +109,14 @@ export class MovingPlatform extends PlatformObject {
 
         if (!this.exist) return;
 
+        if (this.rotating) {
+
+            if ((this.rotateTimer -= event.step) <= 0) {
+
+                this.rotating = false;
+            }
+        }
+
         if (!player.isMoving()) {
 
             this.movementChecked = false;
@@ -140,10 +158,16 @@ export class MovingPlatform extends PlatformObject {
 
         canvas.drawMesh(this.meshTop);
 
+        let baseAngle = Math.PI/2 * ANGLE[this.direction];
+        if (this.rotating) {
+
+            baseAngle -= Math.PI/2 * (this.rotateTimer / this.moveTime);
+        }
+
         canvas.transform    
             .translate(0, -(1.0 - tileHeight))
             .scale(tileWidth, tileHeight)
-            .rotate(Math.PI/2 * ANGLE[this.direction])
+            .rotate(baseAngle)
             .use();
 
         canvas.drawMesh(this.meshArrow);
@@ -152,4 +176,15 @@ export class MovingPlatform extends PlatformObject {
             .pop()
             .use();
     }
+
+
+    public rotate(stage : Stage, startIndex : number) {
+
+        this.direction = negMod(this.direction - 1, 4);
+
+        stage.setTile(0, this.pos.x | 0, this.pos.y | 0, startIndex + this.direction);
+    }
+
+
+    public getDirection = () : Direction => this.direction;
 }

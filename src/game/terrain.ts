@@ -25,7 +25,7 @@ const COLORS = [
 const OUTLINE_WIDTH = 0.025;
 
 
-const isFloorTile = (id : number) => [1, 11, 13, 14, 16, 17, 18, 19, 20].includes(id);
+const isFloorTile = (id : number) => [1, 11, 13, 14, 16, 17, 18, 19, 20, 23].includes(id);
 
 
 const generateFloorMesh = (map : Tilemap, 

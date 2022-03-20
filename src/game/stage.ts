@@ -548,6 +548,12 @@ export class Stage {
                 this.drawFloorArrow(canvas, tid-17, x, y);
                 break;
 
+            // Button... some color
+            case 24:
+                
+                this.drawButton(canvas, x, y, StageMesh.ButtonDown);
+                break;
+
             default:
                 break;
             }
@@ -575,6 +581,12 @@ export class Stage {
                 this.drawButton(canvas, x, y, StageMesh.BlueButtonUp);
                 break;
 
+            // Button... something
+            case 23:
+
+                this.drawButton(canvas, x, y, StageMesh.ButtonUp);
+                break;    
+
             default:
                 break;
             }
@@ -598,6 +610,12 @@ export class Stage {
             case 14:
 
                 this.drawButton(canvas, x, y, StageMesh.BlueButtonShadow);
+                break;
+
+            // Button something
+            case 23:
+
+                this.drawButton(canvas, x, y, StageMesh.ButtonShadow);
                 break;
 
             default:
@@ -772,11 +790,11 @@ export class Stage {
 
         case 1:
         case 12:
-        case 16:
         case 17:
         case 18:
         case 19:
         case 20:
+        case 24:
             return TileType.Floor;
 
         case 2:
@@ -789,9 +807,11 @@ export class Stage {
         case 14:
         case 15:
         case 21:
+        case 23:
             return TileType.Platform;
 
         case 13:
+        case 16:    
             return TileType.JumpTile;
 
         default:
@@ -1051,6 +1071,22 @@ export class Stage {
                 o.update(this.player, this, event);
             }
             break;
+
+        // Button pressed, the third color
+        case 23:
+
+            replaceInArray(this.activeLayers[0], 24, 23);
+            this.setTile(0, x, y, 24);
+
+            this.waiting = true;
+            this.waitTimer = TURN_TIME;
+
+            for (let o of this.movingPlatforms) {
+
+                o.rotate(this, 5);
+            }
+
+            return UnderlyingEffectType.Button;
 
         default:
             break;
