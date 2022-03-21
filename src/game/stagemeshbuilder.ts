@@ -46,8 +46,13 @@ export const enum StageMesh {
     RotationButtonDown = 24,
     RotationButtonUp = 25,
     RotationButtonShadow = 26,
+
+    GhostBody = 27,
+    GhostFaceFront = 28,
+    GhostFaceSide = 29,
+    GhostShadow = 30,
 };
-const STAGE_MESH_COUNT = 24;
+const STAGE_MESH_COUNT = 31; // Practically useless
 
 
 const PLATFORM_SCALE = 0.90;
@@ -178,7 +183,6 @@ export class StageMeshBuilder {
         const ORB_RADIUS = 0.25;
         const INNER_RADIUS = 0.15;
         const OUTLINE_WIDTH = 0.033;
-
         
         const ORB_COLOR_1 = new RGBA(0.25, 0.70, 0.20);
         const ORB_COLOR_2 = new RGBA(0.50, 1.0, 0.40);
@@ -635,6 +639,29 @@ export class StageMeshBuilder {
     }
 
 
+    private generateGhostMeshes(event : CoreEvent) {
+
+        const BODY_RADIUS = 0.40;
+        const INNER_RADIUS = 0.31;
+        const OUTLINE_WIDTH = 0.033;
+        
+        const BODY_COLOR_1 = new RGBA(0.70);
+        const BODY_COLOR_2 = new RGBA(1.0);
+
+        let r = BODY_RADIUS - OUTLINE_WIDTH;
+
+        this.meshes[StageMesh.GhostBody] = (new ShapeGenerator())
+            .addEllipse(0, 0, BODY_RADIUS*2, BODY_RADIUS*2, 32, BLACK)
+            .addEllipse(0, 0, r*2, r*2, 32, BODY_COLOR_1)
+            .addEllipse(-0.033, -0.033, INNER_RADIUS*2, INNER_RADIUS*2, 32, BODY_COLOR_2)
+            .constructMesh(event);
+
+        this.meshes[StageMesh.GhostShadow] = (new ShapeGenerator())
+            .addEllipse(0, 0, BODY_RADIUS*2, BODY_RADIUS, 32, BLACK)
+            .constructMesh(event);
+    }
+
+
     private generateMeshes(tileWidth : number, tileHeight : number, event : CoreEvent) {
 
         this.generatePlatformMeshes(tileWidth, tileHeight, event);
@@ -647,6 +674,7 @@ export class StageMeshBuilder {
         this.generateBlueButton(tileHeight / tileWidth, event);
         this.generateSwitchingPlatform(tileWidth, tileHeight, event);
         this.generateRotationButton(tileWidth, tileHeight, event);
+        this.generateGhostMeshes(event);
 
         this.meshes[StageMesh.Rectangle] = (new ShapeGenerator())
             .addRectangle(-0.5, -0.5, 1.0, 1.0)

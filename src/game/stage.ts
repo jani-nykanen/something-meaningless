@@ -15,6 +15,7 @@ import { TogglableTile } from "./togglabletile.js";
 import { RGBA, Vector2, Vector3 } from "../core/vector.js";
 import { Direction } from "./types.js";
 import { SwitchingPlatform } from "./switchingplatform.js";
+import { Ghost } from "./ghost.js";
 
 
 const TURN_TIME = 15;
@@ -83,6 +84,7 @@ export class Stage {
     private togglablePlatforms : Array<TogglableTile>;
     private switchingPlatforms : Array<SwitchingPlatform>;
     private orbs : Array<Orb>;
+    private ghosts : Array<Ghost>;
 
     private objectBuffer : ObjectBuffer;
 
@@ -121,6 +123,7 @@ export class Stage {
         this.togglablePlatforms = new Array<TogglableTile> ();
         this.switchingPlatforms = new Array<SwitchingPlatform> ();
         this.orbs = new Array<Orb> ();
+        this.ghosts = new Array<Ghost> ();
 
         this.objectBuffer = new ObjectBuffer();
 
@@ -168,6 +171,7 @@ export class Stage {
         this.togglablePlatforms.length = 0;
         this.switchingPlatforms.length = 0;
         this.orbs.length = 0;
+        this.ghosts.length = 0;
 
         this.objectBuffer.flush();
 
@@ -274,20 +278,39 @@ export class Stage {
                     break;
                 }
 
-                // Top layer
-                switch (map.getTile(1, x, y)) {
+                tid = map.getTile(1, x, y);
 
+                // Top layer
+                switch (tid) {
+
+                // Player
                 case 3:
                     
                     this.player.setPosition(x, y);
                     break;
 
+                // Orbs
                 case 4:
                     
                     this.orbs.push(
                         new Orb(x, y,
                             this.meshBuilder.getMesh(StageMesh.OrbBody), 
                             this.meshBuilder.getMesh(StageMesh.OrbShadow)));
+                    break;
+
+                // Ghosts
+                case 25:
+                case 26:
+                case 27:
+                case 28:
+
+                    this.ghosts.push(
+                        new Ghost(x, y,
+                            this.meshBuilder.getMesh(StageMesh.GhostBody),
+                            this.meshBuilder.getMesh(StageMesh.GhostShadow),
+                            this.meshBuilder.getMesh(StageMesh.GhostFaceFront),
+                            this.meshBuilder.getMesh(StageMesh.GhostFaceSide),
+                            TURN_TIME, tid - 25));
                     break;
 
                 default:
@@ -350,6 +373,11 @@ export class Stage {
         }
 
         for (let o of this.orbs) {
+
+            o.update(this.player, this, event);
+        }
+
+        for (let o of this.ghosts) {
 
             o.update(this.player, this, event);
         }
@@ -634,6 +662,10 @@ export class Stage {
         canvas.setStencilCondition(StencilCondition.NotEqual);
 
         this.terrain.drawShadows(canvas);
+        for (let o of this.ghosts) {
+
+            o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT, 1.0 - TILE_HEIGHT);
+        }
         this.player.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT, 1.0 - TILE_HEIGHT);
 
         canvas.setColor(0, 0, 0, SHADOW_ALPHA);
@@ -714,6 +746,10 @@ export class Stage {
 
             o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
         }
+        for (let o of this.ghosts) {
+
+            o.drawShadow(canvas, TILE_WIDTH, TILE_HEIGHT);
+        }
 
         this.drawStaticObjectsShadows(canvas);
 
@@ -727,6 +763,7 @@ export class Stage {
         this.objectBuffer.flush();
         this.objectBuffer.addObject(this.player);
         this.objectBuffer.addObjects(this.orbs);
+        this.objectBuffer.addObjects(this.ghosts);
         this.objectBuffer.sort();
 
         let scaleFactor = (this.height + 2.5) * TILE_HEIGHT;
@@ -828,6 +865,14 @@ export class Stage {
     }
 
 
+    public isUpperTileEmpty(x : number, y : number) : boolean {
+
+        let tile = this.getTile(1, x, y, -1);
+
+        return tile == 0; // || tile == 8;
+    }
+
+
     public setTile(layer : 0 | 1, x : number, y : number, value : number) {
 
         if (x < 0 || y < 0 || x >= this.width || y >= this.height)
@@ -865,6 +910,7 @@ export class Stage {
         this.killObjects(this.orbs);
         this.killObjects(this.togglablePlatforms);
         this.killObjects(this.switchingPlatforms);
+        this.killObjects(this.ghosts);
 
         let o : GameObject;
         let tid : number;
@@ -940,6 +986,20 @@ export class Stage {
                         break;
 
                     (<Orb> o).recreate(x, y);
+                    break;
+
+                // Ghosts
+                case 25:
+                case 26:
+                case 27:
+                case 28:
+
+                    o = <GameObject> nextObject<Ghost> (this.ghosts);
+                    // Should not happen
+                    if (o == null)
+                        break;
+                    (<Ghost> o).recreate(x, y, tid - 25);
+                    
                     break;
 
                 default:

@@ -1,7 +1,7 @@
 .PHONY: js
 js:
 	mkdir -p js
-	tsc -w src/*.ts --module es2020 --lib es2020,dom --target es2020 --outDir js
+	tsc -w src/main.ts --module es2020 --lib es2020,dom --target es2020 --outDir js
 
 server:
 	python3 -m http.server

@@ -1,35 +1,34 @@
 import { Canvas } from "../core/canvas.js";
 import { CoreEvent } from "../core/core.js";
-import { negMod } from "../core/math.js";
 import { Mesh } from "../core/mesh.js";
 import { Vector2 } from "../core/vector.js";
-import { PlatformObject } from "./gameobject.js";
+import { MovingObject} from "./gameobject.js";
 import { Player } from "./player.js";
 import { Stage } from "./stage.js";
 import { Direction, oppositeDirection } from "./types.js";
 
 
-export class MovingPlatform extends PlatformObject {
+export class Ghost extends MovingObject {
 
-
-    private readonly meshArrow : Mesh;
 
     private direction : Direction;
 
     private movementChecked : boolean;
 
-    private rotating : boolean;
-    private rotateTimer : number;
+    private wave : number;
+
+    private readonly meshBody : Mesh;
+    private readonly meshShadow : Mesh;
+    private readonly meshFaceFront : Mesh;
+    private readonly meshFaceSide : Mesh;
 
 
     constructor(x : number, y : number,
-        meshBottom : Mesh, meshTop : Mesh, 
-        meshShadow : Mesh, meshArrow : Mesh,
+        meshBody : Mesh, meshShadow : Mesh, 
+        meshFaceFront : Mesh, meshFaceSide : Mesh,
         moveTime : number, direction : Direction) {
 
-        super(x, y, meshBottom, meshTop, meshShadow);
-
-        this.meshArrow = meshArrow;
+        super(x, y, true);
 
         this.moveTimer = 0.0;
         this.moveTime = moveTime;
@@ -38,8 +37,12 @@ export class MovingPlatform extends PlatformObject {
 
         this.movementChecked = false;
 
-        this.rotating = false;
-        this.rotateTimer = 0.0;
+        this.wave = Math.random() * Math.PI * 2;
+
+        this.meshBody = meshBody;
+        this.meshShadow = meshShadow;
+        this.meshFaceFront = meshFaceFront;
+        this.meshFaceSide = meshFaceSide;
     }
 
 
@@ -58,9 +61,6 @@ export class MovingPlatform extends PlatformObject {
         this.direction = direction;
 
         this.exist = true;
-
-        this.rotating = false;
-        this.rotateTimer = 0.0;
     }
 
 
@@ -80,13 +80,13 @@ export class MovingPlatform extends PlatformObject {
         if (stage.getTile(1, px, py) == 3)
             return;
 
-        if (!stage.isBottomTileEmpty(px + dirx, py + diry)) {
+        if (!stage.isUpperTileEmpty(px + dirx, py + diry)) {
 
             this.direction = oppositeDirection(this.direction);
             dirx = DIRX[this.direction];
             diry = DIRY[this.direction];
 
-            if (!stage.isBottomTileEmpty(px + dirx, py + diry)) {
+            if (!stage.isUpperTileEmpty(px + dirx, py + diry)) {
 
                 return;
             }
@@ -96,22 +96,18 @@ export class MovingPlatform extends PlatformObject {
         this.moveTimer = this.moveTime;
         this.moving = true;
 
-        stage.setTile(0, px, py, 0);
-        stage.setTile(0, px + dirx, py + diry, this.direction + 5);
+        stage.setTile(1, px, py, 0);
+        stage.setTile(1, px + dirx, py + diry, this.direction + 25); 
     }
 
 
     public update(player : Player, stage : Stage, event : CoreEvent) {
 
+        const WAVE_SPEED = 0.05;
+
         if (!this.exist) return;
 
-        if (this.rotating) {
-
-            if ((this.rotateTimer -= event.step) <= 0) {
-
-                this.rotating = false;
-            }
-        }
+        this.wave = (this.wave + WAVE_SPEED * event.step) % (Math.PI*2);
 
         if (!player.isMoving()) {
 
@@ -128,68 +124,57 @@ export class MovingPlatform extends PlatformObject {
 
             this.checkMovement(stage, event);
         }
-
         this.move(stage, event);
     }
 
 
-    protected applyBaseTransform(canvas : Canvas, tileWidth : number, tileHeight : number) {
+    private setTransform(canvas : Canvas, tileWidth: number, tileHeight: number, yoff = 0, scale = 1.0) {
 
         canvas.transform
             .push()
             .translate(
                 this.renderPos.x * tileWidth, 
-                this.renderPos.y * tileHeight + (1.0 - tileHeight))
+                this.renderPos.y * tileHeight + yoff)
+            .scale(scale, scale)
             .use();
     }
 
 
-    public drawTop(canvas : Canvas, tileWidth : number, tileHeight : number) {
-
-        const ANGLE = [-1, 2, 1, 0];
+    public drawShadow(canvas: Canvas, tileWidth: number, tileHeight: number, offset = 0.0) {
+        
+        const BASE_SCALE = 0.85;
+        const SCALE_AMPLITUDE = 0.05;
 
         if (!this.exist) return;
 
-        this.applyBaseTransform(canvas, tileWidth, tileHeight);
+        let scale = BASE_SCALE + Math.sin(this.wave) * SCALE_AMPLITUDE;
 
-        canvas.drawMesh(this.meshTop);
+        this.setTransform(canvas, tileWidth, tileHeight, offset, scale);
 
-        let baseAngle = Math.PI/2 * ANGLE[this.direction];
-        if (this.rotating) {
+        canvas.drawMesh(this.meshShadow);
 
-            baseAngle -= Math.PI/2 * (this.rotateTimer / this.moveTime);
-        }
-
-        canvas.transform    
-            .translate(0, -(1.0 - tileHeight))
-            .scale(tileWidth, tileHeight)
-            .rotate(baseAngle)
-            .use();
-
-        canvas.drawMesh(this.meshArrow);
-
-        canvas.transform   
+        canvas.transform
             .pop()
             .use();
     }
 
 
-    public rotate(stage : Stage, startIndex : number) {
+    public draw(canvas: Canvas, tileWidth: number, tileHeight: number) {
+        
+        const BASE_OFFSET = -0.40;
+        const AMPLITUDE = 0.05;
 
-        this.movementChecked = false;
-        if (this.moving) {
+        if (!this.exist) return;
 
-            this.pos = this.target.clone();
-            this.renderPos = this.pos.clone();
-            this.moving = false;
-        }
+        let offset = BASE_OFFSET + Math.sin(this.wave) * AMPLITUDE;
 
-        this.rotating = true;
-        this.rotateTimer = this.moveTime;
+        this.setTransform(canvas, tileWidth, tileHeight, offset);
 
-        this.direction = negMod(this.direction - 1, 4);
+        canvas.drawMesh(this.meshBody);
 
-        stage.setTile(0, this.pos.x | 0, this.pos.y | 0, startIndex + this.direction);
+        canvas.transform
+            .pop()
+            .use();
     }
 
 
