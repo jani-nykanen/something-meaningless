@@ -645,8 +645,23 @@ export class StageMeshBuilder {
         const INNER_RADIUS = 0.31;
         const OUTLINE_WIDTH = 0.033;
         
+        const EYE_OFFSET_X = 0.275;
+        const EYE_Y = -0.05;
+        const EYE_WIDTH = 0.15;
+        const EYE_HEIGHT = 0.225;
+
+        const EYE_WHITE_OFF_X = -0.01;
+        const EYE_WHITE_OFF_Y = -0.02;
+
+        const SIDE_EYE_X1 = 0.30;
+        const SIDE_EYE_X2 = 0.20;
+        const SIDE_EYE_Y1 = -0.1;
+        const SIDE_EYE_Y2 = -0.05;
+
         const BODY_COLOR_1 = new RGBA(0.70);
         const BODY_COLOR_2 = new RGBA(1.0);
+
+        const WHITE = new RGBA();
 
         let r = BODY_RADIUS - OUTLINE_WIDTH;
 
@@ -658,6 +673,24 @@ export class StageMeshBuilder {
 
         this.meshes[StageMesh.GhostShadow] = (new ShapeGenerator())
             .addEllipse(0, 0, BODY_RADIUS*2, BODY_RADIUS, 32, BLACK)
+            .constructMesh(event);
+
+        this.meshes[StageMesh.GhostFaceFront] = (new ShapeGenerator())
+            .addEllipse(-EYE_OFFSET_X/2, EYE_Y, EYE_WIDTH, EYE_HEIGHT, 16, BLACK)
+            .addEllipse(EYE_OFFSET_X/2, EYE_Y, EYE_WIDTH, EYE_HEIGHT, 16, BLACK)
+            .addEllipse(-EYE_OFFSET_X/2 + EYE_WHITE_OFF_X, 
+                EYE_Y + EYE_WHITE_OFF_Y, 
+                EYE_WIDTH/2, EYE_HEIGHT/2, 16, WHITE)
+            .addEllipse(EYE_OFFSET_X/2 + EYE_WHITE_OFF_X, 
+                EYE_Y + EYE_WHITE_OFF_Y, 
+                EYE_WIDTH/2, EYE_HEIGHT/2, 16, WHITE)
+            .constructMesh(event);
+
+        this.meshes[StageMesh.GhostFaceSide] = (new ShapeGenerator())
+            .addEllipse(-SIDE_EYE_X1, SIDE_EYE_Y1, EYE_WIDTH/2, EYE_HEIGHT/1.1, 16, BLACK)
+            .addEllipse(-SIDE_EYE_X2, SIDE_EYE_Y2, EYE_WIDTH/1.5, EYE_HEIGHT, 16, BLACK)
+            .addEllipse(-SIDE_EYE_X1 + EYE_WHITE_OFF_X, SIDE_EYE_Y1 + EYE_WHITE_OFF_Y, EYE_WIDTH/4, EYE_HEIGHT/2.2, 16, WHITE)
+            .addEllipse(-SIDE_EYE_X2 + EYE_WHITE_OFF_X, SIDE_EYE_Y2 + EYE_WHITE_OFF_Y, EYE_WIDTH/3, EYE_HEIGHT/2, 16, WHITE)
             .constructMesh(event);
     }
 

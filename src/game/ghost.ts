@@ -128,14 +128,14 @@ export class Ghost extends MovingObject {
     }
 
 
-    private setTransform(canvas : Canvas, tileWidth: number, tileHeight: number, yoff = 0, scale = 1.0) {
+    private setTransform(canvas : Canvas, tileWidth: number, tileHeight: number, yoff = 0, scale = 1.0, flip = false) {
 
         canvas.transform
             .push()
             .translate(
                 this.renderPos.x * tileWidth, 
                 this.renderPos.y * tileHeight + yoff)
-            .scale(scale, scale)
+            .scale(flip ? -scale : scale, scale)
             .use();
     }
 
@@ -161,16 +161,24 @@ export class Ghost extends MovingObject {
 
     public draw(canvas: Canvas, tileWidth: number, tileHeight: number) {
         
-        const BASE_OFFSET = -0.40;
+        const BASE_OFFSET = -0.45;
         const AMPLITUDE = 0.05;
 
         if (!this.exist) return;
 
         let offset = BASE_OFFSET + Math.sin(this.wave) * AMPLITUDE;
 
-        this.setTransform(canvas, tileWidth, tileHeight, offset);
+        this.setTransform(canvas, tileWidth, tileHeight, offset, 1.0, this.direction == Direction.Right);
 
         canvas.drawMesh(this.meshBody);
+        if (this.direction == Direction.Down) {
+
+            canvas.drawMesh(this.meshFaceFront);
+        }
+        else if (this.direction == Direction.Left || this.direction == Direction.Right) {
+
+            canvas.drawMesh(this.meshFaceSide);
+        }
 
         canvas.transform
             .pop()

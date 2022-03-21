@@ -116,7 +116,11 @@ export class Player extends MovingObject {
 
         let moveTimeFactor = 1.0;
 
-        // Check if free
+        // Check if the top tile is free
+        if (!stage.canMoveToUpperTile(px + dirx, py + diry))
+            return;
+
+        // Check if bottom tile is free
         let tileType = stage.getBottomTileType(px + dirx, py + diry);
         if (tileType == TileType.Invalid) {
 
@@ -124,7 +128,8 @@ export class Player extends MovingObject {
             dirx *= 2;
             diry *= 2;
 
-            if (stage.getBottomTileType(px + dirx, py + diry) == TileType.Invalid) {
+            if (stage.getBottomTileType(px + dirx, py + diry) == TileType.Invalid ||
+                !stage.canMoveToUpperTile(px + dirx, py + diry)) {
 
                 return;
             }

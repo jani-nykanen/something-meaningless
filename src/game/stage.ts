@@ -971,7 +971,8 @@ export class Stage {
                 }
 
                 // Top layer
-                switch (this.activeLayers[1][y * this.width + x]) {
+                tid = this.activeLayers[1][y * this.width + x];
+                switch (tid) {
 
                 case 3:
                     
@@ -1203,5 +1204,11 @@ export class Stage {
             }
         }
         return null;
+    }
+
+
+    public canMoveToUpperTile(x : number, y : number) : boolean {
+        
+        return (this.getTile(1, x, y) < 25 || this.getTile(1, x, y) > 28);
     }
 }
