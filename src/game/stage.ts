@@ -480,6 +480,16 @@ export class Stage {
     }
 
 
+    private drawGiantFloorStar(canvas : Canvas, x : number, y : number) {
+
+        const COUNT = 4;
+
+        this.drawAnimatedFloor(canvas, x, y, 
+            this.starAnimationTimer, StageMesh.FloorStar,
+            COUNT, 1.99, new RGBA(0.0, 0.33, 0.67), this.specialStarScale);
+    }
+
+
     private drawFloorArrow(canvas : Canvas, dir : Direction,  x : number, y : number) {
 
         const OFFSET = 0.20;
@@ -580,6 +590,12 @@ export class Stage {
             case 24:
                 
                 this.drawButton(canvas, x, y, StageMesh.RotationButtonDown);
+                break;
+
+            // Giant floor star
+            case 29:
+
+                this.drawGiantFloorStar(canvas, x, y);
                 break;
 
             default:
@@ -849,6 +865,7 @@ export class Stage {
 
         case 13:
         case 16:    
+        case 29:
             return TileType.JumpTile;
 
         default:
@@ -1170,7 +1187,7 @@ export class Stage {
 
     public isCleared() : boolean {
 
-        return this.orbsLeft == 0;
+        return this.orbs.length > 0 && this.orbsLeft == 0;
     }
 
 
@@ -1211,4 +1228,7 @@ export class Stage {
         
         return (this.getTile(1, x, y) < 25 || this.getTile(1, x, y) > 28);
     }
+
+
+    public getIndex = () : number => this.stageIndex;
 }

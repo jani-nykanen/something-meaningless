@@ -1,4 +1,4 @@
-import { Canvas, ShaderType } from "../core/canvas.js";
+import { Canvas, ShaderType, TextAlign } from "../core/canvas.js";
 import { CoreEvent, Scene } from "../core/core.js";
 import { TransitionEffectType } from "../core/transition.js";
 import { State } from "../core/types.js";
@@ -65,6 +65,24 @@ export class GameScene implements Scene {
     }
 
 
+    private drawHUD(canvas : Canvas) {
+
+        canvas.changeShader(ShaderType.Textured);
+
+        canvas.transform
+            .loadIdentity()
+            .fitGivenDimension(1080.0, canvas.width/canvas.height)
+            .use();
+        
+        let str = "STAGE " + String(this.stage.getIndex());
+        let view = canvas.transform.getViewport();
+
+        canvas.setColor();
+        canvas.drawText(canvas.assets.getBitmap("font"), 
+            str, view.x/2, 16, -56, 0, TextAlign.Center, 0.67, 0.67);
+    }
+
+
     public redraw(canvas: Canvas) : void {
 
         const SCALE_OUT = 0.33;
@@ -85,10 +103,11 @@ export class GameScene implements Scene {
         canvas.transform
             .loadIdentity()
             .use();
-
         canvas.clear(0.33, 0.67, 1.0);
 
         this.stage.draw(canvas, scaleOut, yoff);
+
+        this.drawHUD(canvas);
     }
 
     
