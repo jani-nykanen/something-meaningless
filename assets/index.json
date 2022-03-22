@@ -36,6 +36,10 @@
         {"name": "33", "path": "33.tmx"},
         {"name": "34", "path": "34.tmx"},
         {"name": "35", "path": "35.tmx"},
-        {"name": "36", "path": "36.tmx"}
+        {"name": "36", "path": "36.tmx"},
+        {"name": "37", "path": "37.tmx"},
+        {"name": "38", "path": "38.tmx"},
+        {"name": "39", "path": "39.tmx"},
+        {"name": "40", "path": "40.tmx"}
     ]
 }

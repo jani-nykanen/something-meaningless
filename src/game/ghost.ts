@@ -144,10 +144,12 @@ export class Ghost extends MovingObject {
         
         const BASE_SCALE = 0.85;
         const SCALE_AMPLITUDE = 0.05;
+        const OFFSET_SCALE_FACTOR = 1.5;
 
         if (!this.exist) return;
 
         let scale = BASE_SCALE + Math.sin(this.wave) * SCALE_AMPLITUDE;
+        scale *= (1.0 - offset/OFFSET_SCALE_FACTOR);
 
         this.setTransform(canvas, tileWidth, tileHeight, offset, scale);
 
