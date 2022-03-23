@@ -9,6 +9,10 @@ const BODY_ROTATION_FACTOR = Math.PI/12;
 const ARM_ROTATION_START = Math.PI/4;
 
 
+const BASE_COLOR_1 = new RGBA(1.0, 0.95, 0.40);
+const BASE_COLOR_2 = new RGBA(0.80, 0.70, 0.10);
+
+
 export class PlayerAnimator {
 
 
@@ -62,14 +66,14 @@ export class PlayerAnimator {
                 WIDTH - OUTLINE_WIDTH*2, 
                 HEIGHT - OUTLINE_WIDTH*2, 
                 0.1, CORNER_QUALITY, 
-                new RGBA(0.80, 0.60, 0.1))
+                BASE_COLOR_2)
             .addRoundedRectangle(
                 -WIDTH/2 + OUTLINE_WIDTH + 0.025, 
                 -HEIGHT/2 + OUTLINE_WIDTH + 0.025, 
                 WIDTH - OUTLINE_WIDTH*2 - 0.1, 
                 HEIGHT - OUTLINE_WIDTH*2 - 0.1, 
                 0.1, CORNER_QUALITY, 
-                new RGBA(1.0, 0.90, 0.50))
+                BASE_COLOR_1)
             // Hat, front
             .addSector(0, Math.PI, 16, new RGBA(0), 0.35, -0.25, 0.33, -0.10, Math.PI/5)
             .addSector(0, Math.PI, 16, new RGBA(0), 0.35, -0.25, 0.225, -0.30, Math.PI/5)
@@ -146,13 +150,12 @@ export class PlayerAnimator {
         const LEG_COLOR_1 = new RGBA(0.80, 0.20, 0.0);
         const LEG_COLOR_2 = new RGBA(1.0, 0.50, 0.10);
 
-        const ARM_COLOR_1 = new RGBA(1.0, 0.90, 0.50);
-        const ARM_COLOR_2 = new RGBA(0.80, 0.60, 0.10)
+        const ARM_COLOR_1 = BASE_COLOR_1; // new RGBA(1.0, 0.90, 0.50);
+        const ARM_COLOR_2 = BASE_COLOR_2; // new RGBA(0.80, 0.60, 0.10)
 
         const ARM_RADIUS_1 = 0.090;
         const ARM_RADIUS_2 = 0.120;
         const ARM_RADIUS_3 = 0.160;
-
 
         this.meshLeg = (new ShapeGenerator())
             .addTriangle(
