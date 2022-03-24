@@ -6,6 +6,11 @@
 
     "samplePath" : "assets/audio/",
     "samples" : [
+        {"name": "select", "path": "select.wav"},
+        {"name": "choose", "path": "choose.wav"},
+        {"name": "jump", "path": "jump.wav"},
+        {"name": "shortJump", "path": "short_jump.wav"},
+
         {"name": "theme", "path": "theme.ogg"}
     ],
 

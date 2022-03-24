@@ -92,7 +92,7 @@ export class Player extends MovingObject {
     }
 
 
-    private jump() {
+    private jump(event : CoreEvent) {
 
         this.jumping = true;
         this.jumpHeight = 2.0;
@@ -101,6 +101,8 @@ export class Player extends MovingObject {
 
             this.rotationPhase = 1;
         }
+        
+        event.audio.playSample(event.assets.getSample("jump"), 0.60);   
     }
 
 
@@ -134,7 +136,7 @@ export class Player extends MovingObject {
                 return;
             }
 
-            this.jump();
+            this.jump(event);
             moveTimeFactor = 2;
         }
         else if (forceJump) {
@@ -144,7 +146,7 @@ export class Player extends MovingObject {
 
             if (stage.getBottomTileType(px + dirx, py + diry) != TileType.Invalid) {
 
-                this.jump();
+                this.jump(event);
                 moveTimeFactor = 2;
             }
             else {
@@ -157,11 +159,16 @@ export class Player extends MovingObject {
             }
         }
 
+        let shortJump = (tileType == TileType.Platform || tileType == TileType.JumpTile ||
+            stage.getBottomTileType(px, py) == TileType.Platform);
+        if (!this.jumping && shortJump) {
+
+            event.audio.playSample(event.assets.getSample("shortJump"), 0.60);  
+        }
+
         this.jumping = forceJump ||
             this.jumping || 
-            tileType == TileType.Platform ||
-            tileType == TileType.JumpTile ||
-            stage.getBottomTileType(px, py) == TileType.Platform;
+            shortJump;
 
         this.target = Vector2.add(this.pos, new Vector2(dirx, diry));
 

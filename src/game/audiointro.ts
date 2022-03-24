@@ -24,8 +24,6 @@ export class AudioIntro implements Scene {
     constructor(param : any, event : CoreEvent) {
 
         const START_SCENE = GameScene;
-        const INITIAL_SAMPLE_VOLUME = 0.40;
-        const INITIAL_MUSIC_VOLUME = 0.50;
 
         this.yesNoMenu = new Menu(
             [
@@ -33,12 +31,8 @@ export class AudioIntro implements Scene {
                     event => {
 
                         event.audio.toggle(true);
-        
-                        event.audio.setGlobalMusicVolume(INITIAL_MUSIC_VOLUME);
-                        event.audio.setGlobalSampleVolume(INITIAL_SAMPLE_VOLUME);
-
-                        // event.audio.playSample(event.assets.getSample("choose"), 0.60);
-
+                        event.audio.playSample(event.assets.getSample("choose"), 0.60);
+                        
                         event.changeScene(START_SCENE);
                     }),
 
@@ -76,15 +70,15 @@ export class AudioIntro implements Scene {
             .setView(canvas.width, canvas.height)
             .use();
 
-        canvas.clear(0.0, 0.33, 0.67);
+        canvas.clear(0.33, 0.67, 1.0);
 
         canvas.changeShader(ShaderType.Textured);
         canvas.setColor();
 
-        canvas.drawText(canvas.assets.getBitmap("font"), 
+        canvas.drawTextWithShadow(canvas.assets.getBitmap("font"), 
             QUESTION, 
             canvas.width/2 - this.width*(128 + XOFF) * TEXT_SCALE / 2, Y_POS, 
-            XOFF, YOFF, TextAlign.Left, TEXT_SCALE, TEXT_SCALE);
+            XOFF, YOFF, TextAlign.Left, TEXT_SCALE, TEXT_SCALE, 4, 4, 0.20);
 
         this.yesNoMenu.draw(canvas, 0, 224, -56, 80, TEXT_SCALE, Math.PI*2/4, 12.0);
     }

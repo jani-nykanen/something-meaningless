@@ -39,23 +39,28 @@ export class GameScene implements Scene {
             new MenuButton("Resume", event => {
 
                 this.pauseMenu.deactivate();
+                this.resumeMusic(event);
             }),
 
             new MenuButton("Restart", event => {
 
                 this.pauseMenu.deactivate();
                 this.stage.reset();
+                this.resumeMusic(event);
             }),
 
             new MenuButton("Undo", event => {
 
                 this.pauseMenu.deactivate();
                 this.stage.undo();
+                this.resumeMusic(event);
             }),
 
             new MenuButton(event.audio.getAudioStateString(), event => {
 
+                event.audio.toggle(!event.audio.isEnabled());
                 // Order to toggle is important...
+                /*
                 if (event.audio.isEnabled()) {
 
                     event.audio.pauseMusic();
@@ -69,6 +74,7 @@ export class GameScene implements Scene {
                         event.audio.fadeInMusic(event.assets.getSample("theme"), THEME_VOLUME, 1000.0);
                     }
                 }
+                */
                 this.pauseMenu.changeButtonText(3, event.audio.getAudioStateString());
             }),
 
@@ -79,6 +85,15 @@ export class GameScene implements Scene {
         ]);
 
         event.audio.fadeInMusic(event.assets.getSample("theme"), THEME_VOLUME, 1000.0);
+    }
+
+
+    private resumeMusic(event : CoreEvent) {
+
+        if (!event.audio.resumeMusic()) {
+
+            event.audio.fadeInMusic(event.assets.getSample("theme"), THEME_VOLUME, 1000.0);
+        }
     }
 
 
@@ -107,6 +122,7 @@ export class GameScene implements Scene {
         else if (event.input.getAction("start") == State.Pressed) {
 
             this.pauseMenu.activate(0);
+            event.audio.pauseMusic();
         }
 
 
@@ -151,15 +167,17 @@ export class GameScene implements Scene {
         let view = canvas.transform.getViewport();
 
         canvas.setColor();
-        canvas.drawText(canvas.assets.getBitmap("font"), 
-            str, view.x/2, 16, -56, 0, TextAlign.Center, 0.67, 0.67);
+        canvas.drawTextWithShadow(canvas.assets.getBitmap("font"), 
+            str, view.x/2, 16, -56, 0, TextAlign.Center, 0.67, 0.67,
+            4, 4, 0.20);
 
         let index = this.stage.getIndex() - 1;
         if (index < HINTS.length) {
 
-            canvas.drawText(canvas.assets.getBitmap("font"), 
+            canvas.drawTextWithShadow(canvas.assets.getBitmap("font"), 
                 HINTS[index], 16, view.y-64 + HINT_OFFSET[index], 
-                -56, -4, TextAlign.Left, 0.40, 0.40);
+                -56, -4, TextAlign.Left, 0.40, 0.40,
+                4, 4, 0.20);
         }
     }
 

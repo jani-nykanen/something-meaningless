@@ -92,8 +92,7 @@ export class Menu {
         if (oldPos != this.cursorPos) {
 
             this.cursorPos = negMod(this.cursorPos, this.buttons.length);
-
-            // event.audio.playSample(event.assets.getSample("choose"), 0.70);
+            event.audio.playSample(event.assets.getSample("choose"), 0.70);
         }
 
         let activeButton = this.buttons[this.cursorPos];
@@ -101,8 +100,8 @@ export class Menu {
         if (event.input.getAction("select") == State.Pressed ||
             event.input.getAction("start") == State.Pressed) {
 
-            // event.audio.playSample(event.assets.getSample("select"), 0.50);    
             activeButton.evaluateCallback(event);
+            event.audio.playSample(event.assets.getSample("select"), 0.50);   
         }
 
         this.textWave = (this.textWave + WAVE_SPEED*event.step) % (Math.PI*2);
@@ -144,9 +143,11 @@ export class Menu {
                 scale = fontScale;
             }
 
-            canvas.drawText(font, this.buttons[i].getText(), 
+            canvas.drawTextWithShadow(font, this.buttons[i].getText(), 
                 dx, dy + i * yoff, xoff, 0, TextAlign.Center,
-                scale, scale, this.textWave, 
+                scale, scale,
+                4, 4, 0.20, 
+                this.textWave, 
                 waveFactor * waveAmplitude, wavePeriod);
         } 
         canvas.setColor();

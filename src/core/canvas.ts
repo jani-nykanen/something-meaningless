@@ -390,6 +390,25 @@ export class Canvas {
     }
 
 
+    public  drawTextWithShadow(font : Bitmap, str : string, 
+        dx : number, dy : number, 
+        xoff = 0.0, yoff = 0.0, align = TextAlign.Center, 
+        scalex = 1, scaley = 1,
+        shadowOffX = 0, shadowOffY = 0, shadowAlpha = 0.0,
+        wave = 0.0, amplitude = 0.0, period = 0.0) {
+
+        let color = this.activeColor.clone();
+    
+        this.setColor(0, 0, 0, shadowAlpha);
+        this.drawText(font, str, dx + shadowOffX, dy + shadowOffY,
+            xoff, yoff, align, scalex, scaley, wave, amplitude, period);
+
+        this.setColor(color.r, color.g, color.b, color.a);
+        this.drawText(font, str, dx, dy,
+            xoff, yoff, align, scalex, scaley, wave, amplitude, period);
+    }
+
+
     public drawMesh(mesh : Mesh) {
 
         this.bindMesh(mesh);

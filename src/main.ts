@@ -3,6 +3,10 @@ import { Core } from "./core/core.js";
 import { AudioIntro } from "./game/audiointro.js";
 
 
+const INITIAL_SAMPLE_VOLUME = 0.50;
+const INITIAL_MUSIC_VOLUME = 0.50;
+
+
 window.onload = () => (new Core())
     .run(AudioIntro, "assets/index.json",
     event => {
@@ -15,5 +19,6 @@ window.onload = () => (new Core())
     },
     event => {
 
-        // ...
+        event.audio.setGlobalMusicVolume(INITIAL_MUSIC_VOLUME);
+        event.audio.setGlobalSampleVolume(INITIAL_SAMPLE_VOLUME);
     });
