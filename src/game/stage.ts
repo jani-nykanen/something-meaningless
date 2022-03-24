@@ -1085,6 +1085,8 @@ export class Stage {
 
     public checkUnderlyingTiles(x : number, y : number, event : CoreEvent) : UnderlyingEffectType {
 
+        const BUTTON_VOL = 0.65;
+
         switch (this.getTile(0, x, y)) {
             
         // Button pressed, purple
@@ -1101,6 +1103,8 @@ export class Stage {
 
             this.waiting = true;
             this.waitTimer = TURN_TIME;
+
+            event.audio.playSample(event.assets.getSample("button"), BUTTON_VOL);   
 
             return UnderlyingEffectType.Button;
 
@@ -1129,6 +1133,8 @@ export class Stage {
             this.waiting = true;
             this.waitTimer = TURN_TIME;
             this.arrowRotationTimer = 1.0;
+
+            event.audio.playSample(event.assets.getSample("button"), BUTTON_VOL);   
 
             return UnderlyingEffectType.Button;
 
@@ -1163,6 +1169,8 @@ export class Stage {
 
                 o.rotate(this, 5);
             }
+
+            event.audio.playSample(event.assets.getSample("button"), BUTTON_VOL);   
 
             return UnderlyingEffectType.Button;
 

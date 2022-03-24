@@ -4,7 +4,7 @@ import { AudioIntro } from "./game/audiointro.js";
 
 
 const INITIAL_SAMPLE_VOLUME = 0.50;
-const INITIAL_MUSIC_VOLUME = 0.50;
+const INITIAL_MUSIC_VOLUME = 0.80;
 
 
 window.onload = () => (new Core())

@@ -161,7 +161,7 @@ export class Player extends MovingObject {
 
         let shortJump = (tileType == TileType.Platform || tileType == TileType.JumpTile ||
             stage.getBottomTileType(px, py) == TileType.Platform);
-        if (!this.jumping && shortJump) {
+        if (!this.jumping && (shortJump || forceJump)) {
 
             event.audio.playSample(event.assets.getSample("shortJump"), 0.60);  
         }
@@ -284,6 +284,8 @@ export class Player extends MovingObject {
                 this.moving = false;
 
                 this.stopAnimation();
+
+                event.audio.playSample(event.assets.getSample("teleport"), 0.65); 
             }
             break;
 

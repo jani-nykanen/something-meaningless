@@ -65,6 +65,8 @@ export class Orb extends GameObject {
 
             stage.spawnStars(this.pos.x, this.pos.y - 0.20, 6);
             stage.recomputeOrbs();
+
+            event.audio.playSample(event.assets.getSample("orb"), 0.60);   
         }
 
         this.wave = (this.wave + WAVE_SPEED * event.step) % (Math.PI*2);

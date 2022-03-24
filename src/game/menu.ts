@@ -8,6 +8,9 @@ import { State } from "../core/types.js";
 export class MenuButton {
 
 
+    private scale : number;
+    private scaleTarget : number;
+
     private text : string;
     private callback : (event : CoreEvent) => void;
 
@@ -16,6 +19,9 @@ export class MenuButton {
 
         this.text = text;
         this.callback = callback;
+
+        this.scale = 1.0;
+        this.scaleTarget = 1.0;
     }
 
 
@@ -33,6 +39,34 @@ export class MenuButton {
 
         this.text = newText;
     }
+
+
+    public setScaleTarget(target = 1.0) {
+
+        this.scaleTarget = target;
+    }
+
+
+    public setScale(scale = 1.0) {
+
+        this.scale = scale;
+    }
+
+
+    public update(scaleSpeed : number, event : CoreEvent) {
+
+        if (this.scale < this.scaleTarget) {
+
+            this.scale = Math.min(this.scaleTarget, this.scale + scaleSpeed * event.step);
+        }
+        else if (this.scale > this.scaleTarget) {
+
+            this.scale = Math.max(this.scaleTarget, this.scale - scaleSpeed * event.step);
+        }
+    }
+
+
+    public getScale = () : number => this.scale;
 }
 
 
@@ -69,13 +103,19 @@ export class Menu {
             this.cursorPos = cursorPos % this.buttons.length;
 
         this.active = true;
+
+        for (let i = 0; i < this.buttons.length; ++ i) {
+
+            this.buttons[i].setScale(i == cursorPos ? 2.0 : 1.0);
+        }
     }
 
 
     public update(event : CoreEvent) {
 
         const WAVE_SPEED = 0.067;
-
+        const BUTTON_SCALE_SPEED = 1.0/10.0;
+        
         if (!this.active) return;
 
         let oldPos = this.cursorPos;
@@ -105,6 +145,19 @@ export class Menu {
         }
 
         this.textWave = (this.textWave + WAVE_SPEED*event.step) % (Math.PI*2);
+
+        for (let i = 0; i < this.buttons.length; ++ i) {
+
+            this.buttons[i].update(BUTTON_SCALE_SPEED, event);
+            if (this.cursorPos == i) {
+
+                this.buttons[i].setScaleTarget(2.0);
+            }
+            else {
+
+                this.buttons[i].setScaleTarget();
+            }
+        }
     }
 
 
@@ -132,16 +185,15 @@ export class Menu {
 
             if (i == this.cursorPos) {
 
-                waveFactor = 1.0;
                 canvas.setColor(1, 1, 0.33);
-                scale = fontScale * ACTIVE_SCALE;
             }
             else {
 
-                waveFactor = 0.0;
                 canvas.setColor();
-                scale = fontScale;
             }
+
+            waveFactor = this.buttons[i].getScale() - 1.0;
+            scale = fontScale * (1.0 + (ACTIVE_SCALE - 1.0) * waveFactor);
 
             canvas.drawTextWithShadow(font, this.buttons[i].getText(), 
                 dx, dy + i * yoff, xoff, 0, TextAlign.Center,

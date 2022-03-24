@@ -10,6 +10,12 @@
         {"name": "choose", "path": "choose.wav"},
         {"name": "jump", "path": "jump.wav"},
         {"name": "shortJump", "path": "short_jump.wav"},
+        {"name": "orb", "path": "orb.wav"},
+        {"name": "button", "path": "button.wav"},
+        {"name": "restart", "path": "restart.wav"},
+        {"name": "undo", "path": "undo.wav"},
+        {"name": "pause", "path": "pause.wav"},
+        {"name": "teleport", "path": "teleport.wav"},
 
         {"name": "theme", "path": "theme.ogg"}
     ],

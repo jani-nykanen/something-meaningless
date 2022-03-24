@@ -123,19 +123,22 @@ export class GameScene implements Scene {
 
             this.pauseMenu.activate(0);
             event.audio.pauseMusic();
-        }
 
+            event.audio.playSample(event.assets.getSample("pause"), 0.70);   
+        }
 
         this.stage.update(event);
 
         if (event.input.getAction("undo") == State.Pressed) {
 
             this.stage.undo();
+            event.audio.playSample(event.assets.getSample("undo"), 0.65);   
         }
 
         if (event.input.getAction("restart") == State.Pressed) {
 
             this.stage.reset();
+            event.audio.playSample(event.assets.getSample("restart"), 0.60);   
         }
 
         if (this.stage.isCleared()) {
