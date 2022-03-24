@@ -98,6 +98,10 @@ export class InputListener {
 
         this.actions.push(new InputAction(name, key1, key2, button1, button2));
 
+        this.keyboard.preventKey(key1);
+        if (key2 != null)
+            this.keyboard.preventKey(key2);
+
         return this;
     }
 

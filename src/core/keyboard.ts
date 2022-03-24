@@ -97,4 +97,9 @@ export class KeyboardListener {
 
     public isAnyPressed = () : boolean => this.anyPressed;
 
+
+    public preventKey(key : string) {
+
+        this.prevent.push(key);
+    }
 }
