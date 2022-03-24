@@ -90,12 +90,14 @@ export class AudioPlayer {
     }
 
 
-    public resumeMusic() {
+    public resumeMusic() : boolean {
 
         if (!this.enabled || this.musicTrack == null)
-            return;
+            return false;
 
         this.musicTrack.resume(this.ctx);
+        
+        return true;
     }
 
 
@@ -109,9 +111,15 @@ export class AudioPlayer {
     }
 
 
+    public isEnabled = () : boolean => this.enabled;
+
+
     public getContext = () : AudioContext => this.ctx;
 
     public getGlobalSampleVolume = () : number => this.globalSampleVol;
     public getGlobalMusicVolume = () : number => this.globalMusicVol;
     
+
+    // For things like settings
+    public getAudioStateString = () : string => this.enabled ? "Audio: On" : "Audio: Off";
 }

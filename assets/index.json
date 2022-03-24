@@ -4,6 +4,12 @@
         {"name": "font", "path": "font.png"}
     ],
 
+    "samplePath" : "assets/audio/",
+    "samples" : [
+        {"name": "theme", "path": "theme.ogg"}
+    ],
+
+
     "tilemapPath" : "assets/tilemaps/",
     "tilemaps" : [
         {"name": "1", "path": "1.tmx"},

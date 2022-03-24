@@ -1,10 +1,10 @@
 
 import { Core } from "./core/core.js";
-import { GameScene } from "./game/game.js";
+import { AudioIntro } from "./game/audiointro.js";
 
 
 window.onload = () => (new Core())
-    .run(GameScene, "assets/index.json",
+    .run(AudioIntro, "assets/index.json",
     event => {
 
         event.input

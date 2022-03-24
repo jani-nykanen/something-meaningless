@@ -7,6 +7,10 @@ import { Menu, MenuButton } from "./menu.js";
 import { Stage } from "./stage.js";
 
 
+// TODO: Put this elsewhere
+const THEME_VOLUME = 1.0;
+
+
 const HINTS = [
     "HINT: Use arrow keys to move.",
     "HINT: You can jump over small gaps.",
@@ -49,9 +53,23 @@ export class GameScene implements Scene {
                 this.stage.undo();
             }),
 
-            new MenuButton("Settings", event => {
+            new MenuButton(event.audio.getAudioStateString(), event => {
 
-                // ...
+                // Order to toggle is important...
+                if (event.audio.isEnabled()) {
+
+                    event.audio.pauseMusic();
+                    event.audio.toggle(false);
+                }
+                else {
+
+                    event.audio.toggle(true);
+                    if (!event.audio.resumeMusic()) {
+
+                        event.audio.fadeInMusic(event.assets.getSample("theme"), THEME_VOLUME, 1000.0);
+                    }
+                }
+                this.pauseMenu.changeButtonText(3, event.audio.getAudioStateString());
             }),
 
             new MenuButton("Main menu", event => {
@@ -59,6 +77,8 @@ export class GameScene implements Scene {
                 // ...
             })
         ]);
+
+        event.audio.fadeInMusic(event.assets.getSample("theme"), THEME_VOLUME, 1000.0);
     }
 
 
