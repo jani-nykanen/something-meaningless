@@ -352,4 +352,14 @@ export class PlayerAnimator {
 
         canvas.transform.pop();
     }
+
+
+    public dispose(event : CoreEvent) {
+        
+        event.disposeMesh(this.meshBody);
+        event.disposeMesh(this.meshFaceStatic);
+        event.disposeMesh(this.meshEye);
+        event.disposeMesh(this.meshLeg);
+        event.disposeMesh(this.meshArm);
+    }
 }

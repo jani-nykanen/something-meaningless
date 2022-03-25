@@ -1,6 +1,7 @@
 {
     "bitmapPath" : "assets/bitmaps/",
     "bitmaps" : [
+        {"name": "logo", "path": "logo.png"},
         {"name": "font", "path": "font.png"}
     ],
 
@@ -16,6 +17,7 @@
         {"name": "undo", "path": "undo.wav"},
         {"name": "pause", "path": "pause.wav"},
         {"name": "teleport", "path": "teleport.wav"},
+        {"name": "start", "path": "start.wav"},
 
         {"name": "theme", "path": "theme.ogg"}
     ],

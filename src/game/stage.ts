@@ -1239,4 +1239,13 @@ export class Stage {
 
 
     public getIndex = () : number => this.stageIndex;
+
+
+    public dispose(event : CoreEvent) {
+
+        this.terrain.dispose(event);
+        this.meshBuilder.dispose(event);
+        this.starGen.dispose(event);
+        this.player.dispose(event);
+    }
 }

@@ -498,4 +498,10 @@ export class Player extends MovingObject {
 
         this.moving = false;
     }
+
+
+    public dispose(event : CoreEvent) {
+
+        this.animator.dispose(event);
+    }
 }

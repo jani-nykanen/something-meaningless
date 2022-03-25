@@ -5,10 +5,13 @@ import { State } from "../core/types.js";
 import { RGBA } from "../core/vector.js";
 import { Menu, MenuButton } from "./menu.js";
 import { Stage } from "./stage.js";
+import { TitleScreen } from "./titlescreen.js";
 
 
 // TODO: Put this elsewhere
-const THEME_VOLUME = 1.0;
+export const THEME_VOLUME = 1.0;
+
+const BACKGROUND_COLOR = new RGBA(0.33, 0.67, 1.0);
 
 
 const HINTS = [
@@ -59,32 +62,19 @@ export class GameScene implements Scene {
             new MenuButton(event.audio.getAudioStateString(), event => {
 
                 event.audio.toggle(!event.audio.isEnabled());
-                // Order to toggle is important...
-                /*
-                if (event.audio.isEnabled()) {
-
-                    event.audio.pauseMusic();
-                    event.audio.toggle(false);
-                }
-                else {
-
-                    event.audio.toggle(true);
-                    if (!event.audio.resumeMusic()) {
-
-                        event.audio.fadeInMusic(event.assets.getSample("theme"), THEME_VOLUME, 1000.0);
-                    }
-                }
-                */
                 this.pauseMenu.changeButtonText(3, event.audio.getAudioStateString());
             }),
 
             new MenuButton("Main menu", event => {
 
-                // ...
+                event.transition.activate(true, TransitionEffectType.Fade,
+                    1.0/30.0, event => {
+
+                        event.changeScene(TitleScreen);
+
+                    }, BACKGROUND_COLOR);
             })
         ]);
-
-        event.audio.fadeInMusic(event.assets.getSample("theme"), THEME_VOLUME, 1000.0);
     }
 
 
@@ -150,7 +140,7 @@ export class GameScene implements Scene {
 
                     this.stage.nextStage(event);
 
-                }, new RGBA(0.33, 0.67, 1.0));
+                }, BACKGROUND_COLOR);
         }
     }
 
@@ -231,7 +221,9 @@ export class GameScene implements Scene {
     }
 
     
-    public dispose() : any {
+    public dispose(event : CoreEvent) : any {
+
+        this.stage.dispose(event);
 
         return <any> null;
     }

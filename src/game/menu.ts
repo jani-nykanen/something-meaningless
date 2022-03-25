@@ -132,7 +132,7 @@ export class Menu {
         if (oldPos != this.cursorPos) {
 
             this.cursorPos = negMod(this.cursorPos, this.buttons.length);
-            event.audio.playSample(event.assets.getSample("choose"), 0.70);
+            event.audio.playSample(event.assets.getSample("choose"), 0.60);
         }
 
         let activeButton = this.buttons[this.cursorPos];
@@ -163,7 +163,7 @@ export class Menu {
 
     public draw(canvas : Canvas, x : number, y : number,
         xoff = -56, yoff = 64, fontScale = 0.67, 
-        wavePeriod = 0, waveAmplitude = 0) {
+        wavePeriod = 0, waveAmplitude = 0, center = true) {
 
         const ACTIVE_SCALE = 1.25;
 
@@ -172,6 +172,8 @@ export class Menu {
         let font = canvas.assets.getBitmap("font");
 
         let view = canvas.transform.getViewport();
+        if (!center)
+            view.zeros();
 
         let h = (this.buttons.length * yoff);
         let dx = view.x/2 + x;

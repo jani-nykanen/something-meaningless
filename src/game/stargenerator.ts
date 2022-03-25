@@ -168,4 +168,10 @@ export class StarGenerator {
                 gravity, scale, time);
         }
     }
+
+
+    public dispose(event : CoreEvent) {
+
+        event.disposeMesh(this.meshStar);
+    }
 }

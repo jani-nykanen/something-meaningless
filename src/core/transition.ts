@@ -101,6 +101,8 @@ export class TransitionEffectManager {
         default:
             break;
         }
+
+        canvas.resetVertexAndFragmentTransforms();
         canvas.setColor();
     }
 
