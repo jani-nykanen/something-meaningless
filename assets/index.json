@@ -18,6 +18,7 @@
         {"name": "pause", "path": "pause.wav"},
         {"name": "teleport", "path": "teleport.wav"},
         {"name": "start", "path": "start.wav"},
+        {"name": "destroy", "path": "destroy.wav"},
 
         {"name": "theme", "path": "theme.ogg"}
     ],

@@ -44,6 +44,7 @@ export const enum UnderlyingEffectType {
     JumpTile = 2,
     AutomaticArrow = 3,
     Teleport = 4,
+    EndTile = 5,
 };
 
 
@@ -396,7 +397,14 @@ export class Stage {
         }
         else {
 
-            this.player.animate(event);
+            if (this.player.isDying()) {
+
+                this.player.update(this, event);
+            }
+            else {
+                
+                this.player.animate(event);
+            }
         }
     }
 
@@ -486,7 +494,7 @@ export class Stage {
 
         this.drawAnimatedFloor(canvas, x, y, 
             this.starAnimationTimer, StageMesh.FloorStar,
-            COUNT, 1.99, new RGBA(0.0, 0.33, 0.67), this.specialStarScale);
+            COUNT, 1.99, new RGBA(0.0, 0.0, 0.0), this.specialStarScale);
     }
 
 
@@ -1066,7 +1074,10 @@ export class Stage {
     }
 
 
-    public spawnStars(x : number, y : number, count : number) {
+    public spawnStars(x : number, y : number, count : number, 
+        speedFactor = 1.0, gravityFactor = 1.0, 
+        timeFactor = 1.0, scaleFactor = 1.0,
+        color = new RGBA()) {
 
         const GRAVITY = 0.005;
         const BASE_SPEED = 0.075;
@@ -1078,8 +1089,11 @@ export class Stage {
         y *= TILE_HEIGHT;
 
         this.starGen.createStars(count, 
-            x, y, BASE_SPEED, JUMP_SPEED,
-            GRAVITY, TIME, SCALE);
+            x, y, 
+            BASE_SPEED * speedFactor, 
+            JUMP_SPEED * gravityFactor,
+            GRAVITY * gravityFactor, TIME * timeFactor, 
+            SCALE * scaleFactor, color);
     }
 
 
@@ -1174,6 +1188,11 @@ export class Stage {
 
             return UnderlyingEffectType.Button;
 
+        // The "final tile"
+        case 29:
+       
+            return UnderlyingEffectType.EndTile;
+
         default:
             break;
         }
@@ -1248,4 +1267,7 @@ export class Stage {
         this.starGen.dispose(event);
         this.player.dispose(event);
     }
+
+
+    public isPlayerDead = () : boolean => !this.player.doesExist() || this.player.isDying();
 }

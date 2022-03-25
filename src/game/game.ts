@@ -3,6 +3,7 @@ import { CoreEvent, Scene } from "../core/core.js";
 import { TransitionEffectType } from "../core/transition.js";
 import { State } from "../core/types.js";
 import { RGBA } from "../core/vector.js";
+import { Ending } from "./ending.js";
 import { Menu, MenuButton } from "./menu.js";
 import { Stage } from "./stage.js";
 import { TitleScreen } from "./titlescreen.js";
@@ -118,6 +119,17 @@ export class GameScene implements Scene {
         }
 
         this.stage.update(event);
+        if (this.stage.isPlayerDead()) {
+
+            event.audio.stopMusic();
+            event.transition.activate(true, TransitionEffectType.Fade,
+                1.0 / 120.0, event => {
+
+                    event.changeScene(Ending);
+
+                }, BACKGROUND_COLOR);
+            return;
+        }
 
         if (event.input.getAction("undo") == State.Pressed) {
 
@@ -191,6 +203,7 @@ export class GameScene implements Scene {
     public redraw(canvas: Canvas) : void {
 
         const SCALE_OUT = 0.33;
+        const FINAL_SCALE_OUT = 2.0;
         const TRANSLATION = 0.25;
 
         let scaleOut = 1.0 + this.scaleOutFactor * SCALE_OUT;
@@ -199,6 +212,11 @@ export class GameScene implements Scene {
         if (!this.fadingOut) {
 
             yoff *= -1;
+        }
+        if (this.stage.isPlayerDead()) {
+
+            yoff = 0.0;
+            scaleOut = 1.0 + this.scaleOutFactor * FINAL_SCALE_OUT;
         }
 
         canvas.changeShader(ShaderType.NoTexture);
@@ -211,6 +229,9 @@ export class GameScene implements Scene {
         canvas.clear(0.33, 0.67, 1.0);
 
         this.stage.draw(canvas, scaleOut, yoff);
+
+        if (this.stage.isPlayerDead()) 
+            return;
 
         this.drawHUD(canvas);
 

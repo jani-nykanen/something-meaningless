@@ -19,6 +19,8 @@ class Star extends ExistingObject {
     private timer : number;
     private time : number;
 
+    private color : RGBA
+
     private readonly meshStar : Mesh;
 
 
@@ -34,6 +36,8 @@ class Star extends ExistingObject {
         this.timer = 0;
         this.time = 1.0;
 
+        this.color = new RGBA();
+
         this.meshStar = meshStar;
     }
 
@@ -41,7 +45,7 @@ class Star extends ExistingObject {
     public spawn(x : number, y : number, 
         speedx : number, speedy : number, 
         gravity : number, scale : number,
-        time : number) {
+        time : number, color = new RGBA()) {
 
         this.pos = new Vector2(x, y);
         this.speed = new Vector2(speedx, speedy);
@@ -50,6 +54,8 @@ class Star extends ExistingObject {
 
         this.timer = time;
         this.time = time;
+
+        this.color = color;
 
         this.exist = true;
     }
@@ -86,7 +92,7 @@ class Star extends ExistingObject {
             .scale(this.scale, this.scale)
             .use();
 
-        canvas.setColor(1, 1, 1, alpha);
+        canvas.setColor(this.color.r, this.color.g, this.color.b, alpha);
         canvas.drawMesh(this.meshStar);
         canvas.setColor();
 
@@ -146,7 +152,7 @@ export class StarGenerator {
 
     public createStars(count : number, x : number, y : number,
         speed : number, jumpSpeed : number, gravity : number,
-        time : number, scale : number) {
+        time : number, scale : number, color = new RGBA()) {
 
         let angle : number;
         let angleStep = Math.PI*2 / count;
@@ -165,7 +171,7 @@ export class StarGenerator {
             o.spawn(x, y, 
                 Math.cos(angle) * speed,
                 Math.sin(angle) * speed + jumpSpeed,
-                gravity, scale, time);
+                gravity, scale, time, color);
         }
     }
 

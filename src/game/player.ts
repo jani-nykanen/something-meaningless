@@ -9,6 +9,9 @@ import { Stage, TileType, UnderlyingEffectType } from "./stage.js";
 import { Direction } from "./types.js";
 
 
+const DEATH_TIME = 30.0;
+
+
 export class Player extends MovingObject {
 
 
@@ -33,6 +36,9 @@ export class Player extends MovingObject {
     private teleportTimer : number;
 
     private baseScale : number;
+
+    private dying : boolean;
+    private deathTimer : number;
 
 
     constructor(x : number, y : number, moveTime : number, event : CoreEvent) {
@@ -254,6 +260,8 @@ export class Player extends MovingObject {
 
     protected stopMovementEvent(stage : Stage, event : CoreEvent) {
         
+        const BLACK = new RGBA(0);
+
         let effect = stage.checkUnderlyingTiles(this.pos.x | 0, this.pos.y | 0, event);
         let p : Vector2;
 
@@ -288,6 +296,20 @@ export class Player extends MovingObject {
                 event.audio.playSample(event.assets.getSample("teleport"), 0.65); 
             }
             break;
+
+        case UnderlyingEffectType.EndTile:
+
+            this.dying = true;
+            this.deathTimer = DEATH_TIME;
+
+            stage.spawnStars(this.renderPos.x, this.renderPos.y, 11, 1.0, 0.0, 10.0, 2.0, BLACK);
+            stage.spawnStars(this.renderPos.x, this.renderPos.y, 13, 0.75, 0.0, 10.0, 2.0, BLACK);
+
+            stage.setTile(0, this.pos.x | 0, this.pos.y | 0, 1);
+
+            event.audio.playSample(event.assets.getSample("destroy"), 0.60);   
+
+            return;
 
         default:
             break;
@@ -339,7 +361,6 @@ export class Player extends MovingObject {
 
         this.animate(event);
 
-
         this.teleportTimer -= event.step;
         if (this.teleportTimer <= 0) {
 
@@ -375,7 +396,25 @@ export class Player extends MovingObject {
     }
 
 
+    private die(event : CoreEvent) {
+
+        if ((this.deathTimer -= event.step) <= 0) {
+
+            this.dying = false;
+            this.exist = false;
+        }
+    }
+
+
     public update(stage : Stage, event : CoreEvent) {
+
+        if (!this.exist) return;
+
+        if (this.dying) {
+
+            this.die(event);
+            return;
+        }
 
         if (this.teleporting) {
 
@@ -403,8 +442,15 @@ export class Player extends MovingObject {
         const BASE_OFFSET_Y = 0.0;
         const SCALE_Y_FACTOR = 0.50;
         
+        if (!this.exist) return;
+
         let ratio = tileHeight / tileWidth;
         let scale = this.baseScale * this.computeScale(tileWidth, tileHeight) * SHADOW_SCALE_FACTOR;
+
+        if (this.dying) {
+
+            canvas.setColor(0, 0, 0, this.deathTimer / DEATH_TIME);
+        }
 
         canvas.transform
             .push()
@@ -439,6 +485,8 @@ export class Player extends MovingObject {
         const OFFSET_Y = 0.50;
         const FIGURE_SCALE_FACTOR = 0.90;
 
+        if (!this.exist) return;
+
         let scale = this.baseScale * this.computeScale(tileWidth, tileHeight) * FIGURE_SCALE_FACTOR;
 
         let extraYOffset = -OFFSET_Y + OFFSET_Y * (1.0 - this.baseScale);
@@ -450,6 +498,13 @@ export class Player extends MovingObject {
                 this.renderPos.y * tileHeight + extraYOffset + this.computeJumpHeight())
             .scale(scale, scale)
             .use();
+
+        let t : number;
+        if (this.dying) {
+
+            t = this.deathTimer / DEATH_TIME;
+            canvas.setColor(t, t, t, t);
+        }
 
         this.animator.draw(canvas);
 
@@ -504,4 +559,7 @@ export class Player extends MovingObject {
 
         this.animator.dispose(event);
     }
+
+
+    public isDying = () : boolean => this.dying;
 }
