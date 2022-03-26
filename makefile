@@ -3,6 +3,10 @@ js:
 	mkdir -p js
 	tsc -w src/main.ts --module es2020 --lib es2020,dom --target es2020 --outDir js
 
+js_full:
+	mkdir -p js
+	tsc src/main.ts --module es2020 --lib es2020,dom --target es2020 --outDir js
+
 server:
 	python3 -m http.server
 
@@ -15,3 +19,4 @@ dist:
 	zip -r dist.zip index.html
 
 all: js
+
