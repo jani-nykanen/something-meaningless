@@ -2,6 +2,8 @@
     "bitmapPath" : "assets/bitmaps/",
     "bitmaps" : [
         {"name": "logo", "path": "logo.png"},
+        {"name": "intro", "path": "intro.png"},
+        {"name": "gramophone", "path": "gramophone.png"},
         {"name": "font", "path": "font.png"}
     ],
 
