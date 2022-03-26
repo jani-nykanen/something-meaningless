@@ -267,13 +267,13 @@ export class TitleScreen implements Scene {
         }
         else if (this.phase == 1) {
 
-            this.menu.draw(canvas, 0, MENU_YOFF, -56, 76, 0.50, Math.PI*2 / 12, 16, false);
+            this.menu.draw(canvas, 0, MENU_YOFF, -60, 76, 0.50, Math.PI*2 / 12, 16, false);
         }
         
         if (this.phase != 2) {
 
             canvas.setColor(1, 1, 0.67, Math.sin(this.enterAlpha));
-            canvas.drawText(font, "(c)2022 Jani Nyk@nen", 0, view.y/2-64, -56, 0, TextAlign.Center, 0.40, 0.40);
+            canvas.drawText(font, "(c)2022 Jani Nyk@nen", 0, view.y/2-64, -60, 0, TextAlign.Center, 0.40, 0.40);
         }
 
         canvas.changeShader(ShaderType.NoTexture);

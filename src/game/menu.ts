@@ -162,7 +162,7 @@ export class Menu {
 
 
     public draw(canvas : Canvas, x : number, y : number,
-        xoff = -56, yoff = 64, fontScale = 0.67, 
+        xoff = -60, yoff = 64, fontScale = 0.67, 
         wavePeriod = 0, waveAmplitude = 0, center = true) {
 
         const ACTIVE_SCALE = 1.25;

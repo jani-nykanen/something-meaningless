@@ -208,7 +208,7 @@ export class GameScene implements Scene {
 
         canvas.setColor();
         canvas.drawTextWithShadow(canvas.assets.getBitmap("font"), 
-            str, view.x/2, 16, -56, 0, TextAlign.Center, 0.67, 0.67,
+            str, view.x/2, 16, -60, 0, TextAlign.Center, 0.67, 0.67,
             4, 4, 0.20);
 
         let index = this.stage.getIndex() - 1;
@@ -216,7 +216,7 @@ export class GameScene implements Scene {
 
             canvas.drawTextWithShadow(canvas.assets.getBitmap("font"), 
                 HINTS[index], 16, view.y-64 + HINT_OFFSET[index], 
-                -56, -4, TextAlign.Left, 0.40, 0.40,
+                -60, -4, TextAlign.Left, 0.40, 0.40,
                 4, 4, 0.20);
         }
     }
@@ -231,16 +231,16 @@ export class GameScene implements Scene {
         canvas.fillRect(0, 0, view.x, view.y);
 
         canvas.changeShader(ShaderType.Textured);
-        this.pauseMenu.draw(canvas, 0, 0, -56, 72, 0.50, Math.PI*2 / 6, 8.0);
+        this.pauseMenu.draw(canvas, 0, 0, -60, 72, 0.50, Math.PI*2 / 6, 8.0);
     
         if (this.yesNoMenu.isActive()) {
 
             canvas.setColor();
             canvas.drawTextWithShadow(canvas.assets.getBitmap("font"), "Are you sure?",
-                view.x/2, view.y/2 - 96, -56, 0, TextAlign.Center, 0.50, 0.50,
+                view.x/2, view.y/2 - 96, -60, 0, TextAlign.Center, 0.50, 0.50,
                 4, 4, 0.33);
 
-            this.yesNoMenu.draw(canvas, 0, 64, -56, 72, 0.50, Math.PI*2 / 6, 8.0);
+            this.yesNoMenu.draw(canvas, 0, 64, -60, 72, 0.50, Math.PI*2 / 6, 8.0);
         }
     }
 

@@ -59,7 +59,7 @@ export class AudioIntro implements Scene {
 
     public redraw(canvas : Canvas) {
 
-        const XOFF = -56;
+        const XOFF = -60;
         const YOFF = 2;
         const TEXT_SCALE = 0.40;
         const MENU_SCALE = 0.50;
@@ -90,7 +90,7 @@ export class AudioIntro implements Scene {
             view.x/2 - this.width*(128 + XOFF) * TEXT_SCALE / 2, Y_POS, 
             XOFF, YOFF, TextAlign.Left, TEXT_SCALE, TEXT_SCALE, 4, 4, 0.20);
 
-        this.yesNoMenu.draw(canvas, 0, 320, -56, 80, MENU_SCALE, Math.PI*2/4, 12.0);
+        this.yesNoMenu.draw(canvas, 0, 320, -60, 80, MENU_SCALE, Math.PI*2/4, 12.0);
     }
 
 
