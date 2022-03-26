@@ -7,6 +7,7 @@ import { RGBA, Vector2 } from "../core/vector.js";
 import { PlayerAnimator } from "./animator.js";
 import { GameScene, THEME_VOLUME } from "./game.js";
 import { Menu, MenuButton } from "./menu.js";
+import { SaveManager } from "./savemanager.js";
 import { ShapeGenerator } from "./shapegenerator.js";
 
 
@@ -28,6 +29,10 @@ export class TitleScreen implements Scene {
     private phase : number;
 
     private meshCircle : Mesh;
+
+    private saveManager : SaveManager;
+    private levelReached : number;
+    private startLevel : number;
 
 
     constructor(param : any, event : CoreEvent) {
@@ -84,12 +89,17 @@ export class TitleScreen implements Scene {
         this.meshCircle = (new ShapeGenerator())
             .addEllipse(0, 0, 2.0, 2.0, 128, new RGBA())
             .constructMesh(event);
+
+        this.saveManager = new SaveManager();
+        this.levelReached = this.saveManager.loadGame(1);
+        this.startLevel = 1;
     }
 
 
     private goToGame(event : CoreEvent, loadGame = false) {
 
         ++ this.phase;
+        this.startLevel = loadGame ? this.levelReached : 1;
 
         event.transition.activate(true, TransitionEffectType.Fade,
             1.0/30.0, event => {
@@ -135,6 +145,8 @@ export class TitleScreen implements Scene {
             return;
         }
         this.fadingOut = false;
+
+        this.saveManager.update(event);
 
         if (this.phase == 0) {
 
@@ -279,6 +291,8 @@ export class TitleScreen implements Scene {
         canvas.transform
             .pop()
             .use();
+
+        this.saveManager.draw(canvas);
     }
 
 
@@ -287,7 +301,7 @@ export class TitleScreen implements Scene {
         this.animator.dispose(event);
         event.disposeMesh(this.meshCircle);
 
-        return <any> 0;
+        return <any> this.startLevel;
     }
 
 }

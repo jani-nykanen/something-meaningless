@@ -5,6 +5,7 @@ import { State } from "../core/types.js";
 import { RGBA } from "../core/vector.js";
 import { Ending } from "./ending.js";
 import { Menu, MenuButton } from "./menu.js";
+import { SaveManager } from "./savemanager.js";
 import { Stage } from "./stage.js";
 import { TitleScreen } from "./titlescreen.js";
 
@@ -32,11 +33,16 @@ export class GameScene implements Scene {
     private fadingOut : boolean;
 
     private pauseMenu : Menu;
+    private yesNoMenu : Menu;
+
+    private saveManager : SaveManager;
 
 
     constructor(param : any, event : CoreEvent) {
 
-        this.stage = new Stage(event, 1);
+        let level = Math.max(1, Number(param));
+
+        this.stage = new Stage(event, level);
 
         this.pauseMenu = new Menu(
         [
@@ -68,14 +74,34 @@ export class GameScene implements Scene {
 
             new MenuButton("Main menu", event => {
 
+                this.pauseMenu.deactivate();
+                this.yesNoMenu.activate(1);
+            })
+        ]);
+
+
+        this.yesNoMenu = new Menu(
+        [
+            new MenuButton("Yes", event => {
+
+                this.yesNoMenu.deactivate();
                 event.transition.activate(true, TransitionEffectType.Fade,
                     1.0/30.0, event => {
 
                         event.changeScene(TitleScreen);
 
                     }, BACKGROUND_COLOR);
+            }),
+
+            new MenuButton("No", event => {
+
+                this.pauseMenu.activate(4);
+                this.yesNoMenu.deactivate();
             })
-        ]);
+        ]
+        )
+
+        this.saveManager = new SaveManager();
     }
 
 
@@ -104,6 +130,14 @@ export class GameScene implements Scene {
             return;
         }
         this.scaleOutFactor = 0.0;
+
+        this.saveManager.update(event);
+
+        if (this.yesNoMenu.isActive()) {
+
+            this.yesNoMenu.update(event);
+            return;
+        }
 
         if (this.pauseMenu.isActive()) {
             
@@ -151,6 +185,7 @@ export class GameScene implements Scene {
                 event => {
 
                     this.stage.nextStage(event);
+                    this.saveManager.saveGame(this.stage.getIndex());
 
                 }, BACKGROUND_COLOR);
         }
@@ -197,6 +232,16 @@ export class GameScene implements Scene {
 
         canvas.changeShader(ShaderType.Textured);
         this.pauseMenu.draw(canvas, 0, 0, -56, 72, 0.50, Math.PI*2 / 6, 8.0);
+    
+        if (this.yesNoMenu.isActive()) {
+
+            canvas.setColor();
+            canvas.drawTextWithShadow(canvas.assets.getBitmap("font"), "Are you sure?",
+                view.x/2, view.y/2 - 96, -56, 0, TextAlign.Center, 0.50, 0.50,
+                4, 4, 0.33);
+
+            this.yesNoMenu.draw(canvas, 0, 64, -56, 72, 0.50, Math.PI*2 / 6, 8.0);
+        }
     }
 
 
@@ -235,10 +280,12 @@ export class GameScene implements Scene {
 
         this.drawHUD(canvas);
 
-        if (this.pauseMenu.isActive()) {
+        if (this.pauseMenu.isActive() || this.yesNoMenu.isActive()) {
 
             this.drawPauseMenu(canvas);
         }
+
+        this.saveManager.draw(canvas);
     }
 
     
